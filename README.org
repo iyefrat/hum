@@ -1,0 +1,4 @@
+#+TITLE: README
+
+* Ham: a Haskell Music Player
+A TUI mpd client. Currently in whatever comes before what comes before alpha.

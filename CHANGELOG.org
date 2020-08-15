@@ -1,3 +1,5 @@
+#+TITLE: CHANGELOG
+
 *  Revision history for ham
 
 ** 0.0.0.0 -- YYYY-mm-dd
