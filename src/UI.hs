@@ -70,10 +70,12 @@ handleEvent s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'q') [] -> halt s
     EvKey (KChar 'p') [] -> do
-      _ <- liftIO (withMPD $ pause True)
-      continue s
-    EvKey (KChar 'l') [] -> do
-      _ <- liftIO (withMPD $ play Nothing)
+      st <- liftIO ( (stState <$>) <$> (withMPD $ status))
+      _ <- case st of
+        Left _ -> liftIO (withMPD $ pause True)
+        Right Paused -> liftIO (withMPD $ play Nothing)
+        Right Stopped -> liftIO (withMPD $ play Nothing)
+        Right Playing -> liftIO (withMPD $ pause True)
       continue s
     EvKey (KChar 'j') [] -> do
       _    <- liftIO (withMPD $ next)
@@ -85,3 +87,5 @@ handleEvent s e = case e of
       continue s { msong = fromRight Nothing song }
     _ -> continue s
   _ -> continue s
+
+-- TODO write generic Response handler to pring the MPDError instead of doing the thing.
