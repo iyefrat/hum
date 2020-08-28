@@ -9,11 +9,8 @@ import           Brick.Widgets.Center
 import           Brick.Widgets.Border
 -- import           Brick.Widgets.Border.Style
 import           Graphics.Vty.Input.Events
-import           Network.MPD
-import           Data.Either
-import           Data.List
-import qualified Data.Map                      as Map
-import           Control.Monad.State.Strict     ( liftIO )
+import qualified Network.MPD                   as MPD
+import           Song
 
 launch :: IO ()
 launch = do
@@ -21,8 +18,8 @@ launch = do
   endState     <- defaultMain app initialState
   print endState
 
-data State =
-  State { msong :: Maybe Song }
+data HState =
+  HState { msong :: Maybe MPD.Song }
   deriving (Show, Eq)
 
 -- data ResourceName =
@@ -30,7 +27,7 @@ data State =
 --  deriving (Show, Eq, Ord)
 type ResourceName = String
 
-app :: App State e ResourceName
+app :: App HState e ResourceName
 app = App { appDraw         = drawSong
           , appChooseCursor = showFirstCursor
           , appHandleEvent  = handleEvent
@@ -38,54 +35,45 @@ app = App { appDraw         = drawSong
           , appAttrMap      = const $ attrMap mempty []
           }
 
-buildInitialState :: IO State
+buildInitialState :: IO HState
 buildInitialState = do
-  song <- withMPD $ currentSong
-  pure State { msong = fromRight Nothing song }
-
-songTitle :: Song -> String
-songTitle song =
-  (\s -> case s of
-      Just vals -> intercalate ", " (toString <$> vals)
-      Nothing   -> "song ded."
-    )
-    (Map.lookup Title (sgTags song))
+  song <- MPD.withMPD MPD.currentSong
+  pure HState { msong = fromRight Nothing song }
 
 
-drawSong :: State -> [Widget ResourceName]
+
+
+drawSong :: HState -> [Widget ResourceName]
 drawSong st =
   center
     <$> borderWithLabel (str "soong")
-    <$> str
-    <$> [ ((\q -> case q of
-             Just s  -> s
-             Nothing -> "draw ded."
-           )
-            (songTitle <$> (msong st))
-          )
-        ]
+    <$> txt
+    <$> [fromMaybe "draw ded." (title =<< msong st)]
 
-handleEvent :: State -> BrickEvent n e -> EventM n (Next State)
+handleEvent :: HState -> BrickEvent n e -> EventM n (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'q') [] -> halt s
     EvKey (KChar 'p') [] -> do
-      st <- liftIO ( (stState <$>) <$> (withMPD $ status))
-      _ <- case st of
-        Left _ -> liftIO (withMPD $ pause True)
-        Right Paused -> liftIO (withMPD $ play Nothing)
-        Right Stopped -> liftIO (withMPD $ play Nothing)
-        Right Playing -> liftIO (withMPD $ pause True)
+      st <- liftIO ((MPD.stState <$>) <$> MPD.withMPD MPD.status)
+      _  <- case st of
+        Left  _           -> liftIO (MPD.withMPD $ MPD.pause True)
+        Right MPD.Paused  -> liftIO (MPD.withMPD $ MPD.play Nothing)
+        Right MPD.Stopped -> liftIO (MPD.withMPD $ MPD.play Nothing)
+        Right MPD.Playing -> liftIO (MPD.withMPD $ MPD.pause True)
       continue s
     EvKey (KChar 'j') [] -> do
-      _    <- liftIO (withMPD $ next)
-      song <- liftIO (withMPD $ currentSong)
+      _    <- liftIO (MPD.withMPD MPD.next)
+      song <- liftIO (MPD.withMPD MPD.currentSong)
       continue s { msong = fromRight Nothing song }
     EvKey (KChar 'k') [] -> do
-      _    <- liftIO (withMPD $ previous)
-      song <- liftIO (withMPD $ currentSong)
+      _    <- liftIO (MPD.withMPD MPD.previous)
+      song <- liftIO (MPD.withMPD MPD.currentSong)
       continue s { msong = fromRight Nothing song }
     _ -> continue s
   _ -> continue s
 
--- TODO write generic Response handler to pring the MPDError instead of doing the thing.
+{-
+TODO write generic Response handler to pring the MPDError instead of doing the thing.
+TODO read over the snake guide, implement tick event to read playlist etc.
+-}

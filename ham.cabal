@@ -68,6 +68,8 @@ library
      , containers
      , mtl
      , bytestring
+     , text
+     , filepath
   -- Directories containing source files.
   hs-source-dirs:      src
 
@@ -102,7 +104,8 @@ executable ham
 
   -- Other library packages from which modules are imported.
   build-depends:
-       base ^>=4.13.0.0
+       base-noprelude ^>=4.13.0.0
+      , relude ^>=0.7.0.0
      , libmpd
      , ham
 
@@ -126,7 +129,6 @@ executable ham
     MultiParamTypeClasses
     EmptyCase
     OverloadedStrings
-
 
 test-suite ham-test
   -- Base language which the package is written in.
