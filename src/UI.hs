@@ -94,11 +94,11 @@ handleEvent s e = case e of
         Right MPD.Stopped -> liftIO (withMPD $ MPD.play Nothing)
         Right MPD.Playing -> liftIO (withMPD $ MPD.pause True)
       continue s
-    EvKey (KChar 'j') [] -> do
+    EvKey (KChar '.') [] -> do
       _    <- liftIO (withMPD MPD.next)
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song }
-    EvKey (KChar 'k') [] -> do
+    EvKey (KChar ',') [] -> do
       _    <- liftIO (withMPD MPD.previous)
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song }
