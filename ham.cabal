@@ -48,7 +48,9 @@ extra-source-files:  CHANGELOG.md
 
 library
   -- Modules exported by the library.
-  exposed-modules:     UI
+  exposed-modules:
+                Prelude
+              , UI
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -58,7 +60,8 @@ library
 
   -- Other library packages from which modules are imported.
   build-depends:
-       base ^>=4.13.0.0
+       base-noprelude ^>=4.13.0.0
+     , relude ^>= 0.7.0.0
      , libmpd
      , brick
      , vty
