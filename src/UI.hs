@@ -9,6 +9,7 @@ import           Brick.Widgets.Center
 import           Brick.Widgets.Border
 -- import           Brick.Widgets.Border.Style
 import           Graphics.Vty.Input.Events
+import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Song
 
@@ -55,20 +56,20 @@ handleEvent s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'q') [] -> halt s
     EvKey (KChar 'p') [] -> do
-      st <- liftIO ((MPD.stState <$>) <$> MPD.withMPD MPD.status)
+      st <- liftIO ((MPD.stState <$>) <$> withMPD MPD.status)
       _  <- case st of
-        Left  _           -> liftIO (MPD.withMPD $ MPD.pause True)
-        Right MPD.Paused  -> liftIO (MPD.withMPD $ MPD.play Nothing)
-        Right MPD.Stopped -> liftIO (MPD.withMPD $ MPD.play Nothing)
-        Right MPD.Playing -> liftIO (MPD.withMPD $ MPD.pause True)
+        Left  _           -> liftIO (withMPD $ MPD.pause True)
+        Right MPD.Paused  -> liftIO (withMPD $ MPD.play Nothing)
+        Right MPD.Stopped -> liftIO (withMPD $ MPD.play Nothing)
+        Right MPD.Playing -> liftIO (withMPD $ MPD.pause True)
       continue s
     EvKey (KChar 'j') [] -> do
-      _    <- liftIO (MPD.withMPD MPD.next)
-      song <- liftIO (MPD.withMPD MPD.currentSong)
+      _    <- liftIO (withMPD MPD.next)
+      song <- liftIO (withMPD MPD.currentSong)
       continue s { msong = fromRight Nothing song }
     EvKey (KChar 'k') [] -> do
-      _    <- liftIO (MPD.withMPD MPD.previous)
-      song <- liftIO (MPD.withMPD MPD.currentSong)
+      _    <- liftIO (withMPD MPD.previous)
+      song <- liftIO (withMPD MPD.currentSong)
       continue s { msong = fromRight Nothing song }
     _ -> continue s
   _ -> continue s
