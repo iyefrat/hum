@@ -31,7 +31,7 @@ data HState =
 type ResourceName = String
 
 app :: App HState e ResourceName
-app = App { appDraw         = drawPlaylist
+app = App { appDraw         = drawUI
           , appChooseCursor = showFirstCursor
           , appHandleEvent  = handleEvent
           , appStartEvent   = pure
@@ -47,15 +47,39 @@ buildInitialState = do
 
 drawSong :: HState -> [Widget ResourceName]
 drawSong st =
-  center
-    .   borderWithLabel (str "soong")
+  vLimit 3
+    .   center
+    .   borderWithLabel (str "Now Playing")
     .   txt
     <$> [fromMaybe "draw ded." (title =<< currentSong st)]
 
 drawPlaylist :: HState -> [Widget ResourceName]
+drawPlaylist st =
+  (: [])
+    . center
+    . borderWithLabel (str "Queue (under construction)")
+    $ playlistWidget
+        (   (fromMaybe "" .)
+        <$> [ title
+            , artist
+            , album
+            , ((\(MPD.Id x) -> show x) <$>) . MPD.sgId
+            , (show <$>) . MPD.sgIndex
+            ]
+        )
+        (playlist st)
 
-drawPlaylist st = (: []) . center . borderWithLabel (str "soong") $ vBox
-  (txt <$> (fromMaybe "" . title <$> playlist st))
+drawUI :: HState -> [Widget ResourceName]
+drawUI st = liftA2 (<=>) (drawPlaylist st) (drawSong st)
+
+playlistWidget :: [MPD.Song -> Text] -> [MPD.Song] -> Widget ResourceName
+playlistWidget fs songs =
+  hBoxPad (Pad 1) $ fmap (\f -> vBox $ txt <$> (f <$> songs)) fs
+
+hBoxPad :: Padding -> [Widget n] -> Widget n
+hBoxPad _ []       = emptyWidget
+hBoxPad _ [w     ] = w
+hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
 
 
 handleEvent :: HState -> BrickEvent n e -> EventM n (Next HState)
