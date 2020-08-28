@@ -7,7 +7,6 @@ import           Data.Maybe                     ( fromJust )
 import           System.IO.Unsafe
 import           Data.Text                     as T
 import           Text.Printf                    ( printf )
-import qualified System.FilePath               as FilePath
 
 -- | test song, to be destroyed
 soong :: MPD.Song
@@ -23,26 +22,22 @@ metaLookup tag =
 
 
 -- | Song tag queries
-artist, artistSort, albumArtist, albumArtistSort, title, track, name, genre, date, composer, performer, comment, disc
+artist, artistSort, album, albumArtist, albumArtistSort, title, track, name, genre, date, composer, performer, comment, disc
   :: MetaQuery
-
-[artist, artistSort, albumArtist, albumArtistSort, title, track, name, genre, date, composer, performer, comment, disc]
-  = metaLookup
-    <$> [ MPD.Artist
-        , MPD.ArtistSort
-        , MPD.Album
-        , MPD.AlbumArtist
-        , MPD.AlbumArtistSort
-        , MPD.Title
-        , MPD.Track
-        , MPD.Name
-        , MPD.Genre
-        , MPD.Date
-        , MPD.Composer
-        , MPD.Performer
-        , MPD.Comment
-        , MPD.Disc
-        ]
+artist = metaLookup MPD.Artist
+artistSort = metaLookup MPD.ArtistSort
+album = metaLookup MPD.Album
+albumArtist = metaLookup MPD.AlbumArtist
+albumArtistSort = metaLookup MPD.AlbumArtistSort
+title = metaLookup MPD.Title
+track = metaLookup MPD.Track
+name = metaLookup MPD.Name
+genre = metaLookup MPD.Genre
+date = metaLookup MPD.Date
+composer = metaLookup MPD.Composer
+performer = metaLookup MPD.Performer
+comment = metaLookup MPD.Comment
+disc = metaLookup MPD.Disc
 
 -- | Song info queries
 duration :: MetaQuery

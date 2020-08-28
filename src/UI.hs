@@ -20,7 +20,9 @@ launch = do
   print endState
 
 data HState =
-  HState { msong :: Maybe MPD.Song }
+  HState { status :: Maybe MPD.Status,
+           currentSong :: Maybe MPD.Song,
+           playlist :: [ MPD.Song ] }
   deriving (Show, Eq)
 
 -- data ResourceName =
@@ -29,7 +31,7 @@ data HState =
 type ResourceName = String
 
 app :: App HState e ResourceName
-app = App { appDraw         = drawSong
+app = App { appDraw         = drawPlaylist
           , appChooseCursor = showFirstCursor
           , appHandleEvent  = handleEvent
           , appStartEvent   = pure
@@ -38,18 +40,23 @@ app = App { appDraw         = drawSong
 
 buildInitialState :: IO HState
 buildInitialState = do
-  song <- MPD.withMPD MPD.currentSong
-  pure HState { msong = fromRight Nothing song }
-
-
-
+  currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
+  status      <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
+  playlist    <- fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
+  pure HState { status, currentSong, playlist }
 
 drawSong :: HState -> [Widget ResourceName]
 drawSong st =
   center
-    <$> borderWithLabel (str "soong")
-    <$> txt
-    <$> [fromMaybe "draw ded." (title =<< msong st)]
+    .   borderWithLabel (str "soong")
+    .   txt
+    <$> [fromMaybe "draw ded." (title =<< currentSong st)]
+
+drawPlaylist :: HState -> [Widget ResourceName]
+
+drawPlaylist st = (: []) . center . borderWithLabel (str "soong") $ vBox
+  (txt <$> (fromMaybe "" . title <$> playlist st))
+
 
 handleEvent :: HState -> BrickEvent n e -> EventM n (Next HState)
 handleEvent s e = case e of
@@ -66,11 +73,11 @@ handleEvent s e = case e of
     EvKey (KChar 'j') [] -> do
       _    <- liftIO (withMPD MPD.next)
       song <- liftIO (withMPD MPD.currentSong)
-      continue s { msong = fromRight Nothing song }
+      continue s { currentSong = fromRight Nothing song }
     EvKey (KChar 'k') [] -> do
       _    <- liftIO (withMPD MPD.previous)
       song <- liftIO (withMPD MPD.currentSong)
-      continue s { msong = fromRight Nothing song }
+      continue s { currentSong = fromRight Nothing song }
     _ -> continue s
   _ -> continue s
 

@@ -49,8 +49,9 @@ extra-source-files:  CHANGELOG.md
 library
   -- Modules exported by the library.
   exposed-modules:
-                Prelude
-              , UI
+               UI
+             , Song
+             , Prelude
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -60,8 +61,8 @@ library
 
   -- Other library packages from which modules are imported.
   build-depends:
-       base-noprelude ^>=4.13.0.0
-     , relude ^>= 0.7.0.0
+      base-noprelude ^>=4.13.0.0
+    , relude ^>= 0.7.0.0
      , libmpd
      , brick
      , vty
@@ -90,6 +91,7 @@ library
     MultiParamTypeClasses
     EmptyCase
     OverloadedStrings
+    NamedFieldPuns
 
 
 executable ham
@@ -104,8 +106,8 @@ executable ham
 
   -- Other library packages from which modules are imported.
   build-depends:
-       base-noprelude ^>=4.13.0.0
-      , relude ^>=0.7.0.0
+   base-noprelude ^>=4.13.0.0
+     , relude ^>= 0.7.0.0
      , libmpd
      , ham
 
@@ -129,6 +131,7 @@ executable ham
     MultiParamTypeClasses
     EmptyCase
     OverloadedStrings
+    NamedFieldPuns
 
 test-suite ham-test
   -- Base language which the package is written in.
