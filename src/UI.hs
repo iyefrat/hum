@@ -81,27 +81,20 @@ drawPlaylist st =
         <=> renderList (const queueRow) True (queue st)
 
  where
-  songIdx  = column (Just 4) Max (Pad 1) $ txt "Inx"
-  songId   = column (Just 3) Max (Pad 1) $ txt "ID"
-  album    = column (Just 25) (Pad 1) Max $ txt "Album"
-  track    = column (Just 8) Max (Pad 2) $ txt "#"
-  title    = column Nothing Max Max $ txt "Title"
-  artist   = column (Just 25) Max (Pad 1) $ txt "Artist"
-  duration = column (Just 8) Max (Pad 1) $ txt "Time"
-  header   = withAttr
+  songIdx = column (Just 4) Max (Pad 1) $ txt "Inx"
+  songId  = column (Just 3) Max (Pad 1) $ txt "ID"
+  album   = column (Just 25) (Pad 1) Max $ txt "Album"
+  track   = column (Just 8) Max (Pad 2) $ txt "#"
+  title   = column Nothing Max Max $ txt "Title"
+  artist  = column (Just 25) Max (Pad 1) $ txt "Artist"
+  time    = column (Just 8) Max (Pad 1) $ txt "Time"
+  header  = withAttr
     "header"
-    (songIdx <+> songId <+> album <+> track <+> title <+> artist <+> duration)
+    (songIdx <+> songId <+> album <+> track <+> title <+> artist <+> time)
 
 queueRow :: MPD.Song -> Widget n
 queueRow song =
-  hCenter
-    $   songIdx
-    <+> songId
-    <+> album
-    <+> track
-    <+> title
-    <+> artist
-    <+> duration
+  hCenter $ songIdx <+> songId <+> album <+> track <+> title <+> artist <+> time
  where
   songIdx =
     column (Just 4) Max (Pad 1) $ txt $ maybe "?" show $ MPD.sgIndex song
@@ -115,8 +108,7 @@ queueRow song =
   title = column Nothing Max Max $ txt $ meta "<no title>" MPD.Title song
   artist =
     column (Just 25) Max (Pad 1) $ txt $ meta "<no artist>" MPD.Artist song
-  duration =
-    column (Just 8) Max (Pad 1) $ txt $ secondsToTime $ MPD.sgLength song
+  time = column (Just 8) Max (Pad 1) $ txt $ secondsToTime $ MPD.sgLength song
 
 column :: Maybe Int -> Padding -> Padding -> Widget n -> Widget n
 column maxWidth left right w = case maxWidth of
@@ -137,7 +129,7 @@ handleEvent :: HState -> BrickEvent Name e -> EventM Name (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'q') [] -> halt s
-    EvKey (KChar 'p') [] -> do
+    EvKey (KChar 't') [] -> do
       st <- liftIO ((MPD.stState <$>) <$> withMPD MPD.status)
       _  <- case st of
         Left  _           -> liftIO (withMPD $ MPD.pause True)
