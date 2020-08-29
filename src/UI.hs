@@ -8,8 +8,11 @@ import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.Border
 import           Brick.Widgets.List
+import           Brick.Util
 -- import           Brick.Widgets.Border.Style
 import           Graphics.Vty.Input.Events
+import           Graphics.Vty                   ( defAttr )
+import qualified Graphics.Vty                  as Vty
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Song
@@ -36,12 +39,15 @@ data Name = Queue | Queue0
  deriving (Show, Eq, Ord)
 
 app :: App HState e Name
-app = App { appDraw         = drawUI
-          , appChooseCursor = showFirstCursor
-          , appHandleEvent  = handleEvent
-          , appStartEvent   = pure
-          , appAttrMap      = const $ attrMap mempty []
-          }
+app = App
+  { appDraw         = drawUI
+  , appChooseCursor = showFirstCursor
+  , appHandleEvent  = handleEvent
+  , appStartEvent   = pure
+  , appAttrMap      = const $ attrMap
+                        defAttr
+                        [(listSelectedAttr, Vty.black `Brick.Util.on` Vty.white)]
+  }
 
 buildInitialState :: IO HState
 buildInitialState = do
@@ -71,9 +77,9 @@ drawPlaylist st =
         . center
         $ playlistWidget
             (   (fromMaybe "" .)
-            <$> [ title
+            <$> [ album
+                , title
                 , artist
-                , album
                 , ((\(MPD.Id x) -> show x) <$>) . MPD.sgId
                 , (show <$>) . MPD.sgIndex
                 ]
@@ -85,13 +91,9 @@ drawUI st = [(<=>) (drawPlaylist st) (drawSong st)]
 
 
 playlistWidget :: [MPD.Song -> Text] -> (List Name MPD.Song) -> Widget Name
-playlistWidget fs songs = renderList
-  (\t -> case t of
-    True  -> ((txt "!!") <+>) . (hBoxPad (Pad 1) . (txt <$>))
-    False -> hBoxPad (Pad 1) . (txt <$>)
-  )
-  True
-  (fmap (\song -> fs ?? song) songs)
+playlistWidget fs songs = renderList (const $ hBoxPad (Max) . (txt <$>))
+                                     True
+                                     (fmap (\song -> fs ?? song) songs)
  -- hBoxPad (Pad 1) $ fmap (\f -> vBox $ txt <$> (f <$> songs)) fs
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
@@ -126,10 +128,10 @@ handleEvent s e = case e of
     EvKey (KChar 'k') [] -> do
       queueExtent <- lookupExtent Queue
       continue s { queue = listMoveUp $ queue s, queueExtent }
-    _            -> continue s
     EvResize _ _ -> do
       queueExtent <- lookupExtent Queue
       continue s { queueExtent }
+    _ -> continue s
   _ -> continue s
 
 --handleEvent s (VtyEvent e) = continue =<< handleListEventVi handleListEvent e s
