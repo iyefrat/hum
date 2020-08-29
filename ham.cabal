@@ -76,7 +76,17 @@ common deps
     EmptyCase
     OverloadedStrings
     NamedFieldPuns
-
+    MultiWayIf
+    TupleSections
+    DeriveFoldable
+    DeriveFunctor
+    DeriveTraversable
+    GeneralizedNewtypeDeriving
+    BangPatterns
+    KindSignatures
+    TypeOperators
+    ScopedTypeVariables
+       
   default-language:    Haskell2010
 
 library
