@@ -71,6 +71,7 @@ library
      , bytestring
      , text
      , filepath
+     , vector
   -- Directories containing source files.
   hs-source-dirs:      src
 
