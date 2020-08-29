@@ -45,21 +45,7 @@ maintainer:          itai3397@gmail.com
 -- README.
 extra-source-files:  CHANGELOG.md
 
-
-library
-  -- Modules exported by the library.
-  exposed-modules:
-               UI
-             , Song
-             , Prelude
-
-  -- Modules included in this library but not exported.
-  -- other-modules:
-
-  -- LANGUAGE extensions used by modules in this package.
-  -- other-extensions:
-
-  -- Other library packages from which modules are imported.
+common deps
   build-depends:
       base-noprelude ^>=4.13.0.0
      , relude ^>= 0.7.0.0
@@ -72,11 +58,7 @@ library
      , text
      , filepath
      , vector
-  -- Directories containing source files.
-  hs-source-dirs:      src
 
-  -- Base language which the package is written in.
-  default-language:    Haskell2010
   ghc-options:
     -Wall
     -Wcompat
@@ -84,6 +66,7 @@ library
     -Wincomplete-uni-patterns
     -Wredundant-constraints
     -threaded
+
   default-extensions:
     LambdaCase
     FlexibleInstances
@@ -94,45 +77,34 @@ library
     OverloadedStrings
     NamedFieldPuns
 
+  default-language:    Haskell2010
+
+library
+  import: deps
+  -- Modules exported by the library.
+  exposed-modules:
+               UI
+             , Song
+             , Prelude
+
+  -- Modules included in this library but not exported.
+  -- other-modules:
+
+  -- Other library packages from which modules are imported.
+ -- Directories containing source files.
+  hs-source-dirs:      src
+
 
 executable ham
+  import: deps
   -- .hs or .lhs file containing the Main module.
   main-is:             Main.hs
 
   -- Modules included in this executable, other than Main.
   -- other-modules:
-
-  -- LANGUAGE extensions used by modules in this package.
-  -- other-extensions:
-
-  -- Other library packages from which modules are imported.
-  build-depends:
-   base-noprelude ^>=4.13.0.0
-     , relude ^>= 0.7.0.0
-     , libmpd
-     , ham
-
+  build-depends: ham
   -- Directories containing source files.
   hs-source-dirs:      app
-
-  -- Base language which the package is written in.
-  default-language:    Haskell2010
-  ghc-options:
-    -Wall
-    -Wcompat
-    -Wincomplete-record-updates
-    -Wincomplete-uni-patterns
-    -Wredundant-constraints
-    -threaded
-  default-extensions:
-    LambdaCase
-    FlexibleInstances
-    FlexibleContexts
-    InstanceSigs
-    MultiParamTypeClasses
-    EmptyCase
-    OverloadedStrings
-    NamedFieldPuns
 
 test-suite ham-test
   -- Base language which the package is written in.
