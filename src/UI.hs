@@ -159,6 +159,13 @@ handleEvent s e = case e of
     EvKey (KChar 'k') [] -> do
       queueExtent <- lookupExtent Queue
       continue s { queue = listMoveUp $ queue s, queueExtent }
+    EvKey KEnter [] -> do
+      let maybeSelectedId =
+            join ((MPD.sgId . snd) <$> (listSelectedElement (queue s)))
+      traverse_ (\sel -> liftIO (withMPD $ MPD.playId sel)) maybeSelectedId
+      song <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song, queue = queue s }
+
     EvResize _ _ -> do
       queueExtent <- lookupExtent Queue
       continue s { queueExtent }
@@ -170,7 +177,7 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 TODO read over the snake guide, implement tick event to read playlist etc.
-TODO format playlist better (alignment, colors)
+TODO format playlist better (colors)
 TODO impliment borderWithFullLabel
 TODO Impliment MPD event channel
 TODO impliment song skipping
