@@ -16,4 +16,4 @@ meta notFound tag song = maybe
 secondsToTime :: Integer -> Text
 secondsToTime sec =
   let (minutes, seconds) = divMod sec 60
-  in  T.pack $ printf "%d:%02d" minutes seconds
+  in  toText (printf "%d:%02d" minutes seconds :: String)

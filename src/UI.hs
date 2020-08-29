@@ -22,7 +22,7 @@ launch :: IO ()
 launch = do
   initialState <- buildInitialState
   _            <- defaultMain app initialState
-  return ()
+  pass
 
 data HState =
   HState { status :: Maybe MPD.Status,
@@ -61,10 +61,10 @@ buildInitialState = do
   pure HState { status, currentSong, playlist, queue, queueExtent }
 
 drawSong :: HState -> Widget Name
-drawSong st =
-  vLimit 3 . center . borderWithLabel (str "Now Playing") $ fromMaybe
-    (txt "nothing.")
-    (queueRow <$> (currentSong st))
+drawSong st = vLimit 3 . center . borderWithLabel (str "Now Playing") $ maybe
+  (txt "nothing.")
+  queueRow
+  (currentSong st)
 
 drawPlaylist :: HState -> Widget Name
 drawPlaylist st =
@@ -78,7 +78,7 @@ drawPlaylist st =
         $   vLimit vsize
         .   center
         $   header
-        <=> (renderList (const queueRow) True (queue st))
+        <=> renderList (const queueRow) True (queue st)
 
  where
   songIdx  = column (Just 4) Max (Pad 1) $ txt "Inx"
@@ -89,7 +89,7 @@ drawPlaylist st =
   artist   = column (Just 25) Max (Pad 1) $ txt "Artist"
   duration = column (Just 8) Max (Pad 1) $ txt "Time"
   header   = withAttr
-    ("header")
+    "header"
     (songIdx <+> songId <+> album <+> track <+> title <+> artist <+> duration)
 
 queueRow :: MPD.Song -> Widget n
@@ -160,8 +160,7 @@ handleEvent s e = case e of
       queueExtent <- lookupExtent Queue
       continue s { queue = listMoveUp $ queue s, queueExtent }
     EvKey KEnter [] -> do
-      let maybeSelectedId =
-            join ((MPD.sgId . snd) <$> (listSelectedElement (queue s)))
+      let maybeSelectedId = MPD.sgId . snd =<< listSelectedElement (queue s)
       traverse_ (\sel -> liftIO (withMPD $ MPD.playId sel)) maybeSelectedId
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song, queue = queue s }

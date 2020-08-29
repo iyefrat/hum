@@ -62,7 +62,7 @@ library
   -- Other library packages from which modules are imported.
   build-depends:
       base-noprelude ^>=4.13.0.0
-    , relude ^>= 0.7.0.0
+     , relude ^>= 0.7.0.0
      , libmpd
      , brick
      , vty
