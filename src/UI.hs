@@ -21,8 +21,8 @@ import           Data.Vector                   as V
 launch :: IO ()
 launch = do
   initialState <- buildInitialState
-  endState     <- defaultMain app initialState
-  print endState
+  _            <- defaultMain app initialState
+  return ()
 
 data HState =
   HState { status :: Maybe MPD.Status,
@@ -165,7 +165,6 @@ handleEvent s e = case e of
       traverse_ (\sel -> liftIO (withMPD $ MPD.playId sel)) maybeSelectedId
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song, queue = queue s }
-
     EvResize _ _ -> do
       queueExtent <- lookupExtent Queue
       continue s { queueExtent }
