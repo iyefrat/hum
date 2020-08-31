@@ -58,6 +58,7 @@ common deps
      , text
      , filepath
      , vector
+     , microlens
 
   ghc-options:
     -Wall
@@ -96,6 +97,7 @@ library
                UI
              , Song
              , Prelude
+             , Brick.Widgets.List
 
   -- Modules included in this library but not exported.
   -- other-modules:
