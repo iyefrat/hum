@@ -25,11 +25,12 @@ launch = do
   pass
 
 data HState =
-  HState { status :: Maybe MPD.Status,
-           currentSong :: Maybe MPD.Song,
-           playlist :: [ MPD.Song ] ,
-           queue :: List Name MPD.Song,
-           queueExtent :: Maybe (Extent Name)}
+  HState { status :: Maybe MPD.Status
+           ,currentSong :: Maybe MPD.Song
+           ,playlist :: [ MPD.Song ]
+           ,queue :: List Name MPD.Song
+           ,queueExtent :: Maybe (Extent Name)
+           }
   deriving (Show) --, Eq)
 
 -- data Name =
@@ -47,6 +48,9 @@ app = App
   , appAttrMap      = const $ attrMap
                         defAttr
                         [ (listSelectedAttr, Vty.black `Brick.Util.on` Vty.white)
+                        , ( listHighlightedFocusedAttr
+                          , Vty.black `Brick.Util.on` Vty.blue
+                          )
                         , (attrName "header", Vty.withStyle defAttr Vty.underline)
                         ]
   }
@@ -156,6 +160,8 @@ handleEvent s e = case e of
       traverse_ (\sel -> liftIO (withMPD $ MPD.playId sel)) maybeSelectedId
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song, queue = queue s }
+    EvKey (KChar ' ') [] -> do
+      continue s { queue = listToggleHighlight (queue s) }
     EvResize _ _ -> do
       queueExtent <- lookupExtent Queue
       continue s { queueExtent }
