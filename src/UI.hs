@@ -35,9 +35,7 @@ app = App
   , appAttrMap      = const $ attrMap
                         defAttr
                         [ (listSelectedAttr, Vty.black `Brick.Util.on` Vty.white)
-                        , ( listHighlightedFocusedAttr
-                          , Vty.black `Brick.Util.on` Vty.blue
-                          )
+                        , (listHighlightedAttr, Vty.black `Brick.Util.on` Vty.blue)
                         , (attrName "header", Vty.withStyle defAttr Vty.underline)
                         ]
   }
@@ -47,7 +45,7 @@ buildInitialState = do
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status      <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   playlist    <- fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
-  let queue       = list Queue0 (V.fromList playlist) 1
+  let queue = (, False) <$> list Queue0 (V.fromList playlist) 1
   let queueExtent = Nothing
   pure HState { status, currentSong, playlist, queue, queueExtent }
 
@@ -55,7 +53,7 @@ drawSong :: HState -> Widget Name
 drawSong st = vLimit 3 . center . borderWithLabel (str "Now Playing") $ maybe
   (txt "nothing.")
   queueRow
-  (currentSong st)
+  ((, False) <$> (currentSong st))
 
 drawPlaylist :: HState -> Widget Name
 drawPlaylist st =
@@ -83,9 +81,17 @@ drawPlaylist st =
     "header"
     (songIdx <+> songId <+> album <+> track <+> title <+> artist <+> time)
 
-queueRow :: MPD.Song -> Widget n
-queueRow song =
-  hCenter $ songIdx <+> songId <+> album <+> track <+> title <+> artist <+> time
+queueRow :: (MPD.Song, Highlight) -> Widget n
+queueRow (song, hl) = (if hl then forceAttr listHighlightedAttr else id)
+  (   hCenter
+  $   songIdx
+  <+> songId
+  <+> album
+  <+> track
+  <+> title
+  <+> artist
+  <+> time
+  )
  where
   songIdx =
     column (Just 4) Max (Pad 1) $ txt $ maybe "?" show $ MPD.sgIndex song
@@ -143,12 +149,17 @@ handleEvent s e = case e of
       queueExtent <- lookupExtent Queue
       continue s { queue = listMoveUp $ queue s, queueExtent }
     EvKey KEnter [] -> do
-      let maybeSelectedId = MPD.sgId . snd =<< listSelectedElement (queue s)
+      let maybeSelectedId =
+            MPD.sgId . fst . snd =<< listSelectedElement (queue s)
       traverse_ (\sel -> liftIO (withMPD $ MPD.playId sel)) maybeSelectedId
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song, queue = queue s }
     EvKey (KChar ' ') [] -> do
-      continue s { queue = listToggleHighlight (queue s) }
+      continue s { queue = listToggleHighlight2 (queue s) }
+    EvKey (KChar 'd') [] -> do
+      _  <- liftIO (withMPD $ deleteHighlighted (queue s))
+      s' <- liftIO (buildInitialState)
+      continue s'
     EvResize _ _ -> do
       queueExtent <- lookupExtent Queue
       continue s { queueExtent }
@@ -159,6 +170,8 @@ handleEvent s e = case e of
 
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
+TODO make highlights work for new type (will involve writing custom drawing function)
+TODO make song deletion actualle delete song (don't actually need to filter?)
 TODO read over the snake guide, implement tick event to read playlist etc.
 TODO format playlist better (colors)
 TODO impliment borderWithFullLabel
