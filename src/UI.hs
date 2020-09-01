@@ -16,28 +16,15 @@ import qualified Graphics.Vty                  as Vty
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Song
+import           Types
 import           Data.Vector                   as V
+import           Queue
 
 launch :: IO ()
 launch = do
   initialState <- buildInitialState
   _            <- defaultMain app initialState
   pass
-
-data HState =
-  HState { status :: Maybe MPD.Status
-           ,currentSong :: Maybe MPD.Song
-           ,playlist :: [ MPD.Song ]
-           ,queue :: List Name MPD.Song
-           ,queueExtent :: Maybe (Extent Name)
-           }
-  deriving (Show) --, Eq)
-
--- data Name =
---  Name
---  deriving (Show, Eq, Ord)
-data Name = Queue | Queue0
- deriving (Show, Eq, Ord)
 
 app :: App HState e Name
 app = App
