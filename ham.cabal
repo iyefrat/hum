@@ -82,12 +82,13 @@ common deps
     DeriveFoldable
     DeriveFunctor
     DeriveTraversable
+    DeriveGeneric
     GeneralizedNewtypeDeriving
     BangPatterns
     KindSignatures
     TypeOperators
     ScopedTypeVariables
-       
+
   default-language:    Haskell2010
 
 library
@@ -98,7 +99,8 @@ library
              , Song
              , Prelude
              , Brick.Widgets.List
-
+             , Types
+             , Queue
   -- Modules included in this library but not exported.
   -- other-modules:
 

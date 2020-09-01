@@ -1,12 +1,4 @@
-{-# LANGUAGE TupleSections #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveFoldable#-}
-{-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE DeriveGeneric #-}
 -- | This module provides a scrollable list type and functions for
 -- manipulating and rendering it.
 --
@@ -76,6 +68,7 @@ module Brick.Widgets.List
   , Reversible(..)
   -- * My additions
   , listToggleHighlight
+  , listFilter
   )
 where
 
@@ -83,31 +76,22 @@ import           Prelude                 hiding ( reverse
                                                 , splitAt
                                                 )
 
-import           Control.Applicative            ( (<$>)
-                                                , (<*>)
-                                                , pure
-                                                )
-import           Data.Foldable                  ( Foldable )
-import           Data.Traversable               ( Traversable )
 
 import           Lens.Micro                     ( (^.)
                                                 , (^?)
-                                                , (&)
+--                                                , (&)
                                                 , (.~)
                                                 , (%~)
                                                 , _2
                                                 , _head
                                                 , set
                                                 )
-import           Data.List.NonEmpty             ( NonEmpty() )
-import           Data.Semigroup                 ( Semigroup )
 import qualified Data.Sequence                 as Seq
 import           Graphics.Vty                   ( Event(..)
                                                 , Key(..)
                                                 , Modifier(..)
                                                 )
 import qualified Data.Vector                   as V
-import           GHC.Generics                   ( Generic )
 
 import           Brick.Types
 import           Brick.Main                     ( lookupViewport )
@@ -689,6 +673,17 @@ listToggleHighlight ls = case listSelected ls of
                           (\j hbool -> if i == j then not hbool else hbool)
                           (listHighlighted ls)
     }
+
+
+listFilter
+  :: (Foldable t, Splittable t, Applicative t, Monoid (t e))
+  => (e -> Bool)
+  -> GenericList n t e
+  -> GenericList n t e
+
+listFilter f ls =
+  foldr (\x xs -> if f x then listInsert 0 x xs else xs) (listClear ls) ls
+
 
 
 {-
