@@ -98,7 +98,7 @@ import           Brick.Main                     ( lookupViewport )
 import           Brick.Widgets.Core
 import           Brick.Util                     ( clamp )
 import           Brick.AttrMap
-
+import           Brick.Widgets.Border
 -- | List state. Lists have a container @t@ of element type @e@ that is
 -- the data stored by the list. Internally, Lists handle the following
 -- events by default:
@@ -386,12 +386,13 @@ drawListElements foc l drawElem = Widget Greedy Greedy $ do
               then withDefAttr listHighlightedFocusedAttr
               else withDefAttr listHighlightedAttr
             makeVisible | isSelected    = visible . selItemAttr
-                        | isHighlighted = visible . highItemAttr
+                        | isHighlighted = highItemAttr
                         | otherwise     = id
         in  makeVisible elemWidget
 
   render
     $ viewport (l ^. listNameL) Vertical
+    $ border
     $ translateBy (Location (0, off))
     $ vBox
     $ toList drawnElements

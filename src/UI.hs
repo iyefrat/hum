@@ -34,7 +34,8 @@ app = App
   , appStartEvent   = pure
   , appAttrMap      = const $ attrMap
                         defAttr
-                        [ (listSelectedAttr, Vty.black `Brick.Util.on` Vty.white)
+                        [ (listAttr, Vty.red `Brick.Util.on` Vty.black)
+                        , (listSelectedAttr, Vty.black `Brick.Util.on` Vty.white)
                         , (listHighlightedAttr, Vty.black `Brick.Util.on` Vty.blue)
                         , (attrName "header", Vty.withStyle defAttr Vty.underline)
                         ]
@@ -82,7 +83,7 @@ drawPlaylist st =
     (songIdx <+> songId <+> album <+> track <+> title <+> artist <+> time)
 
 queueRow :: (MPD.Song, Highlight) -> Widget n
-queueRow (song, hl) = (if hl then forceAttr listHighlightedAttr else id)
+queueRow (song, hl) = (if hl then withAttr listHighlightedAttr else id)
   (   hCenter
   $   songIdx
   <+> songId
@@ -113,8 +114,10 @@ column maxWidth left right w = case maxWidth of
   Just m  -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
 
+drawTest :: Widget n
+drawTest = withAttr listAttr (withAttr listSelectedAttr $ txt "sup")
 drawUI :: HState -> [Widget Name]
-drawUI st = [(<=>) (drawPlaylist st) (drawSong st)]
+drawUI st = [drawPlaylist st <=> drawTest <=> drawSong st]
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget

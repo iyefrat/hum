@@ -3,8 +3,22 @@
 module Queue where
 
 import           Brick.Widgets.List
+import           Brick.AttrMap
+import           Brick.Widgets.Core
+import           Lens.Micro                     ( (^.)
+--                                                , (^?)
+--                                                , (&)
+--                                               , (.~)
+--                                               , (%~)
+--                                               , _2
+--                                               , _head
+--                                               , set
+                                                )
+
+import           Brick.Types
 import           Types
 import qualified Network.MPD                   as MPD
+import qualified Data.Vector                   as V
 
 deleteHighlighted :: MPD.MonadMPD m => SongList -> m ()
 
@@ -13,19 +27,6 @@ deleteHighlighted ls = for_
   (\s -> whenJust (MPD.sgId . fst $ s) MPD.deleteId)
   where hls = listFilter snd ls
 
---   My additions
 -- | toggle selected items highlight status
 listToggleHighlight2 :: SongList -> SongList
 listToggleHighlight2 = listModify (\(sg, hl) -> (sg, not hl))
-
-
-{-
-listFilter
-  :: (Foldable t, Splittable t, Applicative t, Monoid (t e))
-  => (e -> Bool)
-  -> GenericList n t e
-  -> GenericList n t e
-
-listFilter f ls =
-  foldr (\x xs -> if f x then listInsert 0 x xs else xs) (listClear ls) ls
--}
