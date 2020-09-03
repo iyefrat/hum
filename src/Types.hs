@@ -11,6 +11,7 @@ data HState =
            ,playlist :: [ MPD.Song ]
            ,queue :: SongList
            ,queueExtent :: Maybe (Extent Name)
+           ,clipboard :: SongList
            }
   deriving (Show) --, Eq)
 
