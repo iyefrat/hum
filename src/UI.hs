@@ -37,8 +37,12 @@ app = App
                         [ (listSelectedAttr, Vty.black `Brick.Util.on` Vty.white)
                         , (listHighlightedAttr, Vty.black `Brick.Util.on` Vty.blue)
                         , (attrName "header", Vty.withStyle defAttr Vty.underline)
+                        , (reverseVideo, Vty.withStyle defAttr Vty.reverseVideo)
                         ]
   }
+
+reverseVideo :: AttrName
+reverseVideo = "reverse"
 
 buildInitialState :: IO HState
 buildInitialState = do
@@ -82,16 +86,17 @@ drawPlaylist st =
     (songIdx <+> songId <+> album <+> track <+> title <+> artist <+> time)
 
 queueRow :: (MPD.Song, Highlight) -> Widget n
-queueRow (song, hl) = (if hl then forceAttr listHighlightedAttr else id)
-  (   hCenter
-  $   songIdx
-  <+> songId
-  <+> album
-  <+> track
-  <+> title
-  <+> artist
-  <+> time
-  )
+queueRow (song, hl) =
+  (if hl then overrideAttr listAttr listHighlightedAttr else id)
+    (   hCenter
+    $   songIdx
+    <+> songId
+    <+> album
+    <+> track
+    <+> title
+    <+> artist
+    <+> time
+    )
  where
   songIdx =
     column (Just 4) Max (Pad 1) $ txt $ maybe "?" show $ MPD.sgIndex song
@@ -166,16 +171,16 @@ handleEvent s e = case e of
     _ -> continue s
   _ -> continue s
 
+
 --handleEvent s (VtyEvent e) = continue =<< handleListEventVi handleListEvent e s
 
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
-TODO make highlights work for new type (will involve writing custom drawing function)
-TODO make song deletion actualle delete song (don't actually need to filter?)
 TODO read over the snake guide, implement tick event to read playlist etc.
 TODO format playlist better (colors)
 TODO impliment borderWithFullLabel
 TODO Impliment MPD event channel
 TODO impliment song skipping
-TODO impliment song deletion, random?
+TODO have select override highlihgt
+TODO random song order
 -}
