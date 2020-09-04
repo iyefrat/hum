@@ -307,7 +307,7 @@ renderListWithIndex
   -> Widget n
                     -- ^ rendered widget
 renderListWithIndex drawElem foc l =
-  withAttr listAttr $ drawListElements foc l drawElem
+  withDefAttr listAttr $ drawListElements foc l drawElem
 
 imap :: (Traversable t) => (Int -> a -> b) -> t a -> t b
 imap f xs =
@@ -331,44 +331,41 @@ drawListElements foc l drawElem = Widget Greedy Greedy $ do
   c <- getContext
 
   -- Take (numPerHeight * 2) elements, or whatever is left
-  let
-    es                  = slice start (numPerHeight * 2) (l ^. listElementsL)
+  let es                  = slice start (numPerHeight * 2) (l ^. listElementsL)
 
-    idx                 = fromMaybe 0 (l ^. listSelectedL)
+      idx                 = fromMaybe 0 (l ^. listSelectedL)
 
-    start               = max 0 $ idx - numPerHeight + 1
+      start               = max 0 $ idx - numPerHeight + 1
 
-    -- The number of items to show is the available height
-    -- divided by the item height...
-    initialNumPerHeight = (c ^. availHeightL) `div` (l ^. listItemHeightL)
-    -- ... but if the available height leaves a remainder of
-    -- an item height then we need to ensure that we render an
-    -- extra item to show a partial item at the top or bottom to
-    -- give the expected result when an item is more than one
-    -- row high. (Example: 5 rows available with item height
-    -- of 3 yields two items: one fully rendered, the other
-    -- rendered with only its top 2 or bottom 2 rows visible,
-    -- depending on how the viewport state changes.)
-    numPerHeight =
-      initialNumPerHeight
-        + if initialNumPerHeight * (l ^. listItemHeightL) == c ^. availHeightL
-            then 0
-            else 1
+      -- The number of items to show is the available height
+      -- divided by the item height...
+      initialNumPerHeight = (c ^. availHeightL) `div` (l ^. listItemHeightL)
+      -- ... but if the available height leaves a remainder of
+      -- an item height then we need to ensure that we render an
+      -- extra item to show a partial item at the top or bottom to
+      -- give the expected result when an item is more than one
+      -- row high. (Example: 5 rows available with item height
+      -- of 3 yields two items: one fully rendered, the other
+      -- rendered with only its top 2 or bottom 2 rows visible,
+      -- depending on how the viewport state changes.)
+      numPerHeight =
+        initialNumPerHeight
+          + if initialNumPerHeight * (l ^. listItemHeightL) == c ^. availHeightL
+              then 0
+              else 1
 
-    off           = start * (l ^. listItemHeightL)
+      off           = start * (l ^. listItemHeightL)
 
-    drawnElements = flip imap es $ \i e ->
-      let
-        j           = i + start
-        isSelected  = Just j == l ^. listSelectedL
-        elemWidget  = drawElem j isSelected e
-        selItemAttr = if foc
-          then withAttr listSelectedFocusedAttr
-          else withAttr listSelectedAttr
-        makeVisible | isSelected = visible . selItemAttr
-                    | otherwise  = id
-      in
-        makeVisible elemWidget
+      drawnElements = flip imap es $ \i e ->
+        let j           = i + start
+            isSelected  = Just j == l ^. listSelectedL
+            elemWidget  = drawElem j isSelected e
+            selItemAttr = if foc
+              then withDefAttr listSelectedFocusedAttr
+              else withDefAttr listSelectedAttr
+            makeVisible | isSelected = visible . selItemAttr
+                        | otherwise  = id
+        in  makeVisible elemWidget
 
   render
     $ viewport (l ^. listNameL) Vertical

@@ -173,7 +173,7 @@ column maxWidth left right w = case maxWidth of
   Just m  -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
 drawClock :: HState -> Widget Name
-drawClock st = center $ border $ str
+drawClock st = vLimit 3 $ center $ border $ str
   ((\ls -> Prelude.take (Prelude.length ls - 11) ls)
     (formatTime defaultTimeLocale "%T.%q" (currentTime st))
   )
