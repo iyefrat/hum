@@ -13,8 +13,10 @@ deleteHighlighted ls =
         >> whenJust
              ((MPD.sgId . fst . snd) =<< listSelectedElement ls)
              MPD.deleteId
-pasteClipboard :: MPD.MonadMPD m => SongList -> m ()
-pasteClipboard clip = for_ clip (\s -> MPD.add (MPD.sgFilePath . fst $ s))
+pasteClipboard :: MPD.MonadMPD m => SongList -> SongList -> m ()
+pasteClipboard clip ls =
+  let pasted = listPaste clip ls
+  in  MPD.clear >> for_ pasted (\s -> MPD.add (MPD.sgFilePath . fst $ s))
 
 getHighlighted :: SongList -> SongList
 getHighlighted ls = hls where
@@ -32,7 +34,7 @@ listPaste
 listPaste p ls =
   let es         = listElements ls
       pos        = fromMaybe 0 (listSelected ls)
-      (es1, es2) = Brick.Widgets.List.splitAt pos es
+      (es1, es2) = Brick.Widgets.List.splitAt (pos + 1) es
   in  ls { listElements = es1 <> (listElements p) <> es2 }
 
 --   My additions

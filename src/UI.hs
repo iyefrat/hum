@@ -177,7 +177,7 @@ handleEvent s e = case e of
       continue s { clipboard = getHighlighted (queue s) }
     EvKey (KChar 'p') [] -> do
       let c = clipboard s
-      _ <- liftIO (withMPD $ pasteClipboard c)
+      _ <- liftIO (withMPD $ pasteClipboard c (queue s))
       let mi = listSelected (queue s)
       s' <- liftIO buildInitialState
       continue s'
