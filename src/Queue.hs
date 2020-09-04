@@ -5,6 +5,7 @@ module Queue where
 import           Brick.Widgets.List
 import           Types
 import qualified Network.MPD                   as MPD
+import qualified Data.Vector                   as V
 
 deleteHighlighted :: MPD.MonadMPD m => SongList -> m ()
 deleteHighlighted ls =
@@ -15,17 +16,10 @@ deleteHighlighted ls =
              MPD.deleteId
 pasteClipboard :: MPD.MonadMPD m => SongList -> SongList -> m ()
 pasteClipboard clip ls =
-  let pos = fromMaybe 0 (listSelected ls)
-      len = (length (listElements ls))
-  in  for_
-        clip
-        (\s ->
-          (MPD.addId (MPD.sgFilePath . fst $ s) Nothing)
-            >>= (\i ->
-                  (fromIntegral <$> MPD.stPlaylistLength <$> MPD.status)
-                    >>= (\newlen -> MPD.moveId i (pos + (newlen - len)))
-                )
-        )
+  let pos         = fromMaybe 0 (listSelected ls)
+      len         = length (listElements ls)
+      indexedClip = V.indexed $ MPD.sgFilePath . fst <$> listElements clip
+  in  for_ indexedClip (\(n, song) -> MPD.addId song (Just (pos + n + 1)))
 
 getHighlighted :: SongList -> SongList
 getHighlighted ls = hls where
@@ -44,7 +38,7 @@ listPaste p ls =
   let es         = listElements ls
       pos        = fromMaybe 0 (listSelected ls)
       (es1, es2) = Brick.Widgets.List.splitAt (pos + 1) es
-  in  ls { listElements = es1 <> (listElements p) <> es2 }
+  in  ls { listElements = es1 <> listElements p <> es2 }
 
 --   My additions
 -- | toggle selected items highlight status
