@@ -35,7 +35,6 @@ module Brick.Widgets.List
   , listName
   , listSelectedElement
   , listSelected
-  , listHighlighted
   , listItemHeight
 
   -- * Manipulating a list
@@ -59,15 +58,11 @@ module Brick.Widgets.List
   , listAttr
   , listSelectedAttr
   , listSelectedFocusedAttr
-  -- added
-  , listHighlightedAttr
-  , listHighlightedFocusedAttr
 
   -- * Classes
   , Splittable(..)
   , Reversible(..)
   -- * My additions
-  , listToggleHighlight
   , listFilter
   )
 where
@@ -127,8 +122,6 @@ data GenericList n t e =
          -- ^ The list's sequence of elements.
          , listSelected :: !(Maybe Int)
          -- ^ The list's selected element index, if any.
-         , listHighlighted :: !(V.Vector Bool)
-         -- ^ The list's elements' highlight status
          , listName :: n
          -- ^ The list's name.
          , listItemHeight :: Int
@@ -254,18 +247,6 @@ listSelectedAttr = listAttr <> "selected"
 listSelectedFocusedAttr :: AttrName
 listSelectedFocusedAttr = listSelectedAttr <> "focused"
 
-
--- | The attribute used only for the highlighted list items when
--- the list does not have focus. Extends 'listAttr'.
-listHighlightedAttr :: AttrName
-listHighlightedAttr = listAttr <> "highlighted"
-
--- | The attribute used only for the highlighted list items when
--- the list has focus. Extends 'listHighlightedAttr'.
-listHighlightedFocusedAttr :: AttrName
-listHighlightedFocusedAttr = listHighlightedAttr <> "focused"
-
-
 -- | Construct a list in terms of container 't' with element type 'e'.
 list
   :: (Foldable t)
@@ -378,19 +359,14 @@ drawListElements foc l drawElem = Widget Greedy Greedy $ do
 
     drawnElements = flip imap es $ \i e ->
       let
-        j             = i + start
-        isSelected    = Just j == l ^. listSelectedL
-        isHighlighted = Just True == (l ^. listHighlightedL) V.!? j
-        elemWidget    = drawElem j isSelected e
-        selItemAttr   = if foc
+        j           = i + start
+        isSelected  = Just j == l ^. listSelectedL
+        elemWidget  = drawElem j isSelected e
+        selItemAttr = if foc
           then withAttr listSelectedFocusedAttr
           else withAttr listSelectedAttr
-        highItemAttr = if foc
-          then withDefAttr listHighlightedFocusedAttr
-          else withDefAttr listHighlightedAttr
-        makeVisible | isSelected    = visible . selItemAttr
-                    | isHighlighted = visible . highItemAttr
-                    | otherwise     = id
+        makeVisible | isSelected = visible . selItemAttr
+                    | otherwise  = id
       in
         makeVisible elemWidget
 
@@ -668,16 +644,6 @@ listModify f l = case l ^. listSelectedL of
   Just j  -> l & listElementsL %~ imap (\i e -> if i == j then f e else e)
 
 --   My additions
--- | toggle selected items highlight status
-listToggleHighlight :: GenericList n t e -> GenericList n t e
-listToggleHighlight ls = case listSelected ls of
-  Nothing -> ls
-  Just i  -> ls
-    { listHighlighted = V.imap
-                          (\j hbool -> if i == j then not hbool else hbool)
-                          (listHighlighted ls)
-    }
-
 
 listFilter
   :: (Foldable t, Splittable t, Applicative t, Monoid (t e))

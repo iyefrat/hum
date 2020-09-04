@@ -54,5 +54,5 @@ listPaste p ls =
   in  ls { listElements = es1 <> listElements p <> es2 }
 
 -- | toggle selected items highlight status
-listToggleHighlight2 :: SongList -> SongList
-listToggleHighlight2 = listModify (\(sg, hl) -> (sg, not hl))
+listToggleHighlight :: SongList -> SongList
+listToggleHighlight = listModify (\(sg, hl) -> (sg, not hl))
