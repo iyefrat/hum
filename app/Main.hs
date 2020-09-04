@@ -26,12 +26,12 @@ main = do
   finalState <- customMain initialVty buildVty (Just chan) app initialState
   pass
 
-mpdListenForever :: (BC.BChan HamEvent) -> IO ()
+mpdListenForever :: BC.BChan HamEvent -> IO ()
 mpdListenForever chan = forever $ do
-  response <- withMPD $ (idle [])
+  response <- withMPD $ idle []
   BC.writeBChan chan (Right response)
 
-tickTock :: (BC.BChan HamEvent) -> IO ()
+tickTock :: BC.BChan HamEvent -> IO ()
 tickTock chan = forever $ do
   BC.writeBChan chan (Left Tick)
   threadDelay 100000

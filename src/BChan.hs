@@ -4,6 +4,6 @@ import           Network.MPD
 mpdListenForever :: IO ()
 mpdListenForever = forever
   (do
-    response <- withMPD $ (idle [])
-    putStrLn (show response)
+    response <- withMPD $ idle []
+    print response
   )

@@ -249,7 +249,7 @@ handleEvent s e = case e of
       continue s { queueExtent }
     _ -> continue s
   (AppEvent (Left Tick)) -> do
-    currentTime <- liftIO (getCurrentTime)
+    currentTime <- liftIO getCurrentTime
     continue s { currentTime }
   _ -> continue s
 
