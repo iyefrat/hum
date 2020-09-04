@@ -33,4 +33,4 @@ mpdListenForever chan = forever $ do
 tickTock :: BC.BChan HamEvent -> IO ()
 tickTock chan = forever $ do
   BC.writeBChan chan (Left Tick)
-  threadDelay 100000
+  threadDelay 1000000
