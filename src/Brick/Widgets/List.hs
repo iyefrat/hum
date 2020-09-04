@@ -77,7 +77,8 @@ import           Prelude                 hiding ( reverse
                                                 )
 
 
-import           Lens.Micro                     ( (^.)
+import           Lens.Micro                     ( (?~)
+                                                , (^.)
                                                 , (^?)
 --                                                , (&)
                                                 , (.~)
@@ -421,7 +422,7 @@ listInsert pos e l =
         Nothing -> 0
         Just s  -> if pos <= s then s + 1 else s
       (front, back) = splitAt pos es
-  in  l & listSelectedL .~ Just newSel & listElementsL .~ sconcat
+  in  l & (listSelectedL ?~ newSel) & listElementsL .~ sconcat
         (front :| [pure e, back])
 
 -- | Remove an element from a list at the specified position.

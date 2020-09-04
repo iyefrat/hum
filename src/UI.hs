@@ -58,7 +58,7 @@ drawSong :: HState -> Widget Name
 drawSong st = vLimit 3 . center . borderWithLabel (str "Now Playing") $ maybe
   (txt "nothing.")
   queueRow
-  ((, False) <$> (currentSong st))
+  ((, False) <$> currentSong st)
 
 drawPlaylist :: HState -> Widget Name
 drawPlaylist st =
@@ -66,10 +66,10 @@ drawPlaylist st =
         Just e  -> (snd . extentSize $ e) - 2
         Nothing -> 40
   in  reportExtent Queue
-        $   borderWithLabel (str "Queue (under construction)")
-        $   viewport Queue Vertical
-        $   visible
-        $   vLimit vsize
+        .   borderWithLabel (str "Queue (under construction)")
+        .   viewport Queue Vertical
+        .   visible
+        .   vLimit vsize
         .   center
         $   header
         <=> renderList (const queueRow) True (queue st)
