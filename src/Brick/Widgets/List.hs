@@ -689,6 +689,9 @@ listFilter f ls =
 
 
 
+
+
+
 {-
 I have an element x :: a and xs :: Vector a. If x isn't in xs I want to add it at the end,
 and if x is in xs I want to drop it from xs. Is there a good way to do this?

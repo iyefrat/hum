@@ -51,7 +51,7 @@ buildInitialState = do
   playlist    <- fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue = (, False) <$> list Queue0 (V.fromList playlist) 1
   let queueExtent = Nothing
-  let clipboard   = list Clipboard (V.empty) 1
+  let clipboard   = list Clipboard V.empty 1
   pure HState { status, currentSong, playlist, queue, queueExtent, clipboard }
 
 drawSong :: HState -> Widget Name
@@ -163,13 +163,28 @@ handleEvent s e = case e of
     EvKey (KChar ' ') [] -> do
       continue s { queue = listToggleHighlight2 (queue s) }
     EvKey (KChar 'd') [] -> do
+      let clipboard = getHighlighted (queue s)
       _ <- liftIO (withMPD $ deleteHighlighted (queue s))
-      let mi = (listSelected (queue s))
-      s' <- liftIO (buildInitialState)
+      let mi = listSelected (queue s)
+      s' <- liftIO buildInitialState
       continue s'
-        { queue = case mi of
-                    Just i  -> listMoveTo i (queue s')
-                    Nothing -> queue s'
+        { queue     = case mi of
+                        Just i  -> listMoveTo i (queue s')
+                        Nothing -> queue s'
+        , clipboard
+        }
+    EvKey (KChar 'y') [] -> do
+      continue s { clipboard = getHighlighted (queue s) }
+    EvKey (KChar 'p') [] -> do
+      let c = clipboard s
+      _ <- liftIO (withMPD $ pasteClipboard c)
+      let mi = listSelected (queue s)
+      s' <- liftIO buildInitialState
+      continue s'
+        { queue     = case mi of
+                        Just i  -> listMoveTo i (queue s')
+                        Nothing -> queue s'
+        , clipboard = c
         }
     EvResize _ _ -> do
       queueExtent <- lookupExtent Queue
