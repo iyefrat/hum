@@ -3,19 +3,6 @@
 module Queue where
 
 import           Brick.Widgets.List
-import           Brick.AttrMap
-import           Brick.Widgets.Core
-import           Lens.Micro                     ( (^.)
---                                                , (^?)
---                                                , (&)
---                                               , (.~)
---                                               , (%~)
---                                               , _2
---                                               , _head
---                                               , set
-                                                )
-
-import           Brick.Types
 import           Types
 import qualified Network.MPD                   as MPD
 import qualified Data.Vector                   as V
@@ -30,7 +17,6 @@ deleteHighlighted ls =
 pasteClipboard :: MPD.MonadMPD m => SongList -> SongList -> m ()
 pasteClipboard clip ls =
   let pos         = fromMaybe 0 (listSelected ls)
-      len         = length (listElements ls)
       indexedClip = V.indexed $ MPD.sgFilePath . fst <$> listElements clip
   in  for_ indexedClip (\(n, song) -> MPD.addId song (Just (pos + n + 1)))
 

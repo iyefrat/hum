@@ -261,7 +261,7 @@ list
 list name es h =
   let selIndex   = if null es then Nothing else Just 0
       safeHeight = max 1 h
-  in  List es selIndex (V.replicate (length es) False) name safeHeight
+  in  List es selIndex name safeHeight
 
 -- | Render a list using the specified item drawing function.
 --

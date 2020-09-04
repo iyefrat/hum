@@ -54,6 +54,9 @@ queueTrackAttr = queueAttr <> "track"
 queueArtistAttr = queueAttr <> "artist"
 queueTimeAttr = queueAttr <> "time"
 
+listHighlightedAttr :: AttrName
+listHighlightedAttr = listAttr <> "highlighted"
+
 buildInitialState :: IO HState
 buildInitialState = do
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
@@ -238,7 +241,6 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 TODO read over the snake guide, implement tick event to read playlist etc.
-TODO format playlist better (colors)
 TODO impliment borderWithFullLabel
 TODO Impliment MPD event channel
 TODO impliment song skipping
