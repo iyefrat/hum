@@ -19,14 +19,17 @@ import           Song
 import           Types
 import           Data.Vector                   as V
 import           Queue
-
+import           Data.Time                      ( getCurrentTime
+                                                , formatTime
+                                                )
+import           Data.Time.Format               ( defaultTimeLocale )
 launch :: IO ()
 launch = do
   initialState <- buildInitialState
   _            <- defaultMain app initialState
   pass
 
-app :: App HState e Name
+app :: App HState HamEvent Name
 app = App
   { appDraw         = drawUI
   , appChooseCursor = showFirstCursor
@@ -62,10 +65,18 @@ buildInitialState = do
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status      <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   playlist    <- fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
+  currentTime <- getCurrentTime
   let queue = (, False) <$> list Queue0 (V.fromList playlist) 1
   let queueExtent = Nothing
   let clipboard   = list Clipboard V.empty 1
-  pure HState { status, currentSong, playlist, queue, queueExtent, clipboard }
+  pure HState { status
+              , currentSong
+              , playlist
+              , queue
+              , queueExtent
+              , clipboard
+              , currentTime
+              }
 
 drawSong :: HState -> Widget Name
 drawSong st = vLimit 3 . center . borderWithLabel (str "Now Playing") $ maybe
@@ -161,9 +172,13 @@ column maxWidth left right w = case maxWidth of
   Nothing -> wpad
   Just m  -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
-
+drawClock :: HState -> Widget Name
+drawClock st = center $ border $ str
+  ((\ls -> Prelude.take (Prelude.length ls - 11) ls)
+    (formatTime defaultTimeLocale "%T.%q" (currentTime st))
+  )
 drawUI :: HState -> [Widget Name]
-drawUI st = [drawPlaylist st <=> drawSong st]
+drawUI st = [drawPlaylist st <=> drawClock st <=> drawSong st]
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget
@@ -171,7 +186,7 @@ hBoxPad _ [w     ] = w
 hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
 
 
-handleEvent :: HState -> BrickEvent Name e -> EventM Name (Next HState)
+handleEvent :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'q') [] -> halt s
@@ -233,8 +248,10 @@ handleEvent s e = case e of
       queueExtent <- lookupExtent Queue
       continue s { queueExtent }
     _ -> continue s
+  (AppEvent (Left Tick)) -> do
+    currentTime <- liftIO (getCurrentTime)
+    continue s { currentTime }
   _ -> continue s
-
 
 --handleEvent s (VtyEvent e) = continue =<< handleListEventVi handleListEvent e s
 

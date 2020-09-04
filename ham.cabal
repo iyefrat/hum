@@ -59,6 +59,7 @@ common deps
      , filepath
      , vector
      , microlens
+     , time
 
   ghc-options:
     -Wall
@@ -101,6 +102,7 @@ library
              , Brick.Widgets.List
              , Types
              , Queue
+             , BChan
   -- Modules included in this library but not exported.
   -- other-modules:
 
