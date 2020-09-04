@@ -8,7 +8,7 @@ import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.Border
 import           Brick.Widgets.List
-import           Brick.Util
+import qualified Brick.Util                    as BU
 -- import           Brick.Widgets.Border.Style
 import           Graphics.Vty.Input.Events
 import           Graphics.Vty                   ( defAttr )
@@ -34,15 +34,25 @@ app = App
   , appStartEvent   = pure
   , appAttrMap      = const $ attrMap
                         defAttr
-                        [ (listSelectedAttr, Vty.black `Brick.Util.on` Vty.white)
-                        , (listHighlightedAttr, Vty.black `Brick.Util.on` Vty.blue)
+                        [ (listSelectedAttr, Vty.withStyle defAttr Vty.reverseVideo)
+                        , (listHighlightedAttr, BU.fg Vty.yellow)
                         , (attrName "header", Vty.withStyle defAttr Vty.underline)
-                        , (reverseVideo, Vty.withStyle defAttr Vty.reverseVideo)
+                        , (queueAlbumAttr     , BU.fg Vty.red)
+                        , (queueTrackAttr     , BU.fg Vty.magenta)
+                        , (queueTitleAttr     , BU.fg Vty.cyan)
+                        , (queueArtistAttr    , BU.fg Vty.green)
+                        , (queueTimeAttr      , BU.fg Vty.blue)
                         ]
   }
 
-reverseVideo :: AttrName
-reverseVideo = "reverse"
+queueAttr, queueAlbumAttr, queueTitleAttr, queueTrackAttr, queueArtistAttr, queueTimeAttr
+  :: AttrName
+queueAttr = "queue"
+queueAlbumAttr = queueAttr <> "album"
+queueTitleAttr = queueAttr <> "title"
+queueTrackAttr = queueAttr <> "track"
+queueArtistAttr = queueAttr <> "artist"
+queueTimeAttr = queueAttr <> "time"
 
 buildInitialState :: IO HState
 buildInitialState = do
@@ -66,7 +76,7 @@ drawPlaylist st =
         Just e  -> (snd . extentSize $ e) - 2
         Nothing -> 40
   in  reportExtent Queue
-        .   borderWithLabel (str "Queue (under construction)")
+        .   borderWithLabel (str "Queue")
         .   viewport Queue Vertical
         .   visible
         .   vLimit vsize
@@ -77,18 +87,32 @@ drawPlaylist st =
  where
   songIdx = column (Just 4) Max (Pad 1) $ txt "Inx"
   songId  = column (Just 3) Max (Pad 1) $ txt "ID"
-  album   = column (Just 25) (Pad 1) Max $ txt "Album"
-  track   = column (Just 8) Max (Pad 2) $ txt "#"
-  title   = column Nothing Max Max $ txt "Title"
-  artist  = column (Just 25) Max (Pad 1) $ txt "Artist"
-  time    = column (Just 8) Max (Pad 1) $ txt "Time"
-  header  = withAttr
+  album   = withAttr queueAlbumAttr $ column (Just 25) (Pad 1) Max $ txt "Album"
+  track   = withAttr queueTrackAttr $ column (Just 8) Max (Pad 2) $ txt "#"
+  title   = withAttr queueTitleAttr $ column Nothing Max Max $ txt "Title"
+  artist =
+    withAttr queueArtistAttr $ column (Just 25) Max (Pad 1) $ txt "Artist"
+  time   = withAttr queueTimeAttr $ column (Just 8) Max (Pad 1) $ txt "Time"
+  header = withAttr
     "header"
     (songIdx <+> songId <+> album <+> track <+> title <+> artist <+> time)
 
 queueRow :: (MPD.Song, Highlight) -> Widget n
 queueRow (song, hl) =
-  (if hl then overrideAttr listAttr listHighlightedAttr else id)
+  (if hl
+      then updateAttrMap
+        (mapAttrNames
+          (   (listHighlightedAttr, )
+          <$> [ queueAlbumAttr
+              , queueTrackAttr
+              , queueTitleAttr
+              , queueArtistAttr
+              , queueTimeAttr
+              ]
+          )
+        )
+      else id
+    )
     (   hCenter
     $   songIdx
     <+> songId
@@ -106,12 +130,28 @@ queueRow (song, hl) =
       $ txt
       $ maybe "?" (\(MPD.Id x) -> show x)
       $ MPD.sgId song
-  album = column (Just 25) (Pad 1) Max $ txt $ meta "<no album>" MPD.Album song
-  track = column (Just 8) Max (Pad 2) $ txt $ meta "?" MPD.Track song
-  title = column Nothing Max Max $ txt $ meta "<no title>" MPD.Title song
-  artist =
-    column (Just 25) Max (Pad 1) $ txt $ meta "<no artist>" MPD.Artist song
-  time = column (Just 8) Max (Pad 1) $ txt $ secondsToTime $ MPD.sgLength song
+  album = withAttr queueAlbumAttr $ column (Just 25) (Pad 1) Max $ txt $ meta
+    "<no album>"
+    MPD.Album
+    song
+  track = withAttr queueTrackAttr $ column (Just 8) Max (Pad 2) $ txt $ meta
+    "?"
+    MPD.Track
+    song
+  title = withAttr queueTitleAttr $ column Nothing Max Max $ txt $ meta
+    "<no title>"
+    MPD.Title
+    song
+  artist = withAttr queueArtistAttr $ column (Just 25) Max (Pad 1) $ txt $ meta
+    "<no artist>"
+    MPD.Artist
+    song
+  time =
+    withAttr queueTimeAttr
+      $ column (Just 8) Max (Pad 1)
+      $ txt
+      $ secondsToTime
+      $ MPD.sgLength song
 
 column :: Maybe Int -> Padding -> Padding -> Widget n -> Widget n
 column maxWidth left right w = case maxWidth of
@@ -202,6 +242,5 @@ TODO format playlist better (colors)
 TODO impliment borderWithFullLabel
 TODO Impliment MPD event channel
 TODO impliment song skipping
-TODO have select override highlihgt
 TODO random song order
 -}
