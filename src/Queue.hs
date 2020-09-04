@@ -3,6 +3,19 @@
 module Queue where
 
 import           Brick.Widgets.List
+import           Brick.AttrMap
+import           Brick.Widgets.Core
+import           Lens.Micro                     ( (^.)
+--                                                , (^?)
+--                                                , (&)
+--                                               , (.~)
+--                                               , (%~)
+--                                               , _2
+--                                               , _head
+--                                               , set
+                                                )
+
+import           Brick.Types
 import           Types
 import qualified Network.MPD                   as MPD
 import qualified Data.Vector                   as V
@@ -40,19 +53,6 @@ listPaste p ls =
       (es1, es2) = Brick.Widgets.List.splitAt (pos + 1) es
   in  ls { listElements = es1 <> listElements p <> es2 }
 
---   My additions
 -- | toggle selected items highlight status
 listToggleHighlight2 :: SongList -> SongList
 listToggleHighlight2 = listModify (\(sg, hl) -> (sg, not hl))
-
-
-{-
-listFilter
-  :: (Foldable t, Splittable t, Applicative t, Monoid (t e))
-  => (e -> Bool)
-  -> GenericList n t e
-  -> GenericList n t e
-
-listFilter f ls =
-  foldr (\x xs -> if f x then listInsert 0 x xs else xs) (listClear ls) ls
--}

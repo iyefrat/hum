@@ -159,8 +159,10 @@ column maxWidth left right w = case maxWidth of
   Just m  -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
 
+drawTest :: Widget n
+drawTest = withAttr listAttr (withAttr listSelectedAttr $ txt "sup")
 drawUI :: HState -> [Widget Name]
-drawUI st = [(<=>) (drawPlaylist st) (drawSong st)]
+drawUI st = [drawPlaylist st <=> drawTest <=> drawSong st]
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget
