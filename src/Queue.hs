@@ -7,13 +7,13 @@ import           Types
 import qualified Network.MPD                   as MPD
 
 deleteHighlighted :: MPD.MonadMPD m => SongList -> m ()
-
 deleteHighlighted ls =
   let hls = listFilter snd ls
   in  (for_ hls (\s -> whenJust (MPD.sgId . fst $ s) MPD.deleteId))
         >> (whenJust ((MPD.sgId . fst . snd) =<< listSelectedElement ls)
                      (\s -> MPD.deleteId s)
            )
+
 --   My additions
 -- | toggle selected items highlight status
 listToggleHighlight2 :: SongList -> SongList

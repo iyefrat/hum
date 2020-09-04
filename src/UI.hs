@@ -51,7 +51,8 @@ buildInitialState = do
   playlist    <- fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue = (, False) <$> list Queue0 (V.fromList playlist) 1
   let queueExtent = Nothing
-  pure HState { status, currentSong, playlist, queue, queueExtent }
+  let clipboard   = list Clipboard (V.empty) 1
+  pure HState { status, currentSong, playlist, queue, queueExtent, clipboard }
 
 drawSong :: HState -> Widget Name
 drawSong st = vLimit 3 . center . borderWithLabel (str "Now Playing") $ maybe
