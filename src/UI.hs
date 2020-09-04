@@ -102,14 +102,14 @@ drawPlaylist st =
   songIdx = column (Just 4) Max (Pad 1) $ txt "Inx"
   songId  = column (Just 3) Max (Pad 1) $ txt "ID"
   album   = withAttr queueAlbumAttr $ column (Just 25) (Pad 1) Max $ txt "Album"
-  track   = withAttr queueTrackAttr $ column (Just 8) Max (Pad 2) $ txt "#"
+  track   = withAttr queueTrackAttr $ column (Just 3) Max (Pad 1) $ txt "#"
   title   = withAttr queueTitleAttr $ column Nothing Max Max $ txt "Title"
   artist =
     withAttr queueArtistAttr $ column (Just 25) Max (Pad 1) $ txt "Artist"
-  time   = withAttr queueTimeAttr $ column (Just 8) Max (Pad 1) $ txt "Time"
-  header = withAttr
-    "header"
-    (songIdx <+> songId <+> album <+> track <+> title <+> artist <+> time)
+  time   = withAttr queueTimeAttr $ column (Just 5) Max (Pad 1) $ txt "Time"
+  header = withAttr "header"
+                    ({-songIdx <+> songId <+>-}
+                     album <+> track <+> title <+> artist <+> time)
 
 queueRow :: (MPD.Song, Highlight) -> Widget n
 queueRow (song, hl) =
@@ -128,9 +128,10 @@ queueRow (song, hl) =
       else id
     )
     (   hCenter
-    $   songIdx
+    $   {-songIdx
     <+> songId
-    <+> album
+    <+> -}
+        album
     <+> track
     <+> title
     <+> artist
@@ -148,7 +149,7 @@ queueRow (song, hl) =
     "<no album>"
     MPD.Album
     song
-  track = withAttr queueTrackAttr $ column (Just 8) Max (Pad 2) $ txt $ meta
+  track = withAttr queueTrackAttr $ column (Just 3) Max (Pad 1) $ txt $ meta
     "?"
     MPD.Track
     song
@@ -162,7 +163,7 @@ queueRow (song, hl) =
     song
   time =
     withAttr queueTimeAttr
-      $ column (Just 8) Max (Pad 1)
+      $ column (Just 5) Max (Pad 1)
       $ txt
       $ secondsToTime
       $ MPD.sgLength song
@@ -249,8 +250,8 @@ handleEvent s e = case e of
       continue s { queueExtent }
     _ -> continue s
   (AppEvent (Left Tick)) -> do
-    --currentTime <- liftIO getCurrentTime
-    continue s --{ currentTime }
+    currentTime <- liftIO getCurrentTime
+    continue s { currentTime }
   (AppEvent (Right (Right _))) -> do
     currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
@@ -267,4 +268,5 @@ TODO read over the snake guide, implement tick event to read playlist etc.
 TODO impliment borderWithFullLabel
 TODO impliment song skipping
 TODO random song order
+TODO
 -}
