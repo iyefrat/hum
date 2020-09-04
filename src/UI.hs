@@ -249,8 +249,14 @@ handleEvent s e = case e of
       continue s { queueExtent }
     _ -> continue s
   (AppEvent (Left Tick)) -> do
-    currentTime <- liftIO getCurrentTime
-    continue s { currentTime }
+    --currentTime <- liftIO getCurrentTime
+    continue s --{ currentTime }
+  (AppEvent (Right (Right _))) -> do
+    currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
+    status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+    playlist    <- liftIO (fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
+    currentTime <- liftIO (getCurrentTime)
+    continue s { currentSong, status, playlist, currentTime }
   _ -> continue s
 
 --handleEvent s (VtyEvent e) = continue =<< handleListEventVi handleListEvent e s
@@ -259,7 +265,6 @@ handleEvent s e = case e of
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 TODO read over the snake guide, implement tick event to read playlist etc.
 TODO impliment borderWithFullLabel
-TODO Impliment MPD event channel
 TODO impliment song skipping
 TODO random song order
 -}
