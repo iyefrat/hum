@@ -15,8 +15,17 @@ deleteHighlighted ls =
              MPD.deleteId
 pasteClipboard :: MPD.MonadMPD m => SongList -> SongList -> m ()
 pasteClipboard clip ls =
-  let pasted = listPaste clip ls
-  in  MPD.clear >> for_ pasted (\s -> MPD.add (MPD.sgFilePath . fst $ s))
+  let pos = fromMaybe 0 (listSelected ls)
+      len = (length (listElements ls))
+  in  for_
+        clip
+        (\s ->
+          (MPD.addId (MPD.sgFilePath . fst $ s) Nothing)
+            >>= (\i ->
+                  (fromIntegral <$> MPD.stPlaylistLength <$> MPD.status)
+                    >>= (\newlen -> MPD.moveId i (pos + (newlen - len)))
+                )
+        )
 
 getHighlighted :: SongList -> SongList
 getHighlighted ls = hls where
