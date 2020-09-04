@@ -162,9 +162,14 @@ handleEvent s e = case e of
     EvKey (KChar ' ') [] -> do
       continue s { queue = listToggleHighlight2 (queue s) }
     EvKey (KChar 'd') [] -> do
-      _  <- liftIO (withMPD $ deleteHighlighted (queue s))
+      _ <- liftIO (withMPD $ deleteHighlighted (queue s))
+      let mi = (listSelected (queue s))
       s' <- liftIO (buildInitialState)
       continue s'
+        { queue = case mi of
+                    Just i  -> listMoveTo i (queue s')
+                    Nothing -> queue s'
+        }
     EvResize _ _ -> do
       queueExtent <- lookupExtent Queue
       continue s { queueExtent }
