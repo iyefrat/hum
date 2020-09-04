@@ -10,20 +10,19 @@ import           Control.Concurrent             ( threadDelay
                                                 , forkIO
                                                 )
 import           Types
---import           BChan                          ( mpdListenForever )
 import           Network.MPD                    ( withMPD
                                                 , idle
                                                 )
 
 main :: IO ()
 main = do
-  chan <- BC.newBChan 10
-  forkIO $ mpdListenForever chan
-  forkIO $ tickTock chan
+  chan         <- BC.newBChan 10
+  _            <- forkIO $ mpdListenForever chan
+  _            <- forkIO $ tickTock chan
   initialState <- buildInitialState
   let buildVty = Vty.mkVty Vty.defaultConfig
   initialVty <- buildVty
-  finalState <- customMain initialVty buildVty (Just chan) app initialState
+  _          <- customMain initialVty buildVty (Just chan) app initialState
   pass
 
 mpdListenForever :: BC.BChan HamEvent -> IO ()
