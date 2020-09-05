@@ -17,7 +17,8 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Song
 import           Types
-import           Data.Vector                   as V
+import qualified Data.Vector                   as V
+import qualified Data.Text                     as T
 import           Queue
 import           Data.Time                      ( getCurrentTime
                                                 , formatTime
@@ -88,7 +89,7 @@ drawNowPlaying st = vLimit 5 . center $ maybe (txt "nothing.")
     (txt "\n")
       <=> (hCenter title)
       <=> hCenter (artist <+> txt " - " <+> album)
-      <=> hCenter songTime
+      <=> progbar
    where
     title     = withAttr queueTitleAttr $ txt $ meta "<no title>" MPD.Title song
     album     = withAttr queueAlbumAttr $ txt $ meta "<no album>" MPD.Album song
@@ -99,6 +100,7 @@ drawNowPlaying st = vLimit 5 . center $ maybe (txt "nothing.")
         <$> msongTime
     songTime =
       withAttr queueTimeAttr $ txt $ fromMaybe "-:--/-:--" msongTimeTxt
+    progbar = withAttr queueTimeAttr $ drawProgressBar st
 
 drawQueue :: HState -> Widget Name
 drawQueue st =
@@ -193,6 +195,29 @@ column maxWidth left right w = case maxWidth of
   Just m  -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
 
+drawProgressBar :: HState -> Widget Name
+drawProgressBar st = bar
+ where
+  width    = fromMaybe 0 (fst . extentSize <$> (queueExtent st))
+  songTime = fromMaybe (0, 1) (MPD.stTime =<< (status st))
+  timeText =
+    toString
+      . (\(i, j) ->
+          (secondsToTime (round i)) <> "/" <> (secondsToTime (round j))
+        )
+      $ songTime
+  completed =
+    (\w -> \(i, j) -> round ((i / j) * (fromIntegral w))) width songTime
+  bar = str
+    (zipWith
+      (\a b -> if elem a ("1234567890/:" :: [Char]) then a else b)
+      (  (replicate (-5 + div width 2) ' ')
+      ++ timeText
+      ++ (replicate (-3 + div width 2) ' ')
+      )
+      (replicate completed '=' ++ replicate (width - completed) ' ')
+    )
+
 drawUI :: HState -> [Widget Name]
 drawUI st = [drawNowPlaying st <=> drawQueue st]
 
@@ -200,7 +225,6 @@ hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget
 hBoxPad _ [w     ] = w
 hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
-
 
 handleEvent :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
@@ -288,4 +312,5 @@ TODO understand what is going on with the headerAttr
 TODO factor out the collum function somewhat, ugh repition
 TODO AlbumArtist -> Album -> Song
 TODO search!
+TODO progressbar for song
 -}
