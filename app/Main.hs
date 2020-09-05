@@ -19,7 +19,7 @@ main = do
   chan         <- BC.newBChan 10
   _            <- forkIO $ mpdListenForever chan
   _            <- forkIO $ tickTock chan
-  initialState <- buildInitialState
+  initialState <- buildInitialState chan
   let buildVty = Vty.mkVty Vty.defaultConfig
   initialVty <- buildVty
   _          <- customMain initialVty buildVty (Just chan) app initialState

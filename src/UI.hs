@@ -4,6 +4,7 @@ module UI where
 import           Brick.AttrMap
 import           Brick.Main
 import           Brick.Types
+import qualified Brick.BChan                   as BC
 import           Brick.Widgets.Core
 import           Brick.Widgets.List
 import qualified Brick.Util                    as BU
@@ -35,8 +36,8 @@ drawUI st = case (view st) of
   QueueView   -> drawViewQueue st
   LibraryView -> drawViewLibrary st
 
-buildInitialState :: IO HState
-buildInitialState = do
+buildInitialState :: (BC.BChan HamEvent) -> IO HState
+buildInitialState chan = do
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status      <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   queueVec <- V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
@@ -51,7 +52,8 @@ buildInitialState = do
   let clipboard   = list Clipboard V.empty 1
   let artists     = list ArtistsList artistsVec 1
   let focus       = FocArtists
-  pure HState { view
+  pure HState { chan
+              , view
               , status
               , currentSong
               , queueVec
@@ -118,9 +120,13 @@ handleEvent s e = case e of
       _    <- liftIO (withMPD $ MPD.seekCur (songTime - 30))
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song }
-    EvKey    (KChar '1') [] -> continue s { view = QueueView }
-    EvKey    (KChar '2') [] -> continue s { view = LibraryView }
-    EvResize _           _  -> do
+    EvKey (KChar '1') [] -> do
+      _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
+      continue s { view = QueueView }
+    EvKey (KChar '2') [] -> do
+      _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
+      continue s { view = LibraryView }
+    EvResize _ _ -> do
       queueExtent <- lookupExtent Queue
       continue s { queueExtent }
     _ -> case (view s) of
@@ -129,10 +135,23 @@ handleEvent s e = case e of
   (AppEvent (Left Tick)) -> do
     queueExtent <- lookupExtent Queue
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-    continue s { status, queueExtent }
+    currentTime <- liftIO (getCurrentTime)
+    continue s { currentTime, status, queueExtent }
   (AppEvent (Right (Right _))) -> do
-    s' <- liftIO (rebuildState)
-    continue s'
+    currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
+    status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+    queueVec <- liftIO
+      (V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
+    artistsVec <- liftIO
+      (   V.fromList
+      <$> fromRight []
+      <$> (withMPD $ MPD.list MPD.AlbumArtistSort Nothing)
+      )
+    let queueUnmoved = (, False) <$> list QueueList queueVec 1
+    let queueNew = case (listSelected (queue s)) of
+          Nothing -> queueUnmoved
+          Just i  -> listMoveTo i queueUnmoved
+    continue s { currentSong, status, queue = queueNew, queueVec, artistsVec }
   _ -> continue s
 
 --handleEvent s (VtyEvent e) = continue =<< handleListEventVi handleListEvent e s

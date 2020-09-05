@@ -2,12 +2,16 @@
 
 module Ham.Types where
 import           Network.MPD                   as MPD
+import qualified Brick.BChan                   as BC
 import           Brick.Types
 import           Brick.Widgets.List
 import           Data.Time                      ( UTCTime )
 import qualified Data.Vector                   as V
+
+
 data HState =
-  HState { view :: View
+  HState { chan :: (BC.BChan HamEvent)
+           ,view :: View
            ,status :: Maybe MPD.Status
            ,currentSong :: Maybe MPD.Song
            ,queueVec :: V.Vector MPD.Song
@@ -19,7 +23,7 @@ data HState =
            ,artists :: List Name Value
            ,focus :: Focus
            }
-  deriving (Show) --, Eq)
+--  deriving (Show) --, Eq)
 
 type SongList = List Name (Song, Highlight)
 
