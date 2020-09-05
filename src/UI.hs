@@ -81,11 +81,22 @@ handleEvent s e = case e of
       continue s { currentSong = fromRight Nothing song }
     EvKey (KChar ']') [] -> do
       let songTime = fromMaybe 0 $ fst <$> (MPD.stTime =<< (status s))
-      _    <- liftIO (withMPD $ MPD.seekId (songTime + 5))
+      _    <- liftIO (withMPD $ MPD.seekCur (songTime + 5))
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song }
     EvKey (KChar '[') [] -> do
-      _    <- liftIO (withMPD MPD.previous)
+      let songTime = fromMaybe 0 $ fst <$> (MPD.stTime =<< (status s))
+      _    <- liftIO (withMPD $ MPD.seekCur (songTime - 5))
+      song <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song }
+    EvKey (KChar '}') [] -> do
+      let songTime = fromMaybe 0 $ fst <$> (MPD.stTime =<< (status s))
+      _    <- liftIO (withMPD $ MPD.seekCur (songTime + 30))
+      song <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song }
+    EvKey (KChar '{') [] -> do
+      let songTime = fromMaybe 0 $ fst <$> (MPD.stTime =<< (status s))
+      _    <- liftIO (withMPD $ MPD.seekCur (songTime - 30))
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song }
     EvKey (KChar 'j') [] -> do
