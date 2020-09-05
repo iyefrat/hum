@@ -79,24 +79,42 @@ buildInitialState = do
               }
 
 drawSong :: HState -> Widget Name
-drawSong st = vLimit 3 . center . borderWithLabel (str "Now Playing") $ maybe
-  (txt "nothing.")
-  queueRow
-  ((, False) <$> currentSong st)
+drawSong st = vLimit 5 . center $ maybe (txt "nothing.")
+                                        nowPlaying
+                                        (currentSong st)
+ where
+  nowPlaying song =
+    (txt "\n")
+      <=> (hCenter title)
+      <=> hCenter (artist <+> txt " - " <+> album)
+      <=> hCenter songTime
+   where
+    title     = withAttr queueTitleAttr $ txt $ meta "<no title>" MPD.Title song
+    album     = withAttr queueAlbumAttr $ txt $ meta "<no album>" MPD.Album song
+    artist    = withAttr queueArtistAttr $ txt $ meta "<no one>" MPD.Artist song
+    msongTime = MPD.stTime =<< (status st)
+    msongTimeTxt =
+      (\(i, j) -> (secondsToTime (round i)) <> "/" <> (secondsToTime (round j)))
+        <$> msongTime
+    songTime =
+      withAttr queueTimeAttr $ txt $ fromMaybe "-:--/-:--" msongTimeTxt
 
 drawPlaylist :: HState -> Widget Name
 drawPlaylist st =
   let vsize = case queueExtent st of
         Just e  -> (snd . extentSize $ e) - 2
-        Nothing -> 40
-  in  reportExtent Queue
-        .   borderWithLabel (str "Queue")
-        .   viewport Queue Vertical
-        .   visible
-        .   vLimit vsize
-        .   center
-        $   header
-        <=> renderList (const queueRow) True (queue st)
+        Nothing -> 60
+  in
+    reportExtent Queue
+    $ hCenter
+    $ (   viewport Queue Vertical
+      .   visible
+      .   vLimit vsize
+      .   center
+      $   (hCenter . hLimit 130 $ header)
+      <=> hBorder
+      <=> (hCenter . hLimit 130 $ renderList (const queueRow) True (queue st))
+      )
 
  where
   songIdx = column (Just 4) Max (Pad 1) $ txt "Inx"
@@ -173,13 +191,9 @@ column maxWidth left right w = case maxWidth of
   Nothing -> wpad
   Just m  -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
-drawClock :: HState -> Widget Name
-drawClock st = vLimit 3 $ center $ border $ str
-  ((\ls -> Prelude.take (Prelude.length ls - 11) ls)
-    (formatTime defaultTimeLocale "%T.%q" (currentTime st))
-  )
+
 drawUI :: HState -> [Widget Name]
-drawUI st = [drawPlaylist st <=> drawClock st <=> drawSong st]
+drawUI st = [drawSong st <=> drawPlaylist st]
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget
@@ -250,8 +264,8 @@ handleEvent s e = case e of
       continue s { queueExtent }
     _ -> continue s
   (AppEvent (Left Tick)) -> do
-    currentTime <- liftIO getCurrentTime
-    continue s { currentTime }
+    status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+    continue s { status }
   (AppEvent (Right (Right _))) -> do
     currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
