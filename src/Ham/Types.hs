@@ -17,6 +17,7 @@ data HState =
            ,currentTime :: UTCTime
            ,artistsVec :: V.Vector Value
            ,artists :: List Name Value
+           ,focus :: Focus
            }
   deriving (Show) --, Eq)
 
@@ -27,6 +28,8 @@ type HamEvent = Either Tick (Response [Subsystem])
 data Name = Queue | QueueList | Clipboard | Library | ArtistsList | LibraryLeft
  deriving (Show, Eq, Ord)
 
+data Focus = FocArtists | FocAlbums | FocSongs
+ deriving(Show,Eq,Ord)
 data View = QueueView | LibraryView
  deriving (Show,Eq,Ord)
 

@@ -50,6 +50,7 @@ buildInitialState = do
   let queueExtent = Nothing
   let clipboard   = list Clipboard V.empty 1
   let artists     = list ArtistsList artistsVec 1
+  let focus       = FocArtists
   pure HState { view
               , status
               , currentSong
@@ -60,6 +61,7 @@ buildInitialState = do
               , currentTime
               , artistsVec
               , artists
+              , focus
               }
 
 hamStartEvent :: HState -> EventM Name HState
