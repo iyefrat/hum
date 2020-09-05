@@ -39,7 +39,7 @@ app = App
                         defAttr
                         [ (listSelectedAttr, Vty.withStyle defAttr Vty.reverseVideo)
                         , (listHighlightedAttr, BU.fg Vty.yellow)
-                        , (attrName "header", Vty.withStyle defAttr Vty.underline)
+                        , (headerAttr, Vty.withStyle defAttr Vty.underline)
                         , (queueAlbumAttr     , BU.fg Vty.red)
                         , (queueTrackAttr     , BU.fg Vty.magenta)
                         , (queueTitleAttr     , BU.fg Vty.cyan)
@@ -48,7 +48,7 @@ app = App
                         ]
   }
 
-queueAttr, queueAlbumAttr, queueTitleAttr, queueTrackAttr, queueArtistAttr, queueTimeAttr
+queueAttr, queueAlbumAttr, queueTitleAttr, queueTrackAttr, queueArtistAttr, queueTimeAttr, headerAttr
   :: AttrName
 queueAttr = "queue"
 queueAlbumAttr = queueAttr <> "album"
@@ -56,6 +56,7 @@ queueTitleAttr = queueAttr <> "title"
 queueTrackAttr = queueAttr <> "track"
 queueArtistAttr = queueAttr <> "artist"
 queueTimeAttr = queueAttr <> "time"
+headerAttr = "header"
 
 listHighlightedAttr :: AttrName
 listHighlightedAttr = listAttr <> "highlighted"
@@ -78,10 +79,10 @@ buildInitialState = do
               , currentTime
               }
 
-drawSong :: HState -> Widget Name
-drawSong st = vLimit 5 . center $ maybe (txt "nothing.")
-                                        nowPlaying
-                                        (currentSong st)
+drawNowPlaying :: HState -> Widget Name
+drawNowPlaying st = vLimit 5 . center $ maybe (txt "nothing.")
+                                              nowPlaying
+                                              (currentSong st)
  where
   nowPlaying song =
     (txt "\n")
@@ -99,10 +100,10 @@ drawSong st = vLimit 5 . center $ maybe (txt "nothing.")
     songTime =
       withAttr queueTimeAttr $ txt $ fromMaybe "-:--/-:--" msongTimeTxt
 
-drawPlaylist :: HState -> Widget Name
-drawPlaylist st =
+drawQueue :: HState -> Widget Name
+drawQueue st =
   let vsize = case queueExtent st of
-        Just e  -> (snd . extentSize $ e) - 2
+        Just e  -> (snd . extentSize $ e)
         Nothing -> 60
   in
     reportExtent Queue
@@ -125,7 +126,7 @@ drawPlaylist st =
   artist =
     withAttr queueArtistAttr $ column (Just 25) Max (Pad 1) $ txt "Artist"
   time   = withAttr queueTimeAttr $ column (Just 5) Max (Pad 1) $ txt "Time"
-  header = withAttr "header"
+  header = withAttr headerAttr
                     ({-songIdx <+> songId <+>-}
                      album <+> track <+> title <+> artist <+> time)
 
@@ -193,7 +194,7 @@ column maxWidth left right w = case maxWidth of
   where wpad = padLeft left . padRight right $ w
 
 drawUI :: HState -> [Widget Name]
-drawUI st = [drawSong st <=> drawPlaylist st]
+drawUI st = [drawNowPlaying st <=> drawQueue st]
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget
@@ -282,5 +283,9 @@ TODO read over the snake guide, implement tick event to read playlist etc.
 TODO impliment borderWithFullLabel
 TODO impliment song skipping
 TODO random song order
-TODO
+TODO more vim motions
+TODO understand what is going on with the headerAttr
+TODO factor out the collum function somewhat, ugh repition
+TODO AlbumArtist -> Album -> Song
+TODO search!
 -}
