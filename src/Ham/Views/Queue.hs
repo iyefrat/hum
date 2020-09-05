@@ -47,7 +47,10 @@ drawQueue st =
       .   center
       $   (hCenter . hLimit 130 $ header)
       <=> hBorder
-      <=> (hCenter . hLimit 130 $ renderList (const queueRow) True (queue st))
+      <=> (hCenter . hLimit 130 $ renderList (const (queueRow st))
+                                             True
+                                             (queue st)
+          )
       )
 
  where
@@ -59,23 +62,29 @@ drawQueue st =
   artist =
     withAttr queueArtistAttr $ column (Just 25) Max (Pad 1) $ txt "Artist"
   time   = withAttr queueTimeAttr $ column (Just 5) Max (Pad 1) $ txt "Time"
-  header = withAttr headerAttr
-                    ({-songIdx <+> songId <+>-}
-                     album <+> track <+> title <+> artist <+> time)
+  header = withDefAttr headerAttr
+                       ({-songIdx <+> songId <+>-}
+                        album <+> track <+> title <+> artist <+> time)
 
-queueRow :: (MPD.Song, Highlight) -> Widget n
-queueRow (song, hl) = (if hl then highlightOverQueueAttrs else id)
-  (   hCenter
-  $   {-songIdx
+queueRow :: HState -> (MPD.Song, Highlight) -> Widget n
+queueRow st (song, hl) =
+  (if hl then highlightOverQueueAttrs else id)
+    . (if maybe False (MPD.sgIndex song ==) (MPD.sgIndex <$> nowPlaying)
+        then withDefAttr queueNowPlayingAttr
+        else id
+      )
+    $ (   hCenter
+      $   {-songIdx
     <+> songId
     <+> -}
-      album
-  <+> track
-  <+> title
-  <+> artist
-  <+> time
-  )
+          album
+      <+> track
+      <+> title
+      <+> artist
+      <+> time
+      )
  where
+  nowPlaying = currentSong st
   songIdx =
     column (Just 4) Max (Pad 1) $ txt $ maybe "?" show $ MPD.sgIndex song
   songId =

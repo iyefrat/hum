@@ -26,6 +26,9 @@ hamAttrMap = const $ attrMap
   , (queueTitleAttr     , BU.fg Vty.cyan)
   , (queueArtistAttr    , BU.fg Vty.green)
   , (queueTimeAttr      , BU.fg Vty.blue)
+  , ( queueNowPlayingAttr
+    , Vty.withStyle (Vty.withStyle defAttr Vty.bold) Vty.underline
+    )
   ]
 
 queueAttr, queueAlbumAttr, queueTitleAttr, queueTrackAttr, queueArtistAttr, queueTimeAttr
@@ -42,6 +45,8 @@ headerAttr = "header"
 
 listHighlightedAttr :: AttrName
 listHighlightedAttr = listAttr <> "highlighted"
+queueNowPlayingAttr :: AttrName
+queueNowPlayingAttr = queueAttr <> "now playing"
 
 
 highlightOverQueueAttrs :: Widget n -> Widget n
