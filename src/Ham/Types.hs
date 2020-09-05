@@ -16,7 +16,7 @@ data HState =
            }
   deriving (Show) --, Eq)
 
-data Name = Queue | QueueList | Clipboard
+data Name = Queue | QueueList | Clipboard | Library
  deriving (Show, Eq, Ord)
 
 type Highlight = Bool
