@@ -17,9 +17,9 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 
 drawNowPlaying :: HState -> Widget Name
-drawNowPlaying st = vLimit 5 . center $ maybe (txt "nothing.")
-                                              nowPlaying
-                                              (currentSong st)
+drawNowPlaying st = lookupExtent vLimit 5 . center $ maybe (txt "nothing.")
+                                                           nowPlaying
+                                                           (currentSong st)
  where
   nowPlaying song =
     (txt "\n")

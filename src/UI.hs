@@ -19,6 +19,7 @@ import           Data.Time                      ( getCurrentTime )
 import           Ham.Attributes
 import           Ham.Views.Queue
 import           Ham.Views.Library
+import           Ham.Utils
 
 app :: App HState HamEvent Name
 
@@ -36,25 +37,29 @@ drawUI st = case (view st) of
 
 buildInitialState :: IO HState
 buildInitialState = do
-  currentSong  <- fromRight Nothing <$> withMPD MPD.currentSong
-  status       <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
-  playlist     <- fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
-  currentTime  <- getCurrentTime
-  albumArtists <-
-    fromRight [] <$> (withMPD $ MPD.list MPD.AlbumArtistSort Nothing)
+  currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
+  status      <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
+  queueVec <- V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
+  currentTime <- getCurrentTime
+  artistsVec  <-
+    V.fromList
+    <$> fromRight []
+    <$> (withMPD $ MPD.list MPD.AlbumArtistSort Nothing)
   let view        = QueueView
-  let queue = (, False) <$> list QueueList (V.fromList playlist) 1
+  let queue = (, False) <$> list QueueList queueVec 1
   let queueExtent = Nothing
   let clipboard   = list Clipboard V.empty 1
+  let artists     = list ArtistsList artistsVec 1
   pure HState { view
               , status
               , currentSong
-              , playlist
+              , queueVec
               , queue
               , queueExtent
               , clipboard
               , currentTime
-              , albumArtists
+              , artistsVec
+              , artists
               }
 
 hamStartEvent :: HState -> EventM Name HState
@@ -120,14 +125,12 @@ handleEvent s e = case e of
       QueueView   -> handleEventQueue s e
       LibraryView -> handleEventLibrary s e
   (AppEvent (Left Tick)) -> do
+    queueExtent <- lookupExtent Queue
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-    continue s { status }
+    continue s { status, queueExtent }
   (AppEvent (Right (Right _))) -> do
-    currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
-    status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-    playlist    <- liftIO (fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
-    currentTime <- liftIO (getCurrentTime)
-    continue s { currentSong, status, playlist, currentTime }
+    s' <- liftIO (rebuildState)
+    continue s'
   _ -> continue s
 
 --handleEvent s (VtyEvent e) = continue =<< handleListEventVi handleListEvent e s

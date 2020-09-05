@@ -15,13 +15,38 @@ import qualified Network.MPD                   as MPD
 
 
 drawLibraryLeft :: HState -> Widget Name
-drawLibraryLeft st = error "whom"
+drawLibraryLeft st =
+  let vsize = case queueExtent st of
+        Just e  -> (snd . extentSize $ e)
+        Nothing -> 60
+  in                               {-reportExtent LibraryLeft
+        $ -}
+      hCenter
+        $ (   viewport LibraryLeft Vertical
+          .   visible
+          .   vLimit vsize
+          .   center
+          $   hBorder
+          <=> (hCenter $ renderList (const $ libraryRow st) True (artists st))
+          )
+
+libraryRow :: HState -> MPD.Value -> Widget n
+libraryRow st val = txt $ MPD.toText val
+
 
 drawViewLibrary :: HState -> [Widget Name]
 drawViewLibrary st =
-  [center $ withAttr queueArtistAttr $ txt "wait where are all the books"]
+  [ (withAttr queueArtistAttr $ txt "wait where are all the books")
+      <=> drawLibraryLeft st
+  ]
 
 handleEventLibrary
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
-handleEventLibrary s e = do
-  continue s
+handleEventLibrary s e = case e of
+  VtyEvent vtye -> case vtye of
+    EvKey (KChar 'j') [] -> do
+      continue s { artists = listMoveDown $ artists s }
+    EvKey (KChar 'k') [] -> do
+      continue s { artists = listMoveUp $ artists s }
+    _ -> continue s
+  _ -> continue s

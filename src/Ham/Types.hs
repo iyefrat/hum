@@ -5,27 +5,32 @@ import           Network.MPD                   as MPD
 import           Brick.Types
 import           Brick.Widgets.List
 import           Data.Time                      ( UTCTime )
+import qualified Data.Vector                   as V
 data HState =
   HState { view :: View
            ,status :: Maybe MPD.Status
            ,currentSong :: Maybe MPD.Song
-           ,playlist :: [ MPD.Song ]
+           ,queueVec :: V.Vector MPD.Song
            ,queue :: SongList
            ,queueExtent :: Maybe (Extent Name)
            ,clipboard :: SongList
            ,currentTime :: UTCTime
-           ,albumArtists :: [Value]
+           ,artistsVec :: V.Vector Value
+           ,artists :: List Name Value
            }
   deriving (Show) --, Eq)
 
-data Name = Queue | QueueList | Clipboard | Library
+type SongList = List Name (Song, Highlight)
+
+type HamEvent = Either Tick (Response [Subsystem])
+
+data Name = Queue | QueueList | Clipboard | Library | ArtistsList | LibraryLeft
  deriving (Show, Eq, Ord)
 
 data View = QueueView | LibraryView
  deriving (Show,Eq,Ord)
 
 type Highlight = Bool
-type SongList = List Name (Song, Highlight)
+
 
 data Tick = Tick
-type HamEvent = Either Tick (Response [Subsystem])
