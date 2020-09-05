@@ -139,10 +139,8 @@ handleEvent s e = case e of
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 TODO read over the snake guide, implement tick event to read playlist etc.
 TODO impliment borderWithFullLabel
-TODO impliment song skipping
 TODO random song order
 TODO more vim motions
-TODO understand what is going on with the headerAttr
 TODO factor out the collum function somewhat, ugh repition
 TODO AlbumArtist -> Album -> Song
 TODO search!
