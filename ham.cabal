@@ -103,6 +103,8 @@ library
              , Ham.Types
              , Ham.Queue
              , Ham.BChan
+             , Ham.Attributes
+             , Ham.Views.Queue
   -- Modules included in this library but not exported.
   -- other-modules:
 
