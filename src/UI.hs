@@ -27,6 +27,8 @@ app = App { appDraw         = drawUI
           , appAttrMap      = hamAttrMap
           }
 
+drawUI :: HState -> [Widget Name]
+drawUI = drawViewQueue
 
 buildInitialState :: IO HState
 buildInitialState = do
@@ -34,7 +36,7 @@ buildInitialState = do
   status      <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   playlist    <- fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   currentTime <- getCurrentTime
-  let queue = (, False) <$> list Queue0 (V.fromList playlist) 1
+  let queue = (, False) <$> list QueueList (V.fromList playlist) 1
   let queueExtent = Nothing
   let clipboard   = list Clipboard V.empty 1
   pure HState { status
@@ -45,7 +47,6 @@ buildInitialState = do
               , clipboard
               , currentTime
               }
-
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget
