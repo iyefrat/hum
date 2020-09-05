@@ -15,11 +15,11 @@ import           Graphics.Vty                   ( defAttr )
 import qualified Graphics.Vty                  as Vty
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
-import           Song
-import           Types
+import           Ham.Song
+import           Ham.Types
 import qualified Data.Vector                   as V
 import qualified Data.Text                     as T
-import           Queue
+import           Ham.Queue
 import           Data.Time                      ( getCurrentTime
                                                 , formatTime
                                                 )

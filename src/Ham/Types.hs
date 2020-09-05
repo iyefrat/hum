@@ -1,6 +1,6 @@
 -- |
 
-module Types where
+module Ham.Types where
 import           Network.MPD                   as MPD
 import           Brick.Types
 import           Brick.Widgets.List

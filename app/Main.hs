@@ -9,7 +9,7 @@ import           UI                             ( buildInitialState
 import           Control.Concurrent             ( threadDelay
                                                 , forkIO
                                                 )
-import           Types
+import           Ham.Types
 import           Network.MPD                    ( withMPD
                                                 , idle
                                                 )

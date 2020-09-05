@@ -1,9 +1,9 @@
 -- |
 
-module Queue where
+module Ham.Queue where
 
 import           Brick.Widgets.List
-import           Types
+import           Ham.Types
 import qualified Network.MPD                   as MPD
 import qualified Data.Vector                   as V
 

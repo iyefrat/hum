@@ -97,12 +97,12 @@ library
   -- Modules exported by the library.
   exposed-modules:
                UI
-             , Song
+             , Ham.Song
              , Prelude
              , Brick.Widgets.List
-             , Types
-             , Queue
-             , BChan
+             , Ham.Types
+             , Ham.Queue
+             , Ham.BChan
   -- Modules included in this library but not exported.
   -- other-modules:
 

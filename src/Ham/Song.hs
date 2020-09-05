@@ -1,6 +1,6 @@
 -- |
 
-module Song where
+module Ham.Song where
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import           Data.Text                     as T
