@@ -1,3 +1,3 @@
 [submodule "libmpd-haskell"]
-	path = libmpd-haskell
+	path = libmpd
 	url = https://github.com/vimus/libmpd-haskell
