@@ -2,6 +2,8 @@
 
 module Ham.Views.Queue where
 import           Ham.Types
+import           Brick.Main
+import           Graphics.Vty.Input.Events
 import           Brick.Types
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
@@ -9,6 +11,9 @@ import           Brick.Widgets.Border
 import           Brick.Widgets.List
 import           Ham.Song
 import           Ham.Attributes
+import           Ham.Queue
+import           Ham.Utils
+import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 
 drawNowPlaying :: HState -> Widget Name
@@ -144,3 +149,49 @@ drawProgressBar st = bar
 
 drawViewQueue :: HState -> [Widget Name]
 drawViewQueue st = [drawNowPlaying st <=> drawQueue st]
+
+
+handleEventQueue
+  :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
+handleEventQueue s e = case e of
+  VtyEvent vtye -> case vtye of
+    EvKey (KChar 'j') [] -> do
+      queueExtent <- lookupExtent Queue
+      continue s { queue = listMoveDown $ queue s, queueExtent }
+    EvKey (KChar 'k') [] -> do
+      queueExtent <- lookupExtent Queue
+      continue s { queue = listMoveUp $ queue s, queueExtent }
+    EvKey KEnter [] -> do
+      let maybeSelectedId =
+            MPD.sgId . fst . snd =<< listSelectedElement (queue s)
+      traverse_ (\sel -> liftIO (withMPD $ MPD.playId sel)) maybeSelectedId
+      song <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song, queue = queue s }
+    EvKey (KChar ' ') [] -> do
+      continue s { queue = listToggleHighlight (queue s) }
+    EvKey (KChar 'd') [] -> do
+      let clipboard = getHighlighted (queue s)
+      _ <- liftIO (withMPD $ deleteHighlighted (queue s))
+      let mi = listSelected (queue s)
+      s' <- liftIO rebuildState
+      continue s'
+        { queue     = case mi of
+                        Just i  -> listMoveTo i (queue s')
+                        Nothing -> queue s'
+        , clipboard
+        }
+    EvKey (KChar 'y') [] -> do
+      continue s { clipboard = getHighlighted (queue s) }
+    EvKey (KChar 'p') [] -> do
+      let c = clipboard s
+      _ <- liftIO (withMPD $ pasteClipboard c (queue s))
+      let mi = listSelected (queue s)
+      s' <- liftIO rebuildState
+      continue s'
+        { queue     = case mi of
+                        Just i  -> listMoveTo i (queue s')
+                        Nothing -> queue s'
+        , clipboard = c
+        }
+    _ -> continue s
+  _ -> continue s

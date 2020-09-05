@@ -15,10 +15,11 @@ name:                ham
 version:             0.0.0.0
 
 -- A short (one-line) description of the package.
-synopsis:            A TUI MPD client written in Haskell, inspired by ncmpcpp
+synopsis:            A TUI MPD client, inspired by ncmpcpp
 
 -- A longer description of the package.
--- description:
+description:         A TUI MPD client, inspired by ncmpcpp.
+                     Built With the brick and using libmpd haskell packages
 
 -- A URL where users can report bugs.
 -- bug-reports:
@@ -37,13 +38,19 @@ author:              Itai Y. Efrat
 maintainer:          itai3397@gmail.com
 
 -- A copyright notice.
--- copyright:
+copyright: (c) Itai Efrat 2020
 
--- category:
+category: Sound
 
 -- Extra files to be distributed with the package, such as examples or a
 -- README.
-extra-source-files:  CHANGELOG.md
+extra-source-files:
+  CHANGELOG.org
+           
+source-repository head
+  type: git
+  location:
+
 
 common deps
   build-depends:
@@ -67,7 +74,6 @@ common deps
     -Wincomplete-record-updates
     -Wincomplete-uni-patterns
     -Wredundant-constraints
-    -threaded
 
   default-extensions:
     LambdaCase
@@ -105,6 +111,8 @@ library
              , Ham.BChan
              , Ham.Attributes
              , Ham.Views.Queue
+             , Ham.Views.Library
+             , Ham.Utils
   -- Modules included in this library but not exported.
   -- other-modules:
 
@@ -120,9 +128,10 @@ executable ham
 
   -- Modules included in this executable, other than Main.
   -- other-modules:
-  build-depends: ham
+  build-depends:       ham
   -- Directories containing source files.
   hs-source-dirs:      app
+  ghc-options:         -threaded
 
 test-suite ham-test
   -- Base language which the package is written in.

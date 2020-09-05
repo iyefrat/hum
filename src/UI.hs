@@ -18,8 +18,10 @@ import           Ham.Queue
 import           Data.Time                      ( getCurrentTime )
 import           Ham.Attributes
 import           Ham.Views.Queue
+import           Ham.Views.Library
 
 app :: App HState HamEvent Name
+
 app = App { appDraw         = drawUI
           , appChooseCursor = showFirstCursor
           , appHandleEvent  = handleEvent
@@ -28,24 +30,31 @@ app = App { appDraw         = drawUI
           }
 
 drawUI :: HState -> [Widget Name]
-drawUI = drawViewQueue
+drawUI st = case (view st) of
+  QueueView   -> drawViewQueue st
+  LibraryView -> drawViewLibrary st
 
 buildInitialState :: IO HState
 buildInitialState = do
-  currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
-  status      <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
-  playlist    <- fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
-  currentTime <- getCurrentTime
+  currentSong  <- fromRight Nothing <$> withMPD MPD.currentSong
+  status       <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
+  playlist     <- fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
+  currentTime  <- getCurrentTime
+  albumArtists <-
+    fromRight [] <$> (withMPD $ MPD.list MPD.AlbumArtistSort Nothing)
+  let view        = QueueView
   let queue = (, False) <$> list QueueList (V.fromList playlist) 1
   let queueExtent = Nothing
   let clipboard   = list Clipboard V.empty 1
-  pure HState { status
+  pure HState { view
+              , status
               , currentSong
               , playlist
               , queue
               , queueExtent
               , clipboard
               , currentTime
+              , albumArtists
               }
 
 hamStartEvent :: HState -> EventM Name HState
@@ -58,6 +67,9 @@ hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget
 hBoxPad _ [w     ] = w
 hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
+
+
+
 
 handleEvent :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
@@ -99,48 +111,14 @@ handleEvent s e = case e of
       _    <- liftIO (withMPD $ MPD.seekCur (songTime - 30))
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song }
-    EvKey (KChar 'j') [] -> do
-      queueExtent <- lookupExtent Queue
-      continue s { queue = listMoveDown $ queue s, queueExtent }
-    EvKey (KChar 'k') [] -> do
-      queueExtent <- lookupExtent Queue
-      continue s { queue = listMoveUp $ queue s, queueExtent }
-    EvKey KEnter [] -> do
-      let maybeSelectedId =
-            MPD.sgId . fst . snd =<< listSelectedElement (queue s)
-      traverse_ (\sel -> liftIO (withMPD $ MPD.playId sel)) maybeSelectedId
-      song <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song, queue = queue s }
-    EvKey (KChar ' ') [] -> do
-      continue s { queue = listToggleHighlight (queue s) }
-    EvKey (KChar 'd') [] -> do
-      let clipboard = getHighlighted (queue s)
-      _ <- liftIO (withMPD $ deleteHighlighted (queue s))
-      let mi = listSelected (queue s)
-      s' <- liftIO buildInitialState
-      continue s'
-        { queue     = case mi of
-                        Just i  -> listMoveTo i (queue s')
-                        Nothing -> queue s'
-        , clipboard
-        }
-    EvKey (KChar 'y') [] -> do
-      continue s { clipboard = getHighlighted (queue s) }
-    EvKey (KChar 'p') [] -> do
-      let c = clipboard s
-      _ <- liftIO (withMPD $ pasteClipboard c (queue s))
-      let mi = listSelected (queue s)
-      s' <- liftIO buildInitialState
-      continue s'
-        { queue     = case mi of
-                        Just i  -> listMoveTo i (queue s')
-                        Nothing -> queue s'
-        , clipboard = c
-        }
-    EvResize _ _ -> do
+    EvKey    (KChar '1') [] -> continue s { view = QueueView }
+    EvKey    (KChar '2') [] -> continue s { view = LibraryView }
+    EvResize _           _  -> do
       queueExtent <- lookupExtent Queue
       continue s { queueExtent }
-    _ -> continue s
+    _ -> case (view s) of
+      QueueView   -> handleEventQueue s e
+      LibraryView -> handleEventLibrary s e
   (AppEvent (Left Tick)) -> do
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
     continue s { status }
@@ -165,5 +143,5 @@ TODO understand what is going on with the headerAttr
 TODO factor out the collum function somewhat, ugh repition
 TODO AlbumArtist -> Album -> Song
 TODO search!
-TODO progressbar for song
+TODO find way for seekCur to have +- option
 -}
