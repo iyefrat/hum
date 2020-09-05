@@ -23,7 +23,7 @@ app :: App HState HamEvent Name
 app = App { appDraw         = drawUI
           , appChooseCursor = showFirstCursor
           , appHandleEvent  = handleEvent
-          , appStartEvent   = pure
+          , appStartEvent   = hamStartEvent
           , appAttrMap      = hamAttrMap
           }
 
@@ -48,6 +48,12 @@ buildInitialState = do
               , currentTime
               }
 
+hamStartEvent :: HState -> EventM Name HState
+hamStartEvent s = do
+  queueExtent <- lookupExtent Queue
+  _           <- liftIO (putStrLn (maybe "nothing" show queueExtent))
+  pure (s { queueExtent })
+
 hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget
 hBoxPad _ [w     ] = w
@@ -70,6 +76,15 @@ handleEvent s e = case e of
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song }
     EvKey (KChar ',') [] -> do
+      _    <- liftIO (withMPD MPD.previous)
+      song <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song }
+    EvKey (KChar ']') [] -> do
+      let songTime = fromMaybe 0 $ fst <$> (MPD.stTime =<< (status s))
+      _    <- liftIO (withMPD $ MPD.seekId (songTime + 5))
+      song <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song }
+    EvKey (KChar '[') [] -> do
       _    <- liftIO (withMPD MPD.previous)
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song }

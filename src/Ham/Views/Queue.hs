@@ -38,20 +38,18 @@ drawQueue st =
   let vsize = case queueExtent st of
         Just e  -> (snd . extentSize $ e)
         Nothing -> 60
-  in
-    reportExtent Queue
-    $ hCenter
-    $ (   viewport Queue Vertical
-      .   visible
-      .   vLimit vsize
-      .   center
-      $   (hCenter . hLimit 130 $ header)
-      <=> hBorder
-      <=> (hCenter . hLimit 130 $ renderList (const (queueRow st))
-                                             True
-                                             (queue st)
+  in  reportExtent Queue
+        $ hCenter
+        $ (   viewport Queue Vertical
+          .   visible
+          .   vLimit vsize
+          .   center
+          $   (hCenter {-. hLimit 130-}
+                       $ header)
+          <=> hBorder
+          <=> (hCenter {-. hLimit 130-}
+                       $ renderList (const (queueRow st)) True (queue st))
           )
-      )
 
  where
   songIdx = column (Just 4) Max (Pad 1) $ txt "Inx"
