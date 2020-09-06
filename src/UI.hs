@@ -191,12 +191,16 @@ handleEvent s e = case e of
 
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
-TODO read over the snake guide, implement tick event to read playlist etc.
-TODO impliment borderWithFullLabel
-TODO random song order
-TODO more vim motions
-TODO factor out the collum function somewhat, ugh repition
+-----
 TODO AlbumArtist -> Album -> Song
-TODO search!
+TODO Highlight and add
+TODO go over HState, nest? lenses?
+TODO Stop and lint everything
+TODO go over entire project and tidy up
+TODO hackage?
 TODO find way for seekCur to have +- option
+TODO playlists
+TODO search!
+TODO more vim motions
+TODO random song order (and friends)
 -}
