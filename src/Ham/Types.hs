@@ -7,6 +7,8 @@ import           Brick.Types
 import           Brick.Widgets.List
 import           Data.Time                      ( UTCTime )
 import qualified Data.Vector                   as V
+import           Data.Map.Strict                ( Map )
+import qualified Data.Map.Strict               as Map
 
 
 data HState =
@@ -16,7 +18,7 @@ data HState =
            ,currentSong :: Maybe MPD.Song
            ,queueVec :: V.Vector MPD.Song
            ,queue :: SongList
-           ,queueExtent :: Maybe (Extent Name)
+           ,extentMap :: Map Name (Maybe (Extent Name))
            ,clipboard :: SongList
            ,currentTime :: UTCTime
            ,artistsVec :: V.Vector Value
@@ -29,7 +31,7 @@ type SongList = List Name (Song, Highlight)
 
 type HamEvent = Either Tick (Response [Subsystem])
 
-data Name = Queue | QueueList | Clipboard | Library | ArtistsList | LibraryLeft
+data Name = Queue | QueueList | NowPlaying | Clipboard | Library | ArtistsList | LibraryLeft
  deriving (Show, Eq, Ord)
 
 data Focus = FocArtists | FocAlbums | FocSongs

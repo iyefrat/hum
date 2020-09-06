@@ -7,6 +7,8 @@ import           Brick.Widgets.List
 import           Data.Time                      ( getCurrentTime )
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
+import           Data.Map.Strict                ( Map )
+import qualified Data.Map.Strict               as Map
 
 rebuildState :: IO HState
 rebuildState = do
@@ -18,18 +20,18 @@ rebuildState = do
     V.fromList
     <$> fromRight []
     <$> (withMPD $ MPD.list MPD.AlbumArtistSort Nothing)
-  let view        = QueueView
-  let queue = (, False) <$> list QueueList queueVec 1
-  let queueExtent = Nothing
-  let clipboard   = list Clipboard V.empty 1
-  let artists     = list ArtistsList artistsVec 1
-  let focus       = FocArtists
+  let view      = QueueView
+  let queue     = (, False) <$> list QueueList queueVec 1
+  let extentMap = Map.empty
+  let clipboard = list Clipboard V.empty 1
+  let artists   = list ArtistsList artistsVec 1
+  let focus     = FocArtists
   pure HState { view
               , status
               , currentSong
               , queueVec
               , queue
-              , queueExtent
+              , extentMap
               , clipboard
               , currentTime
               , artistsVec

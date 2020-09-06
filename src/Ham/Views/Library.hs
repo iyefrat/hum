@@ -12,14 +12,16 @@ import           Brick.Widgets.List
 import           Ham.Song
 import           Ham.Attributes
 import qualified Network.MPD                   as MPD
+import           Data.Map.Strict                ( Map )
+import qualified Data.Map.Strict               as Map
 
 
 drawLibraryLeft :: HState -> Widget Name
 drawLibraryLeft st =
-  let vsize = case queueExtent st of
+  let vsize = case (join $ Map.lookup Queue $ extentMap st) of
         Just e  -> (snd . extentSize $ e)
         Nothing -> 60
-  in                               {-reportExtent LibraryLeft
+  in                                      {-reportExtent LibraryLeft
         $ -}
       hCenter
         $ (   viewport LibraryLeft Vertical
@@ -34,11 +36,11 @@ libraryRow :: HState -> MPD.Value -> Widget n
 libraryRow st val = txt $ MPD.toText val
 
 
-drawViewLibrary :: HState -> [Widget Name]
+drawViewLibrary :: HState -> Widget Name
 drawViewLibrary st =
-  [ (withAttr queueArtistAttr $ txt "wait where are all the books")
-      <=> drawLibraryLeft st
-  ]
+  (withAttr queueArtistAttr $ txt "wait where are all the books")
+    <=> drawLibraryLeft st
+
 
 handleEventLibrary
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)

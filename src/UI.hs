@@ -20,7 +20,10 @@ import           Data.Time                      ( getCurrentTime )
 import           Ham.Attributes
 import           Ham.Views.Queue
 import           Ham.Views.Library
+import           Ham.Views.Common
 import           Ham.Utils
+import           Data.Map.Strict                ( Map )
+import qualified Data.Map.Strict               as Map
 
 app :: App HState HamEvent Name
 
@@ -32,9 +35,13 @@ app = App { appDraw         = drawUI
           }
 
 drawUI :: HState -> [Widget Name]
-drawUI st = case (view st) of
-  QueueView   -> drawViewQueue st
-  LibraryView -> drawViewLibrary st
+drawUI st =
+  [ drawNowPlaying st
+      <=> (case (view st) of
+            QueueView   -> drawViewQueue st
+            LibraryView -> drawViewLibrary st
+          )
+  ]
 
 buildInitialState :: (BC.BChan HamEvent) -> IO HState
 buildInitialState chan = do
@@ -46,19 +53,19 @@ buildInitialState chan = do
     V.fromList
     <$> fromRight []
     <$> (withMPD $ MPD.list MPD.AlbumArtistSort Nothing)
-  let view        = QueueView
-  let queue = (, False) <$> list QueueList queueVec 1
-  let queueExtent = Nothing
-  let clipboard   = list Clipboard V.empty 1
-  let artists     = list ArtistsList artistsVec 1
-  let focus       = FocArtists
+  let view      = QueueView
+  let queue     = (, False) <$> list QueueList queueVec 1
+  let extentMap = Map.empty
+  let clipboard = list Clipboard V.empty 1
+  let artists   = list ArtistsList artistsVec 1
+  let focus     = FocArtists
   pure HState { chan
               , view
               , status
               , currentSong
               , queueVec
               , queue
-              , queueExtent
+              , extentMap
               , clipboard
               , currentTime
               , artistsVec
@@ -68,9 +75,7 @@ buildInitialState chan = do
 
 hamStartEvent :: HState -> EventM Name HState
 hamStartEvent s = do
-  queueExtent <- lookupExtent Queue
-  _           <- liftIO (putStrLn (maybe "nothing" show queueExtent))
-  pure (s { queueExtent })
+  pure s
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget
@@ -127,16 +132,20 @@ handleEvent s e = case e of
       _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
       continue s { view = LibraryView }
     EvResize _ _ -> do
-      queueExtent <- lookupExtent Queue
-      continue s { queueExtent }
+      queueE      <- lookupExtent Queue
+      nowPlayingE <- lookupExtent NowPlaying
+      let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
+      continue s { extentMap }
     _ -> case (view s) of
       QueueView   -> handleEventQueue s e
       LibraryView -> handleEventLibrary s e
   (AppEvent (Left Tick)) -> do
-    queueExtent <- lookupExtent Queue
+    queueE      <- lookupExtent Queue
+    nowPlayingE <- lookupExtent NowPlaying
+    let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
     currentTime <- liftIO (getCurrentTime)
-    continue s { currentTime, status, queueExtent }
+    continue s { currentTime, status, extentMap }
   (AppEvent (Right (Right _))) -> do
     currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))

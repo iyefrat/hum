@@ -15,32 +15,12 @@ import           Ham.Queue
 import           Ham.Utils
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
+import           Data.Map.Strict                ( Map )
+import qualified Data.Map.Strict               as Map
 
-drawNowPlaying :: HState -> Widget Name
-drawNowPlaying st = vLimit 5 . center $ maybe (txt "nothing.")
-                                              nowPlaying
-                                              (currentSong st)
- where
-  nowPlaying song =
-    (txt "\n")
-      <=> (hCenter title)
-      <=> hCenter (artist <+> txt " - " <+> album)
-      <=> progbar
-   where
-    title     = withAttr queueTitleAttr $ txt $ meta "<no title>" MPD.Title song
-    album     = withAttr queueAlbumAttr $ txt $ meta "<no album>" MPD.Album song
-    artist    = withAttr queueArtistAttr $ txt $ meta "<no one>" MPD.Artist song
-    msongTime = MPD.stTime =<< (status st)
-    msongTimeTxt =
-      (\(i, j) -> (secondsToTime (round i)) <> "/" <> (secondsToTime (round j)))
-        <$> msongTime
-    songTime =
-      withAttr queueTimeAttr $ txt $ fromMaybe "-:--/-:--" msongTimeTxt
-    progbar = withAttr queueTimeAttr $ drawProgressBar st
-
-drawQueue :: HState -> Widget Name
-drawQueue st =
-  let vsize = case queueExtent st of
+drawViewQueue :: HState -> Widget Name
+drawViewQueue st =
+  let vsize = case (join $ Map.lookup Queue $ extentMap st) of
         Just e  -> (snd . extentSize $ e)
         Nothing -> 60
   in  reportExtent Queue
@@ -130,43 +110,20 @@ column maxWidth left right w = case maxWidth of
   Just (Col m) -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
 
-drawProgressBar :: HState -> Widget Name
-drawProgressBar st = bar
- where
-  width    = fromMaybe 0 (fst . extentSize <$> (queueExtent st))
-  songTime = fromMaybe (0, 1) (MPD.stTime =<< (status st))
-  timeText =
-    toString
-      . (\(i, j) ->
-          (secondsToTime (round i)) <> "/" <> (secondsToTime (round j))
-        )
-      $ songTime
-  completed =
-    (\w -> \(i, j) -> round ((i / j) * (fromIntegral w))) width songTime
-  bar = str
-    (zipWith
-      (\a b -> if elem a ("1234567890/:" :: [Char]) then a else b)
-      (  (replicate (-5 + div width 2) ' ')
-      ++ timeText
-      ++ (replicate (-3 + div width 2) ' ')
-      )
-      (replicate completed '=' ++ replicate (width - completed) ' ')
-    )
-
-drawViewQueue :: HState -> [Widget Name]
-drawViewQueue st = [drawNowPlaying st <=> drawQueue st]
-
-
 handleEventQueue
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleEventQueue s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> do
-      queueExtent <- lookupExtent Queue
-      continue s { queue = listMoveDown $ queue s, queueExtent }
+      queueE      <- lookupExtent Queue
+      nowPlayingE <- lookupExtent NowPlaying
+      let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
+      continue s { queue = listMoveDown $ queue s, extentMap }
     EvKey (KChar 'k') [] -> do
-      queueExtent <- lookupExtent Queue
-      continue s { queue = listMoveUp $ queue s, queueExtent }
+      queueE      <- lookupExtent Queue
+      nowPlayingE <- lookupExtent NowPlaying
+      let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
+      continue s { queue = listMoveUp $ queue s, extentMap }
     EvKey KEnter [] -> do
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)
@@ -179,12 +136,16 @@ handleEventQueue s e = case e of
       let clipboard = getHighlighted (queue s)
       _ <- liftIO (withMPD $ deleteHighlighted (queue s))
       let mi = listSelected (queue s)
+      queueE      <- lookupExtent Queue
+      nowPlayingE <- lookupExtent NowPlaying
+      let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
       s' <- liftIO rebuildState
       continue s'
         { queue     = case mi of
                         Just i  -> listMoveTo i (queue s')
                         Nothing -> queue s'
         , clipboard
+        , extentMap
         }
     EvKey (KChar 'y') [] -> do
       continue s { clipboard = getHighlighted (queue s) }
@@ -192,12 +153,16 @@ handleEventQueue s e = case e of
       let c = clipboard s
       _ <- liftIO (withMPD $ pasteClipboard c (queue s))
       let mi = listSelected (queue s)
+      queueE      <- lookupExtent Queue
+      nowPlayingE <- lookupExtent NowPlaying
+      let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
       s' <- liftIO rebuildState
       continue s'
         { queue     = case mi of
                         Just i  -> listMoveTo i (queue s')
                         Nothing -> queue s'
         , clipboard = c
+        , extentMap
         }
     _ -> continue s
   _ -> continue s
