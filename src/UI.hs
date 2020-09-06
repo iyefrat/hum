@@ -116,25 +116,25 @@ handleEvent s e = case e of
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song }
     EvKey (KChar ']') [] -> do
-      let songTime = fromMaybe 0 $ fst <$> (MPD.stTime =<< (status s))
-      _    <- liftIO (withMPD $ MPD.seekCur (songTime + 5))
-      song <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song }
+      _      <- liftIO (withMPD $ MPD.seekCur False 5)
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      song   <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song, status }
     EvKey (KChar '[') [] -> do
-      let songTime = fromMaybe 0 $ fst <$> (MPD.stTime =<< (status s))
-      _    <- liftIO (withMPD $ MPD.seekCur (songTime - 5))
-      song <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song }
+      _      <- liftIO (withMPD $ MPD.seekCur False (-5))
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      song   <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song, status }
     EvKey (KChar '}') [] -> do
-      let songTime = fromMaybe 0 $ fst <$> (MPD.stTime =<< (status s))
-      _    <- liftIO (withMPD $ MPD.seekCur (songTime + 30))
-      song <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song }
+      _      <- liftIO (withMPD $ MPD.seekCur False 30)
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      song   <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song, status }
     EvKey (KChar '{') [] -> do
-      let songTime = fromMaybe 0 $ fst <$> (MPD.stTime =<< (status s))
-      _    <- liftIO (withMPD $ MPD.seekCur (songTime - 30))
-      song <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song }
+      _      <- liftIO (withMPD $ MPD.seekCur False (-30))
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      song   <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song, status }
     EvKey (KChar '1') [] -> do
       _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
       continue s { view = QueueView }
@@ -198,7 +198,6 @@ TODO go over HState, nest? lenses?
 TODO Stop and lint everything
 TODO go over entire project and tidy up
 TODO hackage?
-TODO find way for seekCur to have +- option
 TODO playlists
 TODO search!
 TODO more vim motions
