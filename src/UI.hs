@@ -50,15 +50,23 @@ buildInitialState chan = do
   queueVec <- V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   currentTime <- getCurrentTime
   artistsVec  <-
-    V.fromList
-    <$> fromRight []
-    <$> (withMPD $ MPD.list MPD.AlbumArtistSort Nothing)
+    V.fromList <$> fromRight [] <$> (withMPD $ MPD.list MPD.AlbumArtist Nothing)
+
   let view      = QueueView
   let queue     = (, False) <$> list QueueList queueVec 1
   let extentMap = Map.empty
   let clipboard = list Clipboard V.empty 1
   let artists   = list ArtistsList artistsVec 1
-  let focus     = FocArtists
+  songsVec <-
+    V.fromList
+    <$> fromRight []
+    <$> (withMPD $ MPD.find
+          (      MPD.AlbumArtist
+          MPD.=? fromMaybe "" (snd <$> listSelectedElement artists)
+          )
+        )
+  let songs = list SongsList songsVec 1
+  let focus = FocArtists
   pure HState { chan
               , view
               , status
@@ -70,6 +78,8 @@ buildInitialState chan = do
               , currentTime
               , artistsVec
               , artists
+              , songsVec
+              , songs
               , focus
               }
 

@@ -12,47 +12,61 @@ import           Brick.Widgets.List
 import           Ham.Song
 import           Ham.Attributes
 import           Ham.Views.Common
+import qualified Data.Text                     as T
+import qualified Data.Vector                   as V
+import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Data.Map.Strict                ( Map )
 import qualified Data.Map.Strict               as Map
 
 
-drawLibraryView :: HState -> Widget Name
-drawLibraryView st =
+
+drawLibraryLeft :: HState -> Widget Name
+drawLibraryLeft st =
   let vsize = case (join $ Map.lookup LibraryLeft $ extentMap st) of
         Just e  -> (snd . extentSize $ e)
         Nothing -> 20
-  in  reportExtent LibraryLeft
+  in
+    reportExtent LibraryLeft
+    $ hCenter
+    $ (   viewport LibraryLeft Vertical
+      .   visible
+      .   vLimit vsize
+      .   center
+      $   hBorder
+      <=> (hCenter $ renderList (const $ libraryRow st)
+                                True
+                                (MPD.toText <$> artists st)
+          )
+      )
+
+drawLibraryRight :: HState -> Widget Name
+drawLibraryRight st =
+  let vsize = case (join $ Map.lookup LibraryRight $ extentMap st) of
+        Just e  -> (snd . extentSize $ e)
+        Nothing -> 20
+  in  reportExtent LibraryRight
         $ hCenter
-        $ (   viewport LibraryLeft Vertical
+        $ (   viewport LibraryRight Vertical
           .   visible
           .   vLimit vsize
           .   center
           $   hBorder
-          <=> ((drawLibraryLeft st))
+          <=> (hCenter $ renderList (const $ libraryRow st)
+                                    True
+                                    (meta "<no title>" MPD.Title <$> songs st)
+              )
           )
 
-drawLibraryLeft :: HState -> Widget Name
-drawLibraryLeft st =
-  (hCenter $ renderList (const $ libraryRow st) True (artists st))
 
-drawLibraryMid :: HState -> Widget Name
-drawLibraryMid st =
-  (hCenter $ renderList (const $ libraryRow st) True (artists st))
- where
 
-libraryRow :: HState -> MPD.Value -> Widget n
+libraryRow :: HState -> T.Text -> Widget n
 libraryRow st val =
-  withAttr queueArtistAttr
-    $ column (Just (Per 30)) (Pad 1) Max
-    $ txt
-    $ MPD.toText val
+  withAttr queueArtistAttr $ column Nothing (Pad 1) Max $ txt $ val
 
 
 drawViewLibrary :: HState -> Widget Name
-drawViewLibrary st =
-  (withAttr queueArtistAttr $ txt "wait where are all the books")
-    <=> drawLibraryLeft st
+drawViewLibrary st = drawLibraryLeft st <+> drawLibraryRight st
 
 
 handleEventLibrary
@@ -60,8 +74,30 @@ handleEventLibrary
 handleEventLibrary s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> do
-      continue s { artists = listMoveDown $ artists s }
+      let artists' = listMoveDown $ artists s
+      songsVec <- liftIO
+        (   V.fromList
+        <$> fromRight []
+        <$> (withMPD $ MPD.find
+              (      MPD.AlbumArtist
+              MPD.=? fromMaybe "" (snd <$> listSelectedElement artists')
+              )
+            )
+        )
+      let songs = list SongsList songsVec 1
+      continue s { artists = artists', songsVec, songs }
     EvKey (KChar 'k') [] -> do
-      continue s { artists = listMoveUp $ artists s }
+      let artists' = listMoveUp $ artists s
+      songsVec <- liftIO
+        (   V.fromList
+        <$> fromRight []
+        <$> (withMPD $ MPD.find
+              (      MPD.AlbumArtist
+              MPD.=? fromMaybe "" (snd <$> listSelectedElement artists')
+              )
+            )
+        )
+      let songs = list SongsList songsVec 1
+      continue s { artists = artists', songsVec, songs }
     _ -> continue s
   _ -> continue s

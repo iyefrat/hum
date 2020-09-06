@@ -24,8 +24,8 @@ data HState =
            ,artistsVec :: V.Vector Value
            ,artists :: List Name Value
            --,albums :: List Name Value
-           --,songsVec :: V.Vector Song
-           --,songs :: List Name Song
+           ,songsVec :: V.Vector Song
+           ,songs :: List Name Song
            ,focus :: Focus
            }
 --  deriving (Show) --, Eq)
@@ -36,10 +36,11 @@ type HamEvent = Either Tick (Response [Subsystem])
 
 data Name = NowPlaying | Clipboard
   | Queue | QueueList
-  | Library | ArtistsList | LibraryLeft
+  | Library | ArtistsList | LibraryLeft | SongsList | LibraryRight
  deriving (Show, Eq, Ord)
 
 data Focus = FocArtists | FocAlbums | FocSongs
+
  deriving(Show,Eq,Ord)
 data View = QueueView | LibraryView
  deriving (Show,Eq,Ord)
