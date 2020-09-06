@@ -11,29 +11,42 @@ import           Brick.Widgets.Border
 import           Brick.Widgets.List
 import           Ham.Song
 import           Ham.Attributes
+import           Ham.Views.Common
 import qualified Network.MPD                   as MPD
 import           Data.Map.Strict                ( Map )
 import qualified Data.Map.Strict               as Map
 
 
-drawLibraryLeft :: HState -> Widget Name
-drawLibraryLeft st =
-  let vsize = case (join $ Map.lookup Queue $ extentMap st) of
+drawLibraryView :: HState -> Widget Name
+drawLibraryView st =
+  let vsize = case (join $ Map.lookup LibraryLeft $ extentMap st) of
         Just e  -> (snd . extentSize $ e)
-        Nothing -> 60
-  in                                      {-reportExtent LibraryLeft
-        $ -}
-      hCenter
+        Nothing -> 20
+  in  reportExtent LibraryLeft
+        $ hCenter
         $ (   viewport LibraryLeft Vertical
           .   visible
           .   vLimit vsize
           .   center
           $   hBorder
-          <=> (hCenter $ renderList (const $ libraryRow st) True (artists st))
+          <=> ((drawLibraryLeft st))
           )
 
+drawLibraryLeft :: HState -> Widget Name
+drawLibraryLeft st =
+  (hCenter $ renderList (const $ libraryRow st) True (artists st))
+
+drawLibraryMid :: HState -> Widget Name
+drawLibraryMid st =
+  (hCenter $ renderList (const $ libraryRow st) True (artists st))
+ where
+
 libraryRow :: HState -> MPD.Value -> Widget n
-libraryRow st val = txt $ MPD.toText val
+libraryRow st val =
+  withAttr queueArtistAttr
+    $ column (Just (Per 30)) (Pad 1) Max
+    $ txt
+    $ MPD.toText val
 
 
 drawViewLibrary :: HState -> Widget Name

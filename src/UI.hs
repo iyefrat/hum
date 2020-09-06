@@ -134,7 +134,12 @@ handleEvent s e = case e of
     EvResize _ _ -> do
       queueE      <- lookupExtent Queue
       nowPlayingE <- lookupExtent NowPlaying
-      let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
+      libLeftE    <- lookupExtent LibraryLeft
+      let extentMap = Map.fromList
+            [ (Queue      , queueE)
+            , (NowPlaying , nowPlayingE)
+            , (LibraryLeft, libLeftE)
+            ]
       continue s { extentMap }
     _ -> case (view s) of
       QueueView   -> handleEventQueue s e
@@ -142,7 +147,9 @@ handleEvent s e = case e of
   (AppEvent (Left Tick)) -> do
     queueE      <- lookupExtent Queue
     nowPlayingE <- lookupExtent NowPlaying
-    let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
+    libLeftE    <- lookupExtent LibraryLeft
+    let extentMap = Map.fromList
+          [(Queue, queueE), (NowPlaying, nowPlayingE), (LibraryLeft, libLeftE)]
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
     currentTime <- liftIO (getCurrentTime)
     continue s { currentTime, status, extentMap }

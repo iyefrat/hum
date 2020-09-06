@@ -13,6 +13,7 @@ import           Ham.Song
 import           Ham.Attributes
 import           Ham.Queue
 import           Ham.Utils
+import           Ham.Views.Common
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Data.Map.Strict                ( Map )
@@ -101,13 +102,6 @@ queueRow st (song, hl) =
       $ txt
       $ secondsToTime
       $ MPD.sgLength song
-data PerCol = Per Int | Col Int
-column :: Maybe (PerCol) -> Padding -> Padding -> Widget n -> Widget n
-column maxWidth left right w = case maxWidth of
-  Nothing      -> wpad
-  Just (Per m) -> hLimitPercent m wpad
-  Just (Col m) -> hLimit m wpad
-  where wpad = padLeft left . padRight right $ w
 
 handleEventQueue
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
