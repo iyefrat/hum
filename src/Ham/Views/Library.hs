@@ -26,19 +26,18 @@ drawLibraryLeft st =
   let vsize = case (join $ Map.lookup LibraryLeft $ extentMap st) of
         Just e  -> (snd . extentSize $ e)
         Nothing -> 20
-  in
-    reportExtent LibraryLeft
-    $ hCenter
-    $ (   viewport LibraryLeft Vertical
-      .   visible
-      .   vLimit vsize
-      .   center
-      $   hBorder
-      <=> (hCenter $ renderList (const $ libraryRow st)
-                                True
-                                (MPD.toText <$> artists st)
+  in  reportExtent LibraryLeft
+        $ hCenter
+        $ (   viewport LibraryLeft Vertical
+          .   visible
+          .   vLimit vsize
+          .   center
+          $   hBorder
+          <=> (hCenter $ renderList (const $ libraryRow st LibraryLeft)
+                                    True
+                                    (MPD.toText <$> artists st)
+              )
           )
-      )
 
 drawLibraryRight :: HState -> Widget Name
 drawLibraryRight st =
@@ -52,7 +51,7 @@ drawLibraryRight st =
           .   vLimit vsize
           .   center
           $   hBorder
-          <=> (hCenter $ renderList (const $ libraryRow st)
+          <=> (hCenter $ renderList (const $ libraryRow st LibraryRight)
                                     True
                                     (meta "<no title>" MPD.Title <$> songs st)
               )
@@ -60,9 +59,17 @@ drawLibraryRight st =
 
 
 
-libraryRow :: HState -> T.Text -> Widget n
-libraryRow st val =
-  withAttr queueArtistAttr $ column Nothing (Pad 1) Max $ txt $ val
+libraryRow :: HState -> Name -> T.Text -> Widget n
+libraryRow st name val =
+  withAttr
+      (case name of
+        LibraryRight -> queueTitleAttr
+        LibraryLeft  -> queueArtistAttr
+        _            -> listAttr
+      )
+    $ column Nothing (Pad 1) Max
+    $ txt
+    $ val
 
 
 drawViewLibrary :: HState -> Widget Name

@@ -145,10 +145,12 @@ handleEvent s e = case e of
       queueE      <- lookupExtent Queue
       nowPlayingE <- lookupExtent NowPlaying
       libLeftE    <- lookupExtent LibraryLeft
+      libRightE   <- lookupExtent LibraryRight
       let extentMap = Map.fromList
-            [ (Queue      , queueE)
-            , (NowPlaying , nowPlayingE)
-            , (LibraryLeft, libLeftE)
+            [ (Queue       , queueE)
+            , (NowPlaying  , nowPlayingE)
+            , (LibraryLeft , libLeftE)
+            , (LibraryRight, libRightE)
             ]
       continue s { extentMap }
     _ -> case (view s) of
@@ -158,8 +160,13 @@ handleEvent s e = case e of
     queueE      <- lookupExtent Queue
     nowPlayingE <- lookupExtent NowPlaying
     libLeftE    <- lookupExtent LibraryLeft
+    libRightE   <- lookupExtent LibraryRight
     let extentMap = Map.fromList
-          [(Queue, queueE), (NowPlaying, nowPlayingE), (LibraryLeft, libLeftE)]
+          [ (Queue       , queueE)
+          , (NowPlaying  , nowPlayingE)
+          , (LibraryLeft , libLeftE)
+          , (LibraryRight, libRightE)
+          ]
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
     currentTime <- liftIO (getCurrentTime)
     continue s { currentTime, status, extentMap }
