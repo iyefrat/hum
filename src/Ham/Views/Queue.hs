@@ -31,7 +31,6 @@ drawViewQueue st =
           .   center
           $   (hCenter {-. hLimit 130-}
                        $ header)
-          <=> hBorder
           <=> (hCenter {-. hLimit 130-}
                        $ renderList (const (queueRow st)) True (queue st))
           )
