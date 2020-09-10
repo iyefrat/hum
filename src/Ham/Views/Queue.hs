@@ -33,7 +33,10 @@ drawViewQueue st =
           $   (hCenter {-. hLimit 130-}
                        $ header)
           <=> (hCenter {-. hLimit 130-}
-                       $ renderList (const (queueRow st)) True (queue st))
+                       $ renderList (const (queueRow st))
+                                    ((focQueue . focus $ st) == FocQueue)
+                                    (queue st)
+              )
           )
 
  where

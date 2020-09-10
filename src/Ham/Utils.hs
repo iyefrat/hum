@@ -25,7 +25,7 @@ rebuildState = do
   let extentMap = Map.empty
   let clipboard = list Clipboard V.empty 1
   let artists   = list ArtistsList artistsVec 1
-  let focus     = FocArtists
+  let focus = Focus { focQueue = FocQueue, focLib = FocArtists }
   pure HState { view
               , status
               , currentSong

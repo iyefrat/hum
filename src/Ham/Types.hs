@@ -39,7 +39,13 @@ data Name = NowPlaying | Clipboard
   | Library | ArtistsList | LibraryLeft | SongsList | LibraryRight
  deriving (Show, Eq, Ord)
 
-data Focus = FocArtists | FocAlbums | FocSongs
+data FocQueue = FocQueue
+  deriving(Show,Eq,Ord)
+data FocLib = FocArtists | FocAlbums | FocSongs
+  deriving(Show,Eq,Ord,Enum)
+data Focus = Focus { focQueue :: FocQueue
+                     ,focLib :: FocLib}
+  deriving(Show,Eq,Ord)
 
  deriving(Show,Eq,Ord)
 data View = QueueView | LibraryView

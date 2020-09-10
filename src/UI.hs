@@ -37,6 +37,7 @@ app = App { appDraw         = drawUI
 drawUI :: HState -> [Widget Name]
 drawUI st =
   [ drawNowPlaying st
+      <=> (str . show $ ((focLib . focus $ st) == FocSongs))
       <=> (case (view st) of
             QueueView   -> drawViewQueue st
             LibraryView -> drawViewLibrary st
@@ -66,7 +67,7 @@ buildInitialState chan = do
           )
         )
   let songs = list SongsList songsVec 1
-  let focus = FocArtists
+  let focus = Focus { focQueue = FocQueue, focLib = FocArtists }
   pure HState { chan
               , view
               , status

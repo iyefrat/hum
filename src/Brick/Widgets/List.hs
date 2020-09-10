@@ -245,7 +245,7 @@ listSelectedAttr = listAttr <> "selected"
 -- | The attribute used only for the currently-selected list item when
 -- the list has focus. Extends 'listSelectedAttr'.
 listSelectedFocusedAttr :: AttrName
-listSelectedFocusedAttr = listSelectedAttr <> "focused"
+listSelectedFocusedAttr = listAttr <> "focused"
 
 -- | Construct a list in terms of container 't' with element type 'e'.
 list
