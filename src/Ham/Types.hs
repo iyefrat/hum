@@ -12,18 +12,18 @@ import qualified Data.Map.Strict               as Map
 
 
 data HState =
-  HState { chan :: (BC.BChan HamEvent)
-           ,view :: View
-           ,status :: Maybe MPD.Status
-           ,currentSong :: Maybe MPD.Song
-           ,queue :: SongList
-           ,extentMap :: Map Name (Maybe (Extent Name))
-           ,clipboard :: SongList
-           ,currentTime :: UTCTime
-           ,artists :: List Name Value
-           ,albums :: List Name Value
-           ,songs :: List Name Song
-           ,focus :: Focus
+  HState { chan :: !(BC.BChan HamEvent)
+           ,view :: !View
+           ,status :: !(Maybe MPD.Status)
+           ,currentSong :: !(Maybe MPD.Song)
+           ,queue :: !SongList
+           ,extentMap :: !(Map Name (Maybe (Extent Name)))
+           ,clipboard :: !SongList
+           ,currentTime :: !UTCTime
+           ,artists :: !(List Name Value)
+           ,albums :: !(List Name Value)
+           ,songs :: !(List Name Song)
+           ,focus :: !Focus
            }
 --  deriving (Show) --, Eq)
 
