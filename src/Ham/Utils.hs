@@ -29,12 +29,10 @@ rebuildState = do
   pure HState { view
               , status
               , currentSong
-              , queueVec
               , queue
               , extentMap
               , clipboard
               , currentTime
-              , artistsVec
               , artists
               , focus
               }

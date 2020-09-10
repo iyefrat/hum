@@ -16,15 +16,12 @@ data HState =
            ,view :: View
            ,status :: Maybe MPD.Status
            ,currentSong :: Maybe MPD.Song
-           ,queueVec :: V.Vector MPD.Song
            ,queue :: SongList
            ,extentMap :: Map Name (Maybe (Extent Name))
            ,clipboard :: SongList
            ,currentTime :: UTCTime
-           ,artistsVec :: V.Vector Value
            ,artists :: List Name Value
            --,albums :: List Name Value
-           ,songsVec :: V.Vector Song
            ,songs :: List Name Song
            ,focus :: Focus
            }

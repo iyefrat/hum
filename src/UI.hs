@@ -47,17 +47,17 @@ drawUI st =
 buildInitialState :: (BC.BChan HamEvent) -> IO HState
 buildInitialState chan = do
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
-  status      <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
+  status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   queueVec <- V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
+  let queue = (, False) <$> list QueueList queueVec 1
   currentTime <- getCurrentTime
   artistsVec  <-
     V.fromList <$> fromRight [] <$> (withMPD $ MPD.list MPD.AlbumArtist Nothing)
+  let artists   = list ArtistsList artistsVec 1
 
   let view      = QueueView
-  let queue     = (, False) <$> list QueueList queueVec 1
   let extentMap = Map.empty
   let clipboard = list Clipboard V.empty 1
-  let artists   = list ArtistsList artistsVec 1
   songsVec <-
     V.fromList
     <$> fromRight []
@@ -72,14 +72,11 @@ buildInitialState chan = do
               , view
               , status
               , currentSong
-              , queueVec
               , queue
               , extentMap
               , clipboard
               , currentTime
-              , artistsVec
               , artists
-              , songsVec
               , songs
               , focus
               }
@@ -176,16 +173,11 @@ handleEvent s e = case e of
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
     queueVec <- liftIO
       (V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
-    artistsVec <- liftIO
-      (   V.fromList
-      <$> fromRight []
-      <$> (withMPD $ MPD.list MPD.AlbumArtistSort Nothing)
-      )
     let queueUnmoved = (, False) <$> list QueueList queueVec 1
     let queueNew = case (listSelected (queue s)) of
           Nothing -> queueUnmoved
           Just i  -> listMoveTo i queueUnmoved
-    continue s { currentSong, status, queue = queueNew, queueVec, artistsVec }
+    continue s { currentSong, status, queue = queueNew }
   _ -> continue s
 
 --handleEvent s (VtyEvent e) = continue =<< handleListEventVi handleListEvent e s
