@@ -8,6 +8,17 @@ import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.Border
+import           Lens.Micro                     ( (?~)
+                                                , (^.)
+                                                , (^?)
+--                                                , (&)
+                                                , (.~)
+                                                , (%~)
+                                                , _2
+                                                , _head
+                                                , set
+                                                )
+
 import           Brick.Widgets.List
 import           Ham.Song
 import           Ham.Attributes
@@ -34,7 +45,7 @@ drawLibraryLeft st =
           .   center
           $   hBorder
           <=> (hCenter $ renderList (const $ libraryRow st LibraryLeft)
-                                    True
+                                    ((focLib . focus $ st) == FocArtists)
                                     (MPD.toText <$> artists st)
               )
           )
@@ -52,7 +63,7 @@ drawLibraryRight st =
           .   center
           $   hBorder
           <=> (hCenter $ renderList (const $ libraryRow st LibraryRight)
-                                    True
+                                    ((focLib . focus $ st) == FocSongs)
                                     (meta "<no title>" MPD.Title <$> songs st)
               )
           )
@@ -71,6 +82,13 @@ libraryRow st name val =
     $ txt
     $ val
 
+libraryMoveFocusRight :: FocLib -> FocLib
+--libraryMoveFocusRight FocArtists = FocAlbums
+libraryMoveFocusRight _ = FocSongs
+
+libraryMoveFocusLeft :: FocLib -> FocLib
+--libraryMoveFocusLeft FocSongs = FocAlbums
+libraryMoveFocusLeft _ = FocArtists
 
 drawViewLibrary :: HState -> Widget Name
 drawViewLibrary st = drawLibraryLeft st <+> drawLibraryRight st
@@ -106,5 +124,9 @@ handleEventLibrary s e = case e of
         )
       let songs = list SongsList songsVec 1
       continue s { artists = artists', songsVec, songs }
+    EvKey (KChar 'l') [] -> do
+      continue $ s & focusL . focLibL %~ libraryMoveFocusRight
+    EvKey (KChar 'h') [] -> do
+      continue $ s & focusL . focLibL %~ libraryMoveFocusLeft
     _ -> continue s
   _ -> continue s
