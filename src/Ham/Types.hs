@@ -21,7 +21,7 @@ data HState =
            ,clipboard :: SongList
            ,currentTime :: UTCTime
            ,artists :: List Name Value
-           --,albums :: List Name Value
+           ,albums :: List Name Value
            ,songs :: List Name Song
            ,focus :: Focus
            }
@@ -33,7 +33,7 @@ type HamEvent = Either Tick (Response [Subsystem])
 
 data Name = NowPlaying | Clipboard
   | Queue | QueueList
-  | Library | ArtistsList | LibraryLeft | SongsList | LibraryRight
+  | Library | ArtistsList | LibraryLeft | AlbumsList | LibraryMid| SongsList | LibraryRight
  deriving (Show, Eq, Ord)
 
 data FocQueue = FocQueue

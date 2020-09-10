@@ -53,19 +53,13 @@ buildInitialState chan = do
   currentTime <- getCurrentTime
   artistsVec  <-
     V.fromList <$> fromRight [] <$> (withMPD $ MPD.list MPD.AlbumArtist Nothing)
-  let artists   = list ArtistsList artistsVec 1
-
+  let artists = list ArtistsList artistsVec 1
+  albumsVec <- albumsOfArtist (snd <$> (listSelectedElement artists))
+  let albums    = list AlbumsList albumsVec 1
   let view      = QueueView
   let extentMap = Map.empty
   let clipboard = list Clipboard V.empty 1
-  songsVec <-
-    V.fromList
-    <$> fromRight []
-    <$> (withMPD $ MPD.find
-          (      MPD.AlbumArtist
-          MPD.=? fromMaybe "" (snd <$> listSelectedElement artists)
-          )
-        )
+  songsVec <- songsOfAlbum (snd <$> (listSelectedElement albums))
   let songs = list SongsList songsVec 1
   let focus = Focus { focQueue = FocQueue, focLib = FocArtists }
   pure HState { chan
@@ -190,6 +184,7 @@ TODO Highlight and add
 TODO go over HState, nest? lenses?
 TODO Stop and lint everything
 TODO go over entire project and tidy up
+TODO Various Artists
 TODO hackage?
 TODO playlists
 TODO search!
