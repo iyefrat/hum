@@ -47,7 +47,6 @@ data Focus = Focus { focQueue :: FocQueue
                      ,focLib :: FocLib}
   deriving(Show,Eq,Ord)
 
- deriving(Show,Eq,Ord)
 data View = QueueView | LibraryView
  deriving (Show,Eq,Ord)
 
@@ -55,3 +54,6 @@ type Highlight = Bool
 
 
 data Tick = Tick
+
+suffixLenses ''HState
+suffixLenses ''Focus
