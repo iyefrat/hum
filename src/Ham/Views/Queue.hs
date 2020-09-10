@@ -18,6 +18,7 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Data.Map.Strict                ( Map )
 import qualified Data.Map.Strict               as Map
+import qualified Data.Vector                   as V
 
 drawViewQueue :: HState -> Widget Name
 drawViewQueue st =
@@ -135,11 +136,17 @@ handleEventQueue s e = case e of
       queueE      <- lookupExtent Queue
       nowPlayingE <- lookupExtent NowPlaying
       let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
-      s' <- liftIO rebuildState
-      continue s'
-        { queue     = case mi of
-                        Just i  -> listMoveTo i (queue s')
-                        Nothing -> queue s'
+      currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      queueVec <- liftIO
+        (V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
+      let queue = (, False) <$> list QueueList queueVec 1
+      continue s
+        { currentSong
+        , status
+        , queue       = case mi of
+                          Just i  -> listMoveTo i queue
+                          Nothing -> queue
         , clipboard
         , extentMap
         }
@@ -152,12 +159,18 @@ handleEventQueue s e = case e of
       queueE      <- lookupExtent Queue
       nowPlayingE <- lookupExtent NowPlaying
       let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
-      s' <- liftIO rebuildState
-      continue s'
-        { queue     = case mi of
-                        Just i  -> listMoveTo i (queue s')
-                        Nothing -> queue s'
-        , clipboard = c
+      currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      queueVec <- liftIO
+        (V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
+      let queue = (, False) <$> list QueueList queueVec 1
+      continue s
+        { currentSong
+        , status
+        , queue       = case mi of
+                          Just i  -> listMoveTo i queue
+                          Nothing -> queue
+        , clipboard   = c
         , extentMap
         }
     _ -> continue s
