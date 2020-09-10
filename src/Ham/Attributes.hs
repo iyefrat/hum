@@ -18,14 +18,15 @@ import           Ham.Types
 hamAttrMap :: HState -> AttrMap
 hamAttrMap = const $ attrMap
   defAttr
-  [ (listSelectedAttr   , Vty.withStyle defAttr Vty.reverseVideo)
-  , (listHighlightedAttr, BU.fg Vty.yellow)
-  , (headerAttr         , Vty.withStyle defAttr Vty.underline)
-  , (queueAlbumAttr     , BU.fg Vty.red)
-  , (queueTrackAttr     , BU.fg Vty.magenta)
-  , (queueTitleAttr     , BU.fg Vty.cyan)
-  , (queueArtistAttr    , BU.fg Vty.green)
-  , (queueTimeAttr      , BU.fg Vty.blue)
+  [ (listSelectedAttr       , Vty.withStyle defAttr Vty.underline)
+  , (listSelectedFocusedAttr, Vty.withStyle defAttr Vty.reverseVideo)
+  , (listHighlightedAttr    , Vty.withStyle (BU.fg Vty.yellow) Vty.dim)
+  , (headerAttr             , Vty.withStyle defAttr Vty.underline)
+  , (queueAlbumAttr         , BU.fg Vty.red)
+  , (queueTrackAttr         , BU.fg Vty.magenta)
+  , (queueTitleAttr         , BU.fg Vty.cyan)
+  , (queueArtistAttr        , BU.fg Vty.green)
+  , (queueTimeAttr          , BU.fg Vty.blue)
   , ( queueNowPlayingAttr
     , Vty.withStyle (Vty.withStyle defAttr Vty.bold) Vty.underline
     )
