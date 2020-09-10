@@ -73,6 +73,7 @@ buildInitialState chan = do
               , artists
               , songs
               , focus
+              , albums
               }
 
 hamStartEvent :: HState -> EventM Name HState

@@ -29,6 +29,7 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Data.Map.Strict                ( Map )
 import qualified Data.Map.Strict               as Map
+import           Ham.Utils
 
 
 
@@ -49,6 +50,24 @@ drawLibraryLeft st =
                                     (MPD.toText <$> artists st)
               )
           )
+drawLibraryMid :: HState -> Widget Name
+drawLibraryMid st =
+  let vsize = case (join $ Map.lookup LibraryMid $ extentMap st) of
+        Just e  -> (snd . extentSize $ e)
+        Nothing -> 20
+  in  reportExtent LibraryMid
+        $ hCenter
+        $ (   viewport LibraryMid Vertical
+          .   visible
+          .   vLimit vsize
+          .   center
+          $   hBorder
+          <=> (hCenter $ renderList (const $ libraryRow st LibraryMid)
+                                    ((focLib . focus $ st) == FocAlbums)
+                                    (MPD.toText <$> albums st)
+              )
+          )
+
 
 drawLibraryRight :: HState -> Widget Name
 drawLibraryRight st =
@@ -75,6 +94,7 @@ libraryRow st name val =
   withAttr
       (case name of
         LibraryRight -> queueTitleAttr
+        LibraryMid   -> queueAlbumAttr
         LibraryLeft  -> queueArtistAttr
         _            -> listAttr
       )
@@ -82,16 +102,17 @@ libraryRow st name val =
     $ txt
     $ val
 
-libraryMoveFocusRight :: FocLib -> FocLib
---libraryMoveFocusRight FocArtists = FocAlbums
-libraryMoveFocusRight _ = FocSongs
+libraryMoveRight :: FocLib -> FocLib
+libraryMoveRight FocArtists = FocAlbums
+libraryMoveRight _          = FocSongs
 
-libraryMoveFocusLeft :: FocLib -> FocLib
---libraryMoveFocusLeft FocSongs = FocAlbums
-libraryMoveFocusLeft _ = FocArtists
+libraryMoveLeft :: FocLib -> FocLib
+libraryMoveLeft FocSongs = FocAlbums
+libraryMoveLeft _        = FocArtists
 
 drawViewLibrary :: HState -> Widget Name
-drawViewLibrary st = drawLibraryLeft st <+> drawLibraryRight st
+drawViewLibrary st =
+  drawLibraryLeft st <+> drawLibraryMid st <+> drawLibraryRight st
 
 
 handleEventLibrary
@@ -100,33 +121,23 @@ handleEventLibrary s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> do
       let artists' = listMoveDown $ artists s
-      songsVec <- liftIO
-        (   V.fromList
-        <$> fromRight []
-        <$> (withMPD $ MPD.find
-              (      MPD.AlbumArtist
-              MPD.=? fromMaybe "" (snd <$> listSelectedElement artists')
-              )
-            )
-        )
+      albumsVec <- liftIO
+        (albumsOfArtist (snd <$> listSelectedElement artists'))
+      let albums = list AlbumsList albumsVec 1
+      songsVec <- liftIO (songsOfArtist (snd <$> listSelectedElement artists'))
       let songs = list SongsList songsVec 1
-      continue s { artists = artists', songsVec, songs }
+      continue s { artists = artists', songs, albums }
     EvKey (KChar 'k') [] -> do
       let artists' = listMoveUp $ artists s
-      songsVec <- liftIO
-        (   V.fromList
-        <$> fromRight []
-        <$> (withMPD $ MPD.find
-              (      MPD.AlbumArtist
-              MPD.=? fromMaybe "" (snd <$> listSelectedElement artists')
-              )
-            )
-        )
+      albumsVec <- liftIO
+        (albumsOfArtist (snd <$> listSelectedElement artists'))
+      let albums = list AlbumsList albumsVec 1
+      songsVec <- liftIO (songsOfArtist (snd <$> listSelectedElement artists'))
       let songs = list SongsList songsVec 1
-      continue s { artists = artists', songsVec, songs }
+      continue s { artists = artists', songs, albums }
     EvKey (KChar 'l') [] -> do
-      continue $ s & focusL . focLibL %~ libraryMoveFocusRight
+      continue $ s & focusL . focLibL %~ libraryMoveRight
     EvKey (KChar 'h') [] -> do
-      continue $ s & focusL . focLibL %~ libraryMoveFocusLeft
+      continue $ s & focusL . focLibL %~ libraryMoveLeft
     _ -> continue s
   _ -> continue s
