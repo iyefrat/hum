@@ -99,6 +99,25 @@ queueRow st (song, hl) =
       $ secondsToTime
       $ MPD.sgLength song
 
+pasteDeleteCleanup :: HState -> SongList -> EventM Name (Next HState)
+pasteDeleteCleanup s clip = do
+  let mi = listSelected (queue s)
+  extentMap   <- updateExtentMap
+  currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
+  status      <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+  queueVec    <- liftIO
+    (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
+  let queue = (, False) <$> list QueueList queueVec 1
+  continue s
+    { currentSong
+    , status
+    , queue       = case mi of
+                      Just i  -> listMoveTo i queue
+                      Nothing -> queue
+    , clipboard   = clip
+    , extentMap
+    }
+
 handleEventQueue
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleEventQueue s e = case e of
@@ -118,44 +137,14 @@ handleEventQueue s e = case e of
     EvKey (KChar ' ') [] -> do
       continue s { queue = listToggleHighlight (queue s) }
     EvKey (KChar 'd') [] -> do
-      let clipboard = getHighlighted (queue s)
+      let clip = getHighlighted (queue s)
       _ <- liftIO (withMPD $ deleteHighlighted (queue s))
-      let mi = listSelected (queue s)
-      extentMap   <- updateExtentMap
-      currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      queueVec    <- liftIO
-        (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
-      let queue = (, False) <$> list QueueList queueVec 1
-      continue s
-        { currentSong
-        , status
-        , queue       = case mi of
-                          Just i  -> listMoveTo i queue
-                          Nothing -> queue
-        , clipboard
-        , extentMap
-        }
+      pasteDeleteCleanup s clip
     EvKey (KChar 'y') [] -> do
       continue s { clipboard = getHighlighted (queue s) }
     EvKey (KChar 'p') [] -> do
-      let c = clipboard s
-      _ <- liftIO (withMPD $ pasteClipboard c (queue s))
-      let mi = listSelected (queue s)
-      extentMap   <- updateExtentMap
-      currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      queueVec    <- liftIO
-        (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
-      let queue = (, False) <$> list QueueList queueVec 1
-      continue s
-        { currentSong
-        , status
-        , queue       = case mi of
-                          Just i  -> listMoveTo i queue
-                          Nothing -> queue
-        , clipboard   = c
-        , extentMap
-        }
+      let clip = clipboard s
+      _ <- liftIO (withMPD $ pasteClipboard clip (queue s))
+      pasteDeleteCleanup s clip
     _ -> continue s
   _ -> continue s
