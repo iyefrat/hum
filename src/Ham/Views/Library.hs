@@ -1,6 +1,7 @@
 -- |
 
 module Ham.Views.Library where
+import           Prelude                 hiding ( Down )
 import           Ham.Types
 import           Brick.Types
 import           Graphics.Vty.Input.Events
@@ -114,57 +115,38 @@ drawViewLibrary :: HState -> Widget Name
 drawViewLibrary st =
   drawLibraryLeft st <+> drawLibraryMid st <+> drawLibraryRight st
 
-libraryMoveDown :: HState -> EventM Name (Next HState)
-libraryMoveDown s =
-  let libfoc = s ^. focusL . focLibL
-  in
-    case libfoc of
-      FocArtists -> do
-        let artists' = listMoveDown $ artists s
-        albumsVec <- liftIO
-          (albumsOfArtist (snd <$> listSelectedElement artists'))
-        let albums = list AlbumsList albumsVec 1
-        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums))
-        let songs = list SongsList songsVec 1
-        continue s { artists = artists', songs, albums }
-      FocAlbums -> do
-        let albums' = listMoveDown $ albums s
-        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums'))
-        let songs = list SongsList songsVec 1
-        continue s { songs, albums = albums' }
-      FocSongs -> do
-        let songs' = listMoveDown $ songs s
-        continue s { songs = songs' }
+libraryMove :: Direction -> HState -> EventM Name (Next HState)
+libraryMove updown s =
+  let libfoc   = s ^. focusL . focLibL
+      listMove = case updown of
+        Up   -> listMoveUp
+        Down -> listMoveDown
+  in  case libfoc of
+        FocArtists -> do
+          let artists' = listMove $ artists s
+          albumsVec <- liftIO
+            (albumsOfArtist (snd <$> listSelectedElement artists'))
+          let albums = list AlbumsList albumsVec 1
+          songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums))
+          let songs = list SongsList songsVec 1
+          continue s { artists = artists', songs, albums }
+        FocAlbums -> do
+          let albums' = listMove $ albums s
+          songsVec <- liftIO
+            (songsOfAlbum (snd <$> listSelectedElement albums'))
+          let songs = list SongsList songsVec 1
+          continue s { songs, albums = albums' }
+        FocSongs -> do
+          let songs' = listMove $ songs s
+          continue s { songs = songs' }
 
-
-libraryMoveUp :: HState -> EventM Name (Next HState)
-libraryMoveUp s =
-  let libfoc = s ^. focusL . focLibL
-  in
-    case libfoc of
-      FocArtists -> do
-        let artists' = listMoveUp $ artists s
-        albumsVec <- liftIO
-          (albumsOfArtist (snd <$> listSelectedElement artists'))
-        let albums = list AlbumsList albumsVec 1
-        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums))
-        let songs = list SongsList songsVec 1
-        continue s { artists = artists', songs, albums }
-      FocAlbums -> do
-        let albums' = listMoveUp $ albums s
-        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums'))
-        let songs = list SongsList songsVec 1
-        continue s { songs, albums = albums' }
-      FocSongs -> do
-        let songs' = listMoveUp $ songs s
-        continue s { songs = songs' }
 
 handleEventLibrary
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleEventLibrary s e = case e of
   VtyEvent vtye -> case vtye of
-    EvKey (KChar 'j') [] -> libraryMoveDown s
-    EvKey (KChar 'k') [] -> libraryMoveUp s
+    EvKey (KChar 'j') [] -> libraryMove Down s
+    EvKey (KChar 'k') [] -> libraryMove Up s
     EvKey (KChar 'l') [] -> do
       continue $ s & focusL . focLibL %~ libraryMoveRight
     EvKey (KChar 'h') [] -> do
