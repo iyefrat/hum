@@ -27,6 +27,7 @@ import           Ham.Song
 import           Ham.Attributes
 import           Ham.Views.Common
 import qualified Data.Text                     as T
+import qualified Data.Vector                   as V
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
@@ -89,7 +90,6 @@ drawLibraryRight st =
         )
 
 
-
 libraryRow :: HState -> Name -> T.Text -> Widget n
 libraryRow _ name val =
   withAttr
@@ -150,40 +150,34 @@ libraryMove direction s =
           let songs' = listMove $ songs s
           continue s { songs = songs' }
 
+songBulkAdd :: Bool -> V.Vector MPD.Song -> HState -> EventM n (Next HState)
+songBulkAdd play songs s = do
+  let songPaths = MPD.sgFilePath <$> songs
+  traverse_
+    (\sel -> liftIO
+      (withMPD $ MPD.addId sel Nothing >>= if play
+        then MPD.playId
+        else const pass
+      )
+    )
+    (V.take 1 songPaths)
+  traverse_ (\sel -> liftIO (withMPD $ MPD.addId sel Nothing))
+            (V.drop 1 songPaths)
+  song <- liftIO (withMPD MPD.currentSong)
+  continue s { currentSong = fromRight Nothing song, queue = queue s }
+
 libraryAdd :: Bool -> HState -> EventM Name (Next HState)
 libraryAdd play s =
   let libfoc = s ^. focusL . focLibL
   in  case libfoc of
         FocArtists -> do
-          songPaths <- liftIO
-            (     MPD.sgFilePath
-            <<$>> songsOfArtist (snd <$> listSelectedElement (artists s))
-            )
-          traverse_
-            (\sel -> liftIO
-              (withMPD $ MPD.addId sel Nothing >>= if play
-                then MPD.playId
-                else const pass
-              )
-            )
-            songPaths
-          song <- liftIO (withMPD MPD.currentSong)
-          continue s { currentSong = fromRight Nothing song, queue = queue s }
+          songs <- liftIO
+            (songsOfArtist (snd <$> listSelectedElement (artists s)))
+          songBulkAdd play songs s
         FocAlbums -> do
-          songPaths <- liftIO
-            (     MPD.sgFilePath
-            <<$>> songsOfAlbum (snd <$> listSelectedElement (albums s))
-            )
-          traverse_
-            (\sel -> liftIO
-              (withMPD $ MPD.addId sel Nothing >>= if play
-                then MPD.playId
-                else const pass
-              )
-            )
-            songPaths
-          song <- liftIO (withMPD MPD.currentSong)
-          continue s { currentSong = fromRight Nothing song, queue = queue s }
+          songs <- liftIO
+            (songsOfAlbum (snd <$> listSelectedElement (albums s)))
+          songBulkAdd play songs s
         FocSongs -> do
           let maybeFilePath =
                 MPD.sgFilePath . snd <$> listSelectedElement (songs s)
