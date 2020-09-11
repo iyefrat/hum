@@ -151,5 +151,15 @@ handleEventLibrary s e = case e of
       continue $ s & focusL . focLibL %~ libraryMoveRight
     EvKey (KChar 'h') [] -> do
       continue $ s & focusL . focLibL %~ libraryMoveLeft
+    EvKey KEnter [] -> do
+      let maybeFilePath =
+            MPD.sgFilePath . snd <$> listSelectedElement (songs s)
+      traverse_
+        (\sel -> liftIO
+          (withMPD $ MPD.addId sel Nothing >>= (\idd -> MPD.playId idd))
+        )
+        maybeFilePath
+      song <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song, queue = queue s }
     _ -> continue s
   _ -> continue s
