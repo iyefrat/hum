@@ -106,7 +106,7 @@ librarySongRow st name song =
   let pathsInQueue =
           (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
   in  withAttr
-          (if (MPD.sgFilePath song) `elem` pathsInQueue
+          (if MPD.sgFilePath song `elem` pathsInQueue
             then queueTitleBoldAttr
             else queueTitleAttr
           )

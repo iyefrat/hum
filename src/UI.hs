@@ -25,7 +25,7 @@ app = App { appDraw         = drawUI
           , appChooseCursor = showFirstCursor
           , appHandleEvent  = handleEvent
           , appStartEvent   = hamStartEvent
-          , appAttrMap      = (const hamAttrMap)
+          , appAttrMap      = const hamAttrMap
           }
 
 drawUI :: HState -> [Widget Name]
@@ -145,8 +145,7 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 -----
-TODO Library Highlights
-TODO bulk add, add without play
+TODO bulk add
 TODO go over HState, nest? lenses?
 TODO Stop and lint everything
 TODO go over entire project and tidy up
