@@ -25,7 +25,7 @@ app = App { appDraw         = drawUI
           , appChooseCursor = showFirstCursor
           , appHandleEvent  = handleEvent
           , appStartEvent   = hamStartEvent
-          , appAttrMap      = hamAttrMap
+          , appAttrMap      = (const hamAttrMap)
           }
 
 drawUI :: HState -> [Widget Name]

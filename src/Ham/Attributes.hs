@@ -15,8 +15,8 @@ import qualified Graphics.Vty                  as Vty
 import           Ham.Types
 
 
-hamAttrMap :: HState -> AttrMap
-hamAttrMap = const $ attrMap
+hamAttrMap :: AttrMap
+hamAttrMap = attrMap
   defAttr
   [ (listSelectedAttr       , Vty.withStyle defAttr Vty.underline)
   , (listSelectedFocusedAttr, Vty.withStyle defAttr Vty.reverseVideo)
@@ -30,6 +30,7 @@ hamAttrMap = const $ attrMap
   , ( queueNowPlayingAttr
     , Vty.withStyle (Vty.withStyle defAttr Vty.bold) Vty.underline
     )
+  , (queueTitleBoldAttr, Vty.withStyle defAttr Vty.bold)
   ]
 
 queueAttr, queueAlbumAttr, queueTitleAttr, queueTrackAttr, queueArtistAttr, queueTimeAttr
@@ -49,6 +50,8 @@ listHighlightedAttr = listAttr <> "highlighted"
 queueNowPlayingAttr :: AttrName
 queueNowPlayingAttr = queueAttr <> "now playing"
 
+queueTitleBoldAttr :: AttrName
+queueTitleBoldAttr = queueTitleAttr <> "bold"
 
 highlightOverQueueAttrs :: Widget n -> Widget n
 highlightOverQueueAttrs = updateAttrMap

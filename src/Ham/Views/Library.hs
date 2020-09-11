@@ -82,9 +82,9 @@ drawLibraryRight st =
         .   center
         $   hBorder
         <=> hCenter
-              (renderList (const $ libraryRow st LibraryRight)
+              (renderList (const $ librarySongRow st LibraryRight)
                           ((focLib . focus $ st) == FocSongs)
-                          (meta "<no title>" MPD.Title <$> songs st)
+                          (songs st)
               )
         )
 
@@ -94,13 +94,24 @@ libraryRow :: HState -> Name -> T.Text -> Widget n
 libraryRow _ name val =
   withAttr
       (case name of
-        LibraryRight -> queueTitleAttr
-        LibraryMid   -> queueAlbumAttr
-        LibraryLeft  -> queueArtistAttr
-        _            -> listAttr
+        LibraryLeft -> queueArtistAttr
+        LibraryMid  -> queueAlbumAttr
+        _           -> listAttr
       )
     $ column Nothing (Pad 1) Max
     $ txt val
+
+librarySongRow :: HState -> Name -> MPD.Song -> Widget n
+librarySongRow st name song =
+  let pathsInQueue =
+          (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
+  in  withAttr
+          (if (MPD.sgFilePath song) `elem` pathsInQueue
+            then queueTitleBoldAttr
+            else queueTitleAttr
+          )
+        $ column Nothing (Pad 1) Max
+        $ txt (meta (MPD.toText . MPD.sgFilePath $ song) MPD.Title song)
 
 libraryMoveRight :: FocLib -> FocLib
 libraryMoveRight FocArtists = FocAlbums
