@@ -9,15 +9,17 @@ import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.Border
-import           Lens.Micro                     ( (?~)
-                                                , (^.)
+import           Lens.Micro                     ( (^.)
+                                                , (%~) {- (?~)
+                                                  (^.)
                                                 , (^?)
---                                                , (&)
+                                                , (&)
                                                 , (.~)
                                                 , (%~)
                                                 , _2
                                                 , _head
                                                 , set
+                                                -}
                                                 )
 
 import           Brick.Widgets.List
@@ -25,10 +27,8 @@ import           Ham.Song
 import           Ham.Attributes
 import           Ham.Views.Common
 import qualified Data.Text                     as T
-import qualified Data.Vector                   as V
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
-import           Data.Map.Strict                ( Map )
 import qualified Data.Map.Strict               as Map
 import           Ham.Utils
 
@@ -91,7 +91,7 @@ drawLibraryRight st =
 
 
 libraryRow :: HState -> Name -> T.Text -> Widget n
-libraryRow st name val =
+libraryRow _ name val =
   withAttr
       (case name of
         LibraryRight -> queueTitleAttr

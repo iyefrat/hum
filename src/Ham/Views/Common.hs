@@ -2,20 +2,12 @@
 
 module Ham.Views.Common where
 import           Ham.Types
-import           Brick.Main
-import           Graphics.Vty.Input.Events
 import           Brick.Types
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
-import           Brick.Widgets.Border
-import           Brick.Widgets.List
 import           Ham.Song
 import           Ham.Attributes
-import           Ham.Queue
-import           Ham.Utils
-import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
-import           Data.Map.Strict                ( Map )
 import qualified Data.Map.Strict               as Map
 
 drawNowPlaying :: HState -> Widget Name
@@ -30,15 +22,9 @@ drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
       <=> hCenter (artist <+> txt " - " <+> album)
       <=> progbar
    where
-    title     = withAttr queueTitleAttr $ txt $ meta "<no title>" MPD.Title song
-    album     = withAttr queueAlbumAttr $ txt $ meta "<no album>" MPD.Album song
-    artist    = withAttr queueArtistAttr $ txt $ meta "<no one>" MPD.Artist song
-    msongTime = MPD.stTime =<< status st
-    msongTimeTxt =
-      (\(i, j) -> secondsToTime (round i) <> "/" <> secondsToTime (round j))
-        <$> msongTime
-    songTime =
-      withAttr queueTimeAttr $ txt $ fromMaybe "-:--/-:--" msongTimeTxt
+    title   = withAttr queueTitleAttr $ txt $ meta "<no title>" MPD.Title song
+    album   = withAttr queueAlbumAttr $ txt $ meta "<no album>" MPD.Album song
+    artist  = withAttr queueArtistAttr $ txt $ meta "<no one>" MPD.Artist song
     progbar = withAttr queueTimeAttr $ drawProgressBar st
 
 drawProgressBar :: HState -> Widget Name

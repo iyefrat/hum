@@ -7,7 +7,6 @@ import           Graphics.Vty.Input.Events
 import           Brick.Types
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
-import           Brick.Widgets.Border
 import           Brick.Widgets.List
 import           Ham.Song
 import           Ham.Attributes
@@ -16,7 +15,6 @@ import           Ham.Utils
 import           Ham.Views.Common
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
-import           Data.Map.Strict                ( Map )
 import qualified Data.Map.Strict               as Map
 import qualified Data.Vector                   as V
 
@@ -39,8 +37,8 @@ drawViewQueue st =
         )
 
  where
-  songIdx = column (Just (Col 4)) Max (Pad 1) $ txt "Inx"
-  songId  = column (Just (Col 3)) Max (Pad 1) $ txt "ID"
+  {-songIdx = column (Just (Col 4)) Max (Pad 1) $ txt "Inx"
+  songId  = column (Just (Col 3)) Max (Pad 1) $ txt "ID"-}
   album =
     withAttr queueAlbumAttr $ column (Just (Per 25)) (Pad 1) Max $ txt "Album"
   track = withAttr queueTrackAttr $ column (Just (Col 3)) Max (Pad 1) $ txt "#"
@@ -66,13 +64,13 @@ queueRow st (song, hl) =
                album <+> track <+> title <+> artist <+> time)
  where
   nowPlaying = currentSong st
-  songIdx =
+  {-songIdx =
     column (Just (Col 4)) Max (Pad 1) $ txt $ maybe "?" show $ MPD.sgIndex song
   songId =
     column (Just (Col 3)) Max (Pad 1)
       $ txt
       $ maybe "?" (\(MPD.Id x) -> show x)
-      $ MPD.sgId song
+      $ MPD.sgId song-}
   album =
     withAttr queueAlbumAttr $ column (Just (Per 25)) (Pad 1) Max $ txt $ meta
       "<no album>"

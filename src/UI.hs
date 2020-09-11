@@ -1,28 +1,22 @@
 module UI where
 
 
-import           Brick.AttrMap
 import           Brick.Main
 import           Brick.Types
 import qualified Brick.BChan                   as BC
 import           Brick.Widgets.Core
 import           Brick.Widgets.List
-import qualified Brick.Util                    as BU
 import           Graphics.Vty.Input.Events
-import           Graphics.Vty                   ( defAttr )
-import qualified Graphics.Vty                  as Vty
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Ham.Types
 import qualified Data.Vector                   as V
-import           Ham.Queue
 import           Data.Time                      ( getCurrentTime )
 import           Ham.Attributes
 import           Ham.Views.Queue
 import           Ham.Views.Library
 import           Ham.Views.Common
 import           Ham.Utils
-import           Data.Map.Strict                ( Map )
 import qualified Data.Map.Strict               as Map
 
 app :: App HState HamEvent Name

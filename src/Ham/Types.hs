@@ -6,9 +6,6 @@ import qualified Brick.BChan                   as BC
 import           Brick.Types
 import           Brick.Widgets.List
 import           Data.Time                      ( UTCTime )
-import qualified Data.Vector                   as V
-import           Data.Map.Strict                ( Map )
-import qualified Data.Map.Strict               as Map
 
 
 data HState =

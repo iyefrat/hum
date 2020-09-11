@@ -5,11 +5,8 @@ import           Ham.Types
 import           Brick.Types
 import           Brick.Main
 import           Data.Vector                   as V
-import           Brick.Widgets.List
-import           Data.Time                      ( getCurrentTime )
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
-import           Data.Map.Strict                ( Map )
 import qualified Data.Map.Strict               as Map
 
 songsOfArtist :: Maybe MPD.Value -> IO (V.Vector MPD.Song)
