@@ -126,9 +126,9 @@ drawViewLibrary st =
   drawLibraryLeft st <+> drawLibraryMid st <+> drawLibraryRight st
 
 libraryMove :: Direction -> HState -> EventM Name (Next HState)
-libraryMove updown s =
+libraryMove direction s =
   let libfoc   = s ^. focusL . focLibL
-      listMove = case updown of
+      listMove = case direction of
         Up   -> listMoveUp
         Down -> listMoveDown
   in  case libfoc of
@@ -150,6 +150,53 @@ libraryMove updown s =
           let songs' = listMove $ songs s
           continue s { songs = songs' }
 
+libraryAdd :: Bool -> HState -> EventM Name (Next HState)
+libraryAdd play s =
+  let libfoc = s ^. focusL . focLibL
+  in  case libfoc of
+        FocArtists -> do
+          songPaths <- liftIO
+            (     MPD.sgFilePath
+            <<$>> songsOfArtist (snd <$> listSelectedElement (artists s))
+            )
+          traverse_
+            (\sel -> liftIO
+              (withMPD $ MPD.addId sel Nothing >>= if play
+                then MPD.playId
+                else const pass
+              )
+            )
+            songPaths
+          song <- liftIO (withMPD MPD.currentSong)
+          continue s { currentSong = fromRight Nothing song, queue = queue s }
+        FocAlbums -> do
+          songPaths <- liftIO
+            (     MPD.sgFilePath
+            <<$>> songsOfAlbum (snd <$> listSelectedElement (albums s))
+            )
+          traverse_
+            (\sel -> liftIO
+              (withMPD $ MPD.addId sel Nothing >>= if play
+                then MPD.playId
+                else const pass
+              )
+            )
+            songPaths
+          song <- liftIO (withMPD MPD.currentSong)
+          continue s { currentSong = fromRight Nothing song, queue = queue s }
+        FocSongs -> do
+          let maybeFilePath =
+                MPD.sgFilePath . snd <$> listSelectedElement (songs s)
+          traverse_
+            (\sel -> liftIO
+              (withMPD $ MPD.addId sel Nothing >>= if play
+                then MPD.playId
+                else const pass
+              )
+            )
+            maybeFilePath
+          song <- liftIO (withMPD MPD.currentSong)
+          continue s { currentSong = fromRight Nothing song, queue = queue s }
 
 handleEventLibrary
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
@@ -161,19 +208,7 @@ handleEventLibrary s e = case e of
       continue $ s & focusL . focLibL %~ libraryMoveRight
     EvKey (KChar 'h') [] -> do
       continue $ s & focusL . focLibL %~ libraryMoveLeft
-    EvKey KEnter [] -> do
-      let maybeFilePath =
-            MPD.sgFilePath . snd <$> listSelectedElement (songs s)
-      traverse_
-        (\sel -> liftIO (withMPD $ MPD.addId sel Nothing >>= MPD.playId))
-        maybeFilePath
-      song <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song, queue = queue s }
-    EvKey (KChar ' ') [] -> do
-      let maybeFilePath =
-            MPD.sgFilePath . snd <$> listSelectedElement (songs s)
-      traverse_ (\sel -> liftIO (withMPD $ MPD.addId sel Nothing)) maybeFilePath
-      song <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song, queue = queue s }
-    _ -> continue s
+    EvKey KEnter      [] -> libraryAdd True s
+    EvKey (KChar ' ') [] -> libraryAdd False s
+    _                    -> continue s
   _ -> continue s

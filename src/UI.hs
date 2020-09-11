@@ -145,7 +145,8 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 -----
-TODO bulk add
+TODO find out how to speed up bulk add
+TODO find out why when adding florence it doesn't add the first one
 TODO go over HState, nest? lenses?
 TODO Stop and lint everything
 TODO go over entire project and tidy up
