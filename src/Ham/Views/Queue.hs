@@ -112,14 +112,10 @@ handleEventQueue
 handleEventQueue s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> do
-      queueE      <- lookupExtent Queue
-      nowPlayingE <- lookupExtent NowPlaying
-      let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
+      extentMap <- updateExtentMap
       continue s { queue = listMoveDown $ queue s, extentMap }
     EvKey (KChar 'k') [] -> do
-      queueE      <- lookupExtent Queue
-      nowPlayingE <- lookupExtent NowPlaying
-      let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
+      extentMap <- updateExtentMap
       continue s { queue = listMoveUp $ queue s, extentMap }
     EvKey KEnter [] -> do
       let maybeSelectedId =
@@ -133,12 +129,10 @@ handleEventQueue s e = case e of
       let clipboard = getHighlighted (queue s)
       _ <- liftIO (withMPD $ deleteHighlighted (queue s))
       let mi = listSelected (queue s)
-      queueE      <- lookupExtent Queue
-      nowPlayingE <- lookupExtent NowPlaying
-      let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
+      extentMap   <- updateExtentMap
       currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
       status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      queueVec <- liftIO
+      queueVec    <- liftIO
         (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
       let queue = (, False) <$> list QueueList queueVec 1
       continue s
@@ -156,12 +150,10 @@ handleEventQueue s e = case e of
       let c = clipboard s
       _ <- liftIO (withMPD $ pasteClipboard c (queue s))
       let mi = listSelected (queue s)
-      queueE      <- lookupExtent Queue
-      nowPlayingE <- lookupExtent NowPlaying
-      let extentMap = Map.fromList [(Queue, queueE), (NowPlaying, nowPlayingE)]
+      extentMap   <- updateExtentMap
       currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
       status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      queueVec <- liftIO
+      queueVec    <- liftIO
         (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
       let queue = (, False) <$> list QueueList queueVec 1
       continue s

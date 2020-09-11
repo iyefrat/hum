@@ -2,6 +2,8 @@
 
 module Ham.Utils where
 import           Ham.Types
+import           Brick.Types
+import           Brick.Main
 import           Data.Vector                   as V
 import           Brick.Widgets.List
 import           Data.Time                      ( getCurrentTime )
@@ -26,3 +28,17 @@ songsOfAlbum malbum =
 albumsOfArtist :: Maybe MPD.Value -> IO (V.Vector MPD.Value)
 albumsOfArtist martist =
   (V.fromList <$> fromRight [] <$> (withMPD $ MPD.list MPD.Album martist))
+
+updateExtentMap :: EventM Name (Map Name (Maybe (Extent Name)))
+updateExtentMap = do
+  queueE      <- lookupExtent Queue
+  nowPlayingE <- lookupExtent NowPlaying
+  libLeftE    <- lookupExtent LibraryLeft
+  libRightE   <- lookupExtent LibraryRight
+  let extentMap = Map.fromList
+        [ (Queue       , queueE)
+        , (NowPlaying  , nowPlayingE)
+        , (LibraryLeft , libLeftE)
+        , (LibraryRight, libRightE)
+        ]
+  pure extentMap

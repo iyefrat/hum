@@ -135,31 +135,13 @@ handleEvent s e = case e of
       _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
       continue s { view = LibraryView }
     EvResize _ _ -> do
-      queueE      <- lookupExtent Queue
-      nowPlayingE <- lookupExtent NowPlaying
-      libLeftE    <- lookupExtent LibraryLeft
-      libRightE   <- lookupExtent LibraryRight
-      let extentMap = Map.fromList
-            [ (Queue       , queueE)
-            , (NowPlaying  , nowPlayingE)
-            , (LibraryLeft , libLeftE)
-            , (LibraryRight, libRightE)
-            ]
+      extentMap <- updateExtentMap
       continue s { extentMap }
     _ -> case (view s) of
       QueueView   -> handleEventQueue s e
       LibraryView -> handleEventLibrary s e
   (AppEvent (Left Tick)) -> do
-    queueE      <- lookupExtent Queue
-    nowPlayingE <- lookupExtent NowPlaying
-    libLeftE    <- lookupExtent LibraryLeft
-    libRightE   <- lookupExtent LibraryRight
-    let extentMap = Map.fromList
-          [ (Queue       , queueE)
-          , (NowPlaying  , nowPlayingE)
-          , (LibraryLeft , libLeftE)
-          , (LibraryRight, libRightE)
-          ]
+    extentMap <- updateExtentMap
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
     currentTime <- liftIO (getCurrentTime)
     continue s { currentTime, status, extentMap }
