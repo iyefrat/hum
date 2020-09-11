@@ -86,7 +86,12 @@ hBoxPad _ [w     ] = w
 hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
 
 
-
+seekCurEventM :: MPD.FractionalSeconds -> HState -> EventM Name (Next HState)
+seekCurEventM i s = do
+  _      <- liftIO (withMPD $ MPD.seekCur False i)
+  status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+  song   <- liftIO (withMPD MPD.currentSong)
+  continue s { currentSong = fromRight Nothing song, status }
 
 handleEvent :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
@@ -108,26 +113,10 @@ handleEvent s e = case e of
       _    <- liftIO (withMPD MPD.previous)
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song }
-    EvKey (KChar ']') [] -> do
-      _      <- liftIO (withMPD $ MPD.seekCur False 5)
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      song   <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song, status }
-    EvKey (KChar '[') [] -> do
-      _      <- liftIO (withMPD $ MPD.seekCur False (-5))
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      song   <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song, status }
-    EvKey (KChar '}') [] -> do
-      _      <- liftIO (withMPD $ MPD.seekCur False 30)
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      song   <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song, status }
-    EvKey (KChar '{') [] -> do
-      _      <- liftIO (withMPD $ MPD.seekCur False (-30))
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      song   <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song, status }
+    EvKey (KChar ']') [] -> seekCurEventM 5 s
+    EvKey (KChar '[') [] -> seekCurEventM (-5) s
+    EvKey (KChar '}') [] -> seekCurEventM 30 s
+    EvKey (KChar '{') [] -> seekCurEventM (-30) s
     EvKey (KChar '1') [] -> do
       _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
       continue s { view = QueueView }
