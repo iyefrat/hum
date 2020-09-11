@@ -169,5 +169,11 @@ handleEventLibrary s e = case e of
         maybeFilePath
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song, queue = queue s }
+    EvKey (KChar ' ') [] -> do
+      let maybeFilePath =
+            MPD.sgFilePath . snd <$> listSelectedElement (songs s)
+      traverse_ (\sel -> liftIO (withMPD $ MPD.addId sel Nothing)) maybeFilePath
+      song <- liftIO (withMPD MPD.currentSong)
+      continue s { currentSong = fromRight Nothing song, queue = queue s }
     _ -> continue s
   _ -> continue s
