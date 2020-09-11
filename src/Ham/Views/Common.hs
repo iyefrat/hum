@@ -25,17 +25,17 @@ drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
   (currentSong st)
  where
   nowPlaying song =
-    (txt "\n")
-      <=> (hCenter title)
+    txt "\n"
+      <=> hCenter title
       <=> hCenter (artist <+> txt " - " <+> album)
       <=> progbar
    where
     title     = withAttr queueTitleAttr $ txt $ meta "<no title>" MPD.Title song
     album     = withAttr queueAlbumAttr $ txt $ meta "<no album>" MPD.Album song
     artist    = withAttr queueArtistAttr $ txt $ meta "<no one>" MPD.Artist song
-    msongTime = MPD.stTime =<< (status st)
+    msongTime = MPD.stTime =<< status st
     msongTimeTxt =
-      (\(i, j) -> (secondsToTime (round i)) <> "/" <> (secondsToTime (round j)))
+      (\(i, j) -> secondsToTime (round i) <> "/" <> secondsToTime (round j))
         <$> msongTime
     songTime =
       withAttr queueTimeAttr $ txt $ fromMaybe "-:--/-:--" msongTimeTxt
@@ -46,24 +46,20 @@ drawProgressBar st = case width of
   0 -> txt $ Prelude.toText timeText
   _ -> bar
  where
-  width = fromMaybe
-    0
-    (fst . extentSize <$> (join $ Map.lookup NowPlaying $ extentMap st))
-  songTime = fromMaybe (0, 1) (MPD.stTime =<< (status st))
+  width =
+    maybe 0 (fst . extentSize) (join (Map.lookup NowPlaying $ extentMap st))
+  songTime = fromMaybe (0, 1) (MPD.stTime =<< status st)
   timeText =
     toString
-      . (\(i, j) ->
-          (secondsToTime (round i)) <> "/" <> (secondsToTime (round j))
-        )
+      . (\(i, j) -> secondsToTime (round i) <> "/" <> secondsToTime (round j))
       $ songTime
-  completed =
-    (\w -> \(i, j) -> round ((i / j) * (fromIntegral w))) width songTime
-  bar = str
+  completed = (\w (i, j) -> round ((i / j) * fromIntegral w)) width songTime
+  bar       = str
     (zipWith
-      (\a b -> if elem a ("1234567890/:" :: [Char]) then a else b)
-      (  (replicate (-5 + div width 2) ' ')
-      ++ timeText
-      ++ (replicate (-3 + div width 2) ' ')
+      (\a b -> if a `elem` ("1234567890/:" :: [Char]) then a else b)
+      (replicate (-5 + div width 2) ' ' ++ timeText ++ replicate
+        (-3 + div width 2)
+        ' '
       )
       (replicate completed '=' ++ replicate (width - completed) ' ')
     )
