@@ -124,7 +124,7 @@ libraryMoveDown s =
         albumsVec <- liftIO
           (albumsOfArtist (snd <$> listSelectedElement artists'))
         let albums = list AlbumsList albumsVec 1
-        songsVec <- liftIO (songsOfArtist (snd <$> listSelectedElement albums))
+        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums))
         let songs = list SongsList songsVec 1
         continue s { artists = artists', songs, albums }
       FocAlbums -> do
@@ -147,7 +147,7 @@ libraryMoveUp s =
         albumsVec <- liftIO
           (albumsOfArtist (snd <$> listSelectedElement artists'))
         let albums = list AlbumsList albumsVec 1
-        songsVec <- liftIO (songsOfArtist (snd <$> listSelectedElement albums))
+        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums))
         let songs = list SongsList songsVec 1
         continue s { artists = artists', songs, albums }
       FocAlbums -> do
