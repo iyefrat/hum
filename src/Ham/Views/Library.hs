@@ -82,7 +82,7 @@ drawLibraryRight st =
         .   center
         $   hBorder
         <=> hCenter
-              (renderList (const $ librarySongRow st LibraryRight)
+              (renderList (const $ librarySongRow st)
                           ((focLib . focus $ st) == FocSongs)
                           (songs st)
               )
@@ -101,8 +101,8 @@ libraryRow _ name val =
     $ column Nothing (Pad 1) Max
     $ txt val
 
-librarySongRow :: HState -> Name -> MPD.Song -> Widget n
-librarySongRow st name song =
+librarySongRow :: HState -> MPD.Song -> Widget n
+librarySongRow st song =
   let pathsInQueue =
           (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
   in  withAttr

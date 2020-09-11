@@ -12,7 +12,6 @@ import           Brick.Widgets.List             ( listAttr
 import qualified Brick.Util                    as BU
 import           Graphics.Vty                   ( defAttr )
 import qualified Graphics.Vty                  as Vty
-import           Ham.Types
 
 
 hamAttrMap :: AttrMap
