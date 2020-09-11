@@ -36,57 +36,57 @@ import           Ham.Utils
 
 drawLibraryLeft :: HState -> Widget Name
 drawLibraryLeft st =
-  let vsize = case (join $ Map.lookup LibraryLeft $ extentMap st) of
+  let vsize = case join $ Map.lookup LibraryLeft $ extentMap st of
         Just e  -> snd . extentSize $ e
         Nothing -> 20
-  in  reportExtent LibraryLeft
-        $ hCenter
-        $ (   viewport LibraryLeft Vertical
-          .   visible
-          .   vLimit vsize
-          .   center
-          $   hBorder
-          <=> (hCenter $ renderList (const $ libraryRow st LibraryLeft)
-                                    ((focLib . focus $ st) == FocArtists)
-                                    (MPD.toText <$> artists st)
+  in  reportExtent LibraryLeft $ hCenter
+        (   viewport LibraryLeft Vertical
+        .   visible
+        .   vLimit vsize
+        .   center
+        $   hBorder
+        <=> hCenter
+              (renderList (const $ libraryRow st LibraryLeft)
+                          ((focLib . focus $ st) == FocArtists)
+                          (MPD.toText <$> artists st)
               )
-          )
+        )
 drawLibraryMid :: HState -> Widget Name
 drawLibraryMid st =
-  let vsize = case (join $ Map.lookup LibraryMid $ extentMap st) of
+  let vsize = case join $ Map.lookup LibraryMid $ extentMap st of
         Just e  -> snd . extentSize $ e
         Nothing -> 20
-  in  reportExtent LibraryMid
-        $ hCenter
-        $ (   viewport LibraryMid Vertical
-          .   visible
-          .   vLimit vsize
-          .   center
-          $   hBorder
-          <=> (hCenter $ renderList (const $ libraryRow st LibraryMid)
-                                    ((focLib . focus $ st) == FocAlbums)
-                                    (MPD.toText <$> albums st)
+  in  reportExtent LibraryMid $ hCenter
+        (   viewport LibraryMid Vertical
+        .   visible
+        .   vLimit vsize
+        .   center
+        $   hBorder
+        <=> hCenter
+              (renderList (const $ libraryRow st LibraryMid)
+                          ((focLib . focus $ st) == FocAlbums)
+                          (MPD.toText <$> albums st)
               )
-          )
+        )
 
 
 drawLibraryRight :: HState -> Widget Name
 drawLibraryRight st =
-  let vsize = case (join $ Map.lookup LibraryRight $ extentMap st) of
+  let vsize = case join $ Map.lookup LibraryRight $ extentMap st of
         Just e  -> snd . extentSize $ e
         Nothing -> 20
-  in  reportExtent LibraryRight
-        $ hCenter
-        $ (   viewport LibraryRight Vertical
-          .   visible
-          .   vLimit vsize
-          .   center
-          $   hBorder
-          <=> (hCenter $ renderList (const $ libraryRow st LibraryRight)
-                                    ((focLib . focus $ st) == FocSongs)
-                                    (meta "<no title>" MPD.Title <$> songs st)
+  in  reportExtent LibraryRight $ hCenter
+        (   viewport LibraryRight Vertical
+        .   visible
+        .   vLimit vsize
+        .   center
+        $   hBorder
+        <=> hCenter
+              (renderList (const $ libraryRow st LibraryRight)
+                          ((focLib . focus $ st) == FocSongs)
+                          (meta "<no title>" MPD.Title <$> songs st)
               )
-          )
+        )
 
 
 
@@ -100,8 +100,7 @@ libraryRow st name val =
         _            -> listAttr
       )
     $ column Nothing (Pad 1) Max
-    $ txt
-    $ val
+    $ txt val
 
 libraryMoveRight :: FocLib -> FocLib
 libraryMoveRight FocArtists = FocAlbums

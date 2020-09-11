@@ -38,28 +38,28 @@ drawUI :: HState -> [Widget Name]
 drawUI st =
   [ drawNowPlaying st
       <=> (str . show $ ((focLib . focus $ st) == FocSongs))
-      <=> (case (view st) of
+      <=> (case view st of
             QueueView   -> drawViewQueue st
             LibraryView -> drawViewLibrary st
           )
   ]
 
-buildInitialState :: (BC.BChan HamEvent) -> IO HState
+buildInitialState :: BC.BChan HamEvent -> IO HState
 buildInitialState chan = do
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
-  queueVec <- V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
+  queueVec <- V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue = (, False) <$> list QueueList queueVec 1
   currentTime <- getCurrentTime
-  artistsVec  <-
-    V.fromList <$> fromRight [] <$> (withMPD $ MPD.list MPD.AlbumArtist Nothing)
+  artistsVec  <- V.fromList . fromRight [] <$> withMPD
+    (MPD.list MPD.AlbumArtist Nothing)
   let artists = list ArtistsList artistsVec 1
-  albumsVec <- albumsOfArtist (snd <$> (listSelectedElement artists))
+  albumsVec <- albumsOfArtist (snd <$> listSelectedElement artists)
   let albums    = list AlbumsList albumsVec 1
   let view      = QueueView
   let extentMap = Map.empty
   let clipboard = list Clipboard V.empty 1
-  songsVec <- songsOfAlbum (snd <$> (listSelectedElement albums))
+  songsVec <- songsOfAlbum (snd <$> listSelectedElement albums)
   let songs = list SongsList songsVec 1
   let focus = Focus { focQueue = FocQueue, focLib = FocArtists }
   pure HState { chan
@@ -126,21 +126,21 @@ handleEvent s e = case e of
     EvResize _ _ -> do
       extentMap <- updateExtentMap
       continue s { extentMap }
-    _ -> case (view s) of
+    _ -> case view s of
       QueueView   -> handleEventQueue s e
       LibraryView -> handleEventLibrary s e
   (AppEvent (Left Tick)) -> do
     extentMap <- updateExtentMap
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-    currentTime <- liftIO (getCurrentTime)
+    currentTime <- liftIO getCurrentTime
     continue s { currentTime, status, extentMap }
   (AppEvent (Right (Right _))) -> do
     currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
     queueVec <- liftIO
-      (V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
+      (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
     let queueUnmoved = (, False) <$> list QueueList queueVec 1
-    let queueNew = case (listSelected (queue s)) of
+    let queueNew = case listSelected (queue s) of
           Nothing -> queueUnmoved
           Just i  -> listMoveTo i queueUnmoved
     continue s { currentSong, status, queue = queueNew }

@@ -69,7 +69,7 @@ drawProgressBar st = case width of
     )
 
 data PerCol = Per Int | Col Int
-column :: Maybe (PerCol) -> Padding -> Padding -> Widget n -> Widget n
+column :: Maybe PerCol -> Padding -> Padding -> Widget n -> Widget n
 column maxWidth left right w = case maxWidth of
   Nothing      -> wpad
   Just (Per m) -> hLimitPercent m wpad

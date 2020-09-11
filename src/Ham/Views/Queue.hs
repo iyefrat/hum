@@ -22,23 +22,21 @@ import qualified Data.Vector                   as V
 
 drawViewQueue :: HState -> Widget Name
 drawViewQueue st =
-  let vsize = case (join $ Map.lookup Queue $ extentMap st) of
-        Just e  -> (snd . extentSize $ e)
+  let vsize = case join $ Map.lookup Queue $ extentMap st of
+        Just e  -> snd . extentSize $ e
         Nothing -> 60
-  in  reportExtent Queue
-        $ hCenter
-        $ (   viewport Queue Vertical
-          .   visible
-          .   vLimit vsize
-          .   center
-          $   (hCenter {-. hLimit 130-}
-                       $ header)
-          <=> (hCenter {-. hLimit 130-}
-                       $ renderList (const (queueRow st))
-                                    ((focQueue . focus $ st) == FocQueue)
-                                    (queue st)
+  in  reportExtent Queue $ hCenter
+        (   viewport Queue Vertical
+        .   visible
+        .   vLimit vsize
+        .   center
+        $   hCenter header
+        <=> hCenter
+              (renderList (const (queueRow st))
+                          ((focQueue . focus $ st) == FocQueue)
+                          (queue st)
               )
-          )
+        )
 
  where
   songIdx = column (Just (Col 4)) Max (Pad 1) $ txt "Inx"
@@ -58,20 +56,14 @@ drawViewQueue st =
 queueRow :: HState -> (MPD.Song, Highlight) -> Widget n
 queueRow st (song, hl) =
   (if hl then highlightOverQueueAttrs else id)
-    . (if maybe False (MPD.sgIndex song ==) (MPD.sgIndex <$> nowPlaying)
+    . (if Just (MPD.sgIndex song) == (MPD.sgIndex <$> nowPlaying)
         then withDefAttr queueNowPlayingAttr
         else id
       )
-    $ (   hCenter
-      $   {-songIdx
+    $ hCenter (   {-songIdx
     <+> songId
     <+> -}
-          album
-      <+> track
-      <+> title
-      <+> artist
-      <+> time
-      )
+               album <+> track <+> title <+> artist <+> time)
  where
   nowPlaying = currentSong st
   songIdx =

@@ -41,4 +41,4 @@ listPaste p ls =
 
 -- | toggle selected items highlight status
 listToggleHighlight :: SongList -> SongList
-listToggleHighlight = listModify (\(sg, hl) -> (sg, not hl))
+listToggleHighlight = listModify (second not)
