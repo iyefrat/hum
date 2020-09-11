@@ -37,7 +37,7 @@ import           Ham.Utils
 drawLibraryLeft :: HState -> Widget Name
 drawLibraryLeft st =
   let vsize = case (join $ Map.lookup LibraryLeft $ extentMap st) of
-        Just e  -> (snd . extentSize $ e)
+        Just e  -> snd . extentSize $ e
         Nothing -> 20
   in  reportExtent LibraryLeft
         $ hCenter
@@ -54,7 +54,7 @@ drawLibraryLeft st =
 drawLibraryMid :: HState -> Widget Name
 drawLibraryMid st =
   let vsize = case (join $ Map.lookup LibraryMid $ extentMap st) of
-        Just e  -> (snd . extentSize $ e)
+        Just e  -> snd . extentSize $ e
         Nothing -> 20
   in  reportExtent LibraryMid
         $ hCenter
@@ -73,7 +73,7 @@ drawLibraryMid st =
 drawLibraryRight :: HState -> Widget Name
 drawLibraryRight st =
   let vsize = case (join $ Map.lookup LibraryRight $ extentMap st) of
-        Just e  -> (snd . extentSize $ e)
+        Just e  -> snd . extentSize $ e
         Nothing -> 20
   in  reportExtent LibraryRight
         $ hCenter
@@ -155,9 +155,7 @@ handleEventLibrary s e = case e of
       let maybeFilePath =
             MPD.sgFilePath . snd <$> listSelectedElement (songs s)
       traverse_
-        (\sel -> liftIO
-          (withMPD $ MPD.addId sel Nothing >>= (\idd -> MPD.playId idd))
-        )
+        (\sel -> liftIO (withMPD $ MPD.addId sel Nothing >>= MPD.playId))
         maybeFilePath
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song, queue = queue s }

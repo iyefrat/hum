@@ -139,7 +139,7 @@ handleEventQueue s e = case e of
       currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
       status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
       queueVec <- liftIO
-        (V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
+        (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
       let queue = (, False) <$> list QueueList queueVec 1
       continue s
         { currentSong
@@ -162,7 +162,7 @@ handleEventQueue s e = case e of
       currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
       status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
       queueVec <- liftIO
-        (V.fromList <$> fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
+        (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
       let queue = (, False) <$> list QueueList queueVec 1
       continue s
         { currentSong

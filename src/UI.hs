@@ -180,8 +180,8 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 -----
-TODO AlbumArtist -> Album -> Song
-TODO Highlight and add
+TODO Library Highlights
+TODO bulk add, add without play
 TODO go over HState, nest? lenses?
 TODO Stop and lint everything
 TODO go over entire project and tidy up
