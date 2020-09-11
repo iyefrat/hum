@@ -20,7 +20,7 @@ hamAttrMap = const $ attrMap
   defAttr
   [ (listSelectedAttr       , Vty.withStyle defAttr Vty.underline)
   , (listSelectedFocusedAttr, Vty.withStyle defAttr Vty.reverseVideo)
-  , (listHighlightedAttr    , Vty.withStyle (BU.fg Vty.yellow) Vty.dim)
+  , (listHighlightedAttr    , BU.fg Vty.yellow)
   , (headerAttr             , Vty.withStyle defAttr Vty.underline)
   , (queueAlbumAttr         , BU.fg Vty.red)
   , (queueTrackAttr         , BU.fg Vty.magenta)
