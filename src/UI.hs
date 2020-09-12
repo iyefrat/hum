@@ -145,6 +145,7 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 -----
+TODO find out why doing G in lib doesn't render, why heroaca stuff renders poorly
 TODO go over HState, nest? lenses?
 TODO Stop and lint everything
 TODO go over entire project and tidy up

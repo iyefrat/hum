@@ -144,5 +144,13 @@ handleEventQueue s e = case e of
       let clip = clipboard s
       _ <- liftIO (withMPD $ pasteClipboard clip (queue s))
       pasteDeleteCleanup s clip
+    EvKey (KChar 'G') [] -> do
+      extentMap <- updateExtentMap
+      continue s { queue     = listMoveTo (length . queue $ s) $ queue s
+                 , extentMap
+                 }
+    EvKey (KChar 'g') [] -> do -- TODO change this to  'gg', somehow
+      extentMap <- updateExtentMap
+      continue s { queue = listMoveTo 0 $ queue s, extentMap }
     _ -> continue s
   _ -> continue s

@@ -103,7 +103,7 @@ common deps
     TypeOperators
     ScopedTypeVariables
     TemplateHaskell
-
+    RankNTypes
   default-language:    Haskell2010
 
 library

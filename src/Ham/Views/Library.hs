@@ -125,30 +125,28 @@ drawViewLibrary :: HState -> Widget Name
 drawViewLibrary st =
   drawLibraryLeft st <+> drawLibraryMid st <+> drawLibraryRight st
 
-libraryMove :: Direction -> HState -> EventM Name (Next HState)
-libraryMove direction s =
-  let libfoc   = s ^. focusL . focLibL
-      listMove = case direction of
-        Up   -> listMoveUp
-        Down -> listMoveDown
-  in  case libfoc of
-        FocArtists -> do
-          let artists' = listMove $ artists s
-          albumsVec <- liftIO
-            (albumsOfArtist (snd <$> listSelectedElement artists'))
-          let albums = list AlbumsList albumsVec 1
-          songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums))
-          let songs = list SongsList songsVec 1
-          continue s { artists = artists', songs, albums }
-        FocAlbums -> do
-          let albums' = listMove $ albums s
-          songsVec <- liftIO
-            (songsOfAlbum (snd <$> listSelectedElement albums'))
-          let songs = list SongsList songsVec 1
-          continue s { songs, albums = albums' }
-        FocSongs -> do
-          let songs' = listMove $ songs s
-          continue s { songs = songs' }
+libraryMove
+  :: (forall e. List Name e -> List Name e) -> HState -> EventM Name (Next HState)
+libraryMove moveFunc s =
+  let libfoc = s ^. focusL . focLibL
+  in
+    case libfoc of
+      FocArtists -> do
+        let artists' = moveFunc $ artists s
+        albumsVec <- liftIO
+          (albumsOfArtist (snd <$> listSelectedElement artists'))
+        let albums = list AlbumsList albumsVec 1
+        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums))
+        let songs = list SongsList songsVec 1
+        continue s { artists = artists', songs, albums }
+      FocAlbums -> do
+        let albums' = moveFunc $ albums s
+        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums'))
+        let songs = list SongsList songsVec 1
+        continue s { songs, albums = albums' }
+      FocSongs -> do
+        let songs' = moveFunc $ songs s
+        continue s { songs = songs' }
 
 songBulkAdd :: Bool -> V.Vector MPD.Song -> HState -> EventM n (Next HState)
 songBulkAdd play songs s = do
@@ -196,13 +194,15 @@ handleEventLibrary
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleEventLibrary s e = case e of
   VtyEvent vtye -> case vtye of
-    EvKey (KChar 'j') [] -> libraryMove Down s
-    EvKey (KChar 'k') [] -> libraryMove Up s
+    EvKey (KChar 'j') [] -> libraryMove listMoveDown s
+    EvKey (KChar 'k') [] -> libraryMove listMoveUp s
     EvKey (KChar 'l') [] -> do
       continue $ s & focusL . focLibL %~ libraryMoveRight
     EvKey (KChar 'h') [] -> do
       continue $ s & focusL . focLibL %~ libraryMoveLeft
     EvKey KEnter      [] -> libraryAdd True s
     EvKey (KChar ' ') [] -> libraryAdd False s
+    EvKey (KChar 'G') [] -> libraryMove (listMoveTo (length . queue $ s)) s
+    EvKey (KChar 'g') [] -> libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     _                    -> continue s
   _ -> continue s
