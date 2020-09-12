@@ -90,7 +90,6 @@ hBoxPad _ []       = emptyWidget
 hBoxPad _ [w     ] = w
 hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
 
-
 seekCurEventM :: MPD.FractionalSeconds -> HState -> EventM Name (Next HState)
 seekCurEventM i s = do
   _      <- liftIO (withMPD $ MPD.seekCur False i)
@@ -166,7 +165,7 @@ TODO Stop and lint everything
 TODO go over entire project and tidy up
 TODO Various Artists
 TODO hackage?
-TODO playlists
+TODO playlist editing
 TODO search!
 TODO more vim motions
 TODO random song order (and friends)

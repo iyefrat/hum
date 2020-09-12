@@ -1,3 +1,4 @@
+{-#LANGUAGE RankNTypes#-}
 -- |
 
 module Ham.Views.Library where
@@ -126,7 +127,9 @@ drawViewLibrary st =
   drawLibraryLeft st <+> drawLibraryMid st <+> drawLibraryRight st
 
 libraryMove
-  :: (forall e. List Name e -> List Name e) -> HState -> EventM Name (Next HState)
+  :: (forall e . List Name e -> List Name e)
+  -> HState
+  -> EventM Name (Next HState)
 libraryMove moveFunc s =
   let libfoc = s ^. focusL . focLibL
   in
