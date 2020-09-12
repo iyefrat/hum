@@ -1,3 +1,4 @@
+{-#LANGUAGE RankNTypes#-}
 -- |
 
 module Ham.Views.Playlists where
@@ -10,11 +11,11 @@ import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.Border
 import           Lens.Micro                     ( (^.)
-                                                , (%~) {- (?~)
+                                                , (%~)
+                                                , (.~){- (?~)
                                                   (^.)
                                                 , (^?)
                                                 , (&)
-                                                , (.~)
                                                 , (%~)
                                                 , _2
                                                 , _head
@@ -47,7 +48,7 @@ drawPlaylistLeft st =
         .   center
         $   hBorder
         <=> hCenter
-              (renderList (const $ playlistRow st PlaylistLeft)
+              (renderList (const $ playlistRow st)
                           ((focPlay . focus $ st) == FocPlaylists)
                           (MPD.toText <$> playlists st)
               )
@@ -70,8 +71,8 @@ drawPlaylistRight st =
               )
         )
 
-playlistRow :: HState -> Name -> T.Text -> Widget n
-playlistRow _ name val =
+playlistRow :: HState -> T.Text -> Widget n
+playlistRow _ val =
   withAttr queueAlbumAttr $ column Nothing (Pad 1) Max $ txt val
 
 playlistSongRow :: HState -> MPD.Song -> Widget n
@@ -88,42 +89,40 @@ playlistSongRow st song =
 
 drawViewPlaylists :: HState -> Widget Name
 drawViewPlaylists st = drawPlaylistLeft st <+> drawPlaylistRight st
-{-
-playlistMoveRight :: FocLib -> FocLib
-playlistMoveRight FocArtists = FocAlbums
-playlistMoveRight _          = FocSongs
 
-playlistMoveLeft :: FocLib -> FocLib
-playlistMoveLeft FocSongs = FocAlbums
-playlistMoveLeft _        = FocArtists
-
-songBulkAdd :: Bool -> V.Vector MPD.Song -> HState -> EventM n (Next HState)
-songBulkAdd play songs s = do
-  let songPaths = MPD.sgFilePath <$> songs
-  traverse_
-    (\sel -> liftIO
-      (withMPD $ MPD.addId sel Nothing >>= if play
-        then MPD.playId
-        else const pass
-      )
-    )
-    (V.take 1 songPaths)
-  traverse_ (\sel -> liftIO (withMPD $ MPD.addId sel Nothing))
-            (V.drop 1 songPaths)
-  song <- liftIO (withMPD MPD.currentSong)
-  continue s { currentSong = fromRight Nothing song, queue = queue s }
-
-playlistAdd :: Bool -> HState -> EventM Name (Next HState)
-playlistAdd play s =
-  let libfoc = s ^. focusL . focPlayL
-  in  case libfoc of
+playlistsMove
+  :: (forall e . List Name e -> List Name e)
+  -> HState
+  -> EventM Name (Next HState)
+playlistsMove moveFunc s =
+  let playfoc = s ^. focusL . focPlayL
+  in  case playfoc of
         FocPlaylists -> do
-          songs <- liftIO
-            (songsOfArtist (snd <$> listSelectedElement (artists s)))
-          songBulkAdd play songs s
+          let playlists' = moveFunc $ playlists s
+          playlistSongsVec <- liftIO
+            (V.fromList . fromRight [] <$> withMPD
+              (MPD.listPlaylistInfo
+                (   fromMaybe "<no playlists>"
+                $   snd
+                <$> listSelectedElement playlists'
+                )
+              )
+            )
+          let playlistSongs = list PlaylistSongs playlistSongsVec 1
+          continue s { playlists = playlists', playlistSongs }
+        FocPSongs -> do
+          let playlistSongs' = moveFunc $ playlistSongs s
+          continue s { playlistSongs = playlistSongs' }
+
+playlistsAdd :: Bool -> HState -> EventM Name (Next HState)
+playlistsAdd play s =
+  let playfoc = s ^. focusL . focPlayL
+  in  case playfoc of
+        FocPlaylists -> do
+          songBulkAdd play (listElements (playlistSongs s)) s
         FocPSongs -> do
           let maybeFilePath =
-                MPD.sgFilePath . snd <$> listSelectedElement (songs s)
+                MPD.sgFilePath . snd <$> listSelectedElement (playlistSongs s)
           traverse_
             (\sel -> liftIO
               (withMPD $ MPD.addId sel Nothing >>= if play
@@ -135,20 +134,19 @@ playlistAdd play s =
           song <- liftIO (withMPD MPD.currentSong)
           continue s { currentSong = fromRight Nothing song, queue = queue s }
 
-handleEventLibrary
+handleEventPlaylists
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
-handleEventLibrary s e = case e of
+handleEventPlaylists s e = case e of
   VtyEvent vtye -> case vtye of
-    EvKey (KChar 'j') [] -> libraryMove listMoveDown s
-    EvKey (KChar 'k') [] -> libraryMove listMoveUp s
+    EvKey (KChar 'j') [] -> playlistsMove listMoveDown s
+    EvKey (KChar 'k') [] -> playlistsMove listMoveUp s
     EvKey (KChar 'l') [] -> do
-      continue $ s & focusL . focLibL %~ libraryMoveRight
+      continue $ s & focusL . focPlayL .~ FocPSongs
     EvKey (KChar 'h') [] -> do
-      continue $ s & focusL . focLibL %~ libraryMoveLeft
-    EvKey KEnter      [] -> libraryAdd True s
-    EvKey (KChar ' ') [] -> libraryAdd False s
-    EvKey (KChar 'G') [] -> libraryMove (listMoveTo (length . queue $ s)) s
-    EvKey (KChar 'g') [] -> libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
+      continue $ s & focusL . focPlayL .~ FocPlaylists
+    EvKey KEnter      [] -> playlistsAdd True s
+    EvKey (KChar ' ') [] -> playlistsAdd False s
+    EvKey (KChar 'G') [] -> playlistsMove (listMoveTo (length . queue $ s)) s
+    EvKey (KChar 'g') [] -> playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     _                    -> continue s
   _ -> continue s
--}

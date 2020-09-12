@@ -148,22 +148,6 @@ libraryMove moveFunc s =
         let songs' = moveFunc $ songs s
         continue s { songs = songs' }
 
-songBulkAdd :: Bool -> V.Vector MPD.Song -> HState -> EventM n (Next HState)
-songBulkAdd play songs s = do
-  let songPaths = MPD.sgFilePath <$> songs
-  traverse_
-    (\sel -> liftIO
-      (withMPD $ MPD.addId sel Nothing >>= if play
-        then MPD.playId
-        else const pass
-      )
-    )
-    (V.take 1 songPaths)
-  traverse_ (\sel -> liftIO (withMPD $ MPD.addId sel Nothing))
-            (V.drop 1 songPaths)
-  song <- liftIO (withMPD MPD.currentSong)
-  continue s { currentSong = fromRight Nothing song, queue = queue s }
-
 libraryAdd :: Bool -> HState -> EventM Name (Next HState)
 libraryAdd play s =
   let libfoc = s ^. focusL . focLibL

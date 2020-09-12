@@ -3,12 +3,15 @@
 module Ham.Views.Common where
 import           Ham.Types
 import           Brick.Types
+import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Ham.Song
 import           Ham.Attributes
+import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
+import qualified Data.Vector                   as V
 
 drawNowPlaying :: HState -> Widget Name
 drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
@@ -57,3 +60,19 @@ column maxWidth left right w = case maxWidth of
   Just (Per m) -> hLimitPercent m wpad
   Just (Col m) -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
+
+songBulkAdd :: Bool -> V.Vector MPD.Song -> HState -> EventM n (Next HState)
+songBulkAdd play songs s = do
+  let songPaths = MPD.sgFilePath <$> songs
+  traverse_
+    (\sel -> liftIO
+      (withMPD $ MPD.addId sel Nothing >>= if play
+        then MPD.playId
+        else const pass
+      )
+    )
+    (V.take 1 songPaths)
+  traverse_ (\sel -> liftIO (withMPD $ MPD.addId sel Nothing))
+            (V.drop 1 songPaths)
+  song <- liftIO (withMPD MPD.currentSong)
+  continue s { currentSong = fromRight Nothing song, queue = queue s }

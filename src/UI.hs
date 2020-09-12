@@ -135,8 +135,9 @@ handleEvent s e = case e of
       extentMap <- updateExtentMap
       continue s { extentMap }
     _ -> case view s of
-      QueueView   -> handleEventQueue s e
-      LibraryView -> handleEventLibrary s e
+      QueueView     -> handleEventQueue s e
+      LibraryView   -> handleEventLibrary s e
+      PlaylistsView -> handleEventPlaylists s e
   (AppEvent (Left Tick)) -> do
     extentMap <- updateExtentMap
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
