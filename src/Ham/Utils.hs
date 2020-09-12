@@ -25,11 +25,17 @@ updateExtentMap = do
   queueE      <- lookupExtent Queue
   nowPlayingE <- lookupExtent NowPlaying
   libLeftE    <- lookupExtent LibraryLeft
+  libMidE     <- lookupExtent LibraryMid
   libRightE   <- lookupExtent LibraryRight
+  playLeftE   <- lookupExtent PlaylistLeft
+  playRightE  <- lookupExtent PlaylistRight
   let extentMap = Map.fromList
-        [ (Queue       , queueE)
-        , (NowPlaying  , nowPlayingE)
-        , (LibraryLeft , libLeftE)
-        , (LibraryRight, libRightE)
+        [ (Queue        , queueE)
+        , (NowPlaying   , nowPlayingE)
+        , (LibraryLeft  , libLeftE)
+        , (LibraryMid   , libMidE)
+        , (LibraryRight , libRightE)
+        , (PlaylistLeft , playLeftE)
+        , (PlaylistRight, playRightE)
         ]
   pure extentMap

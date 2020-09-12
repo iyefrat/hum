@@ -13,9 +13,7 @@ import           Ham.Types
 import qualified Data.Vector                   as V
 import           Data.Time                      ( getCurrentTime )
 import           Ham.Attributes
-import           Ham.Views.Queue
-import           Ham.Views.Library
-import           Ham.Views.Common
+import           Ham.Views
 import           Ham.Utils
 import qualified Data.Map.Strict               as Map
 
@@ -31,11 +29,12 @@ app = App { appDraw         = drawUI
 drawUI :: HState -> [Widget Name]
 drawUI st =
   [ drawNowPlaying st
-      <=> (str . show $ ((focLib . focus $ st) == FocSongs))
       <=> (case view st of
-            QueueView   -> drawViewQueue st
-            LibraryView -> drawViewLibrary st
+            QueueView     -> drawViewQueue st
+            LibraryView   -> drawViewLibrary st
+            PlaylistsView -> drawViewPlaylists st
           )
+      <=> (str . show $ ((focLib . focus $ st) == FocSongs))
   ]
 
 buildInitialState :: BC.BChan HamEvent -> IO HState
@@ -55,7 +54,17 @@ buildInitialState chan = do
   let clipboard = list Clipboard V.empty 1
   songsVec <- songsOfAlbum (snd <$> listSelectedElement albums)
   let songs = list SongsList songsVec 1
-  let focus = Focus { focQueue = FocQueue, focLib = FocArtists }
+  let focus = Focus { focQueue = FocQueue
+                    , focLib   = FocArtists
+                    , focPlay  = FocPlaylists
+                    }
+  playlistsVec <- V.fromList . fromRight [] <$> withMPD (MPD.listPlaylists)
+  let playlists = list PlaylistList playlistsVec 1
+  playlistSongsVec <- V.fromList . fromRight [] <$> withMPD
+    (MPD.listPlaylistInfo
+      (fromMaybe "<no playlists>" $ snd <$> listSelectedElement playlists)
+    )
+  let playlistSongs = list PlaylistSongs playlistSongsVec 1
   pure HState { chan
               , view
               , status
@@ -68,6 +77,8 @@ buildInitialState chan = do
               , songs
               , focus
               , albums
+              , playlists
+              , playlistSongs
               }
 
 hamStartEvent :: HState -> EventM Name HState
@@ -117,6 +128,9 @@ handleEvent s e = case e of
     EvKey (KChar '2') [] -> do
       _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
       continue s { view = LibraryView }
+    EvKey (KChar '3') [] -> do
+      _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
+      continue s { view = PlaylistsView }
     EvResize _ _ -> do
       extentMap <- updateExtentMap
       continue s { extentMap }

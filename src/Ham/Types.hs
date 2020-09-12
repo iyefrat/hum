@@ -21,6 +21,8 @@ data HState =
            ,albums :: !(List Name Value)
            ,songs :: !(List Name Song)
            ,focus :: !Focus
+           ,playlists :: !(List Name PlaylistName)
+           ,playlistSongs :: !(List Name Song)
            }
 --  deriving (Show) --, Eq)
 
@@ -31,17 +33,21 @@ type HamEvent = Either Tick (Response [Subsystem])
 data Name = NowPlaying | Clipboard
   | Queue | QueueList
   | Library | ArtistsList | LibraryLeft | AlbumsList | LibraryMid| SongsList | LibraryRight
+  | PlaylistList | PlaylistLeft | PlaylistSongs | PlaylistRight
  deriving (Show, Eq, Ord)
 
 data FocQueue = FocQueue
   deriving(Show,Eq,Ord)
 data FocLib = FocArtists | FocAlbums | FocSongs
   deriving(Show,Eq,Ord,Enum)
+data FocPlay = FocPlaylists | FocPSongs
+  deriving(Show,Eq,Ord,Enum)
 data Focus = Focus { focQueue :: FocQueue
-                     ,focLib :: FocLib}
+                     ,focLib :: FocLib
+                     ,focPlay :: FocPlay}
   deriving(Show,Eq,Ord)
 
-data View = QueueView | LibraryView
+data View = QueueView | LibraryView | PlaylistsView
  deriving (Show,Eq,Ord)
 
 type Highlight = Bool
