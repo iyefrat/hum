@@ -189,7 +189,7 @@ handleEventLibrary s e = case e of
       continue $ s & focusL . focLibL %~ libraryMoveLeft
     EvKey KEnter      [] -> libraryAdd True s
     EvKey (KChar ' ') [] -> libraryAdd False s
-    EvKey (KChar 'G') [] -> libraryMove (listMoveTo (length . queue $ s)) s
+    EvKey (KChar 'G') [] -> libraryMove (\ls -> listMoveBy (length ls) ls) s
     EvKey (KChar 'g') [] -> libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     _                    -> continue s
   _ -> continue s
