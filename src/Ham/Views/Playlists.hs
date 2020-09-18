@@ -87,8 +87,14 @@ playlistSongRow st song =
         $ column Nothing (Pad 1) Max
         $ txt (meta (MPD.toText . MPD.sgFilePath $ song) MPD.Title song)
 
+
+
+
+
+
 drawViewPlaylists :: HState -> Widget Name
-drawViewPlaylists st = drawPlaylistLeft st <+> drawPlaylistRight st
+drawViewPlaylists st =
+  (hLimitPercent 25 $ drawPlaylistLeft st) <+> drawPlaylistRight st
 
 playlistsMove
   :: (forall e . List Name e -> List Name e)

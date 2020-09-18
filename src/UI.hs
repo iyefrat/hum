@@ -34,7 +34,6 @@ drawUI st =
             LibraryView   -> drawViewLibrary st
             PlaylistsView -> drawViewPlaylists st
           )
-      <=> (str . show $ ((focLib . focus $ st) == FocSongs))
   ]
 
 buildInitialState :: BC.BChan HamEvent -> IO HState
