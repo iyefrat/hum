@@ -158,14 +158,15 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 -----
-TODO find out why doing G in lib doesn't render, why heroaca stuff renders poorly
+TODO update visuals
+TODO go over entire project and tidy up
+TODO search!
+TODO playlist editing
 TODO go over HState, nest? lenses?
 TODO Stop and lint everything
-TODO go over entire project and tidy up
 TODO Various Artists
 TODO hackage?
-TODO playlist editing
-TODO search!
 TODO more vim motions
 TODO random song order (and friends)
+TODO (oneday) album art stuff, look into hip and jucypixels on hackage
 -}

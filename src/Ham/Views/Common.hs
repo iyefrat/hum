@@ -53,6 +53,9 @@ drawProgressBar st = case width of
       (replicate completed '=' ++ replicate (width - completed) ' ')
     )
 
+--drawEx :: HState -> Widget Name
+--drawEx st =
+
 data PerCol = Per Int | Col Int
 column :: Maybe PerCol -> Padding -> Padding -> Widget n -> Widget n
 column maxWidth left right w = case maxWidth of

@@ -54,7 +54,7 @@ source-repository head
 
 common deps
   build-depends:
-       base    ^>=4.13.0.0
+       base    > 4.13 && < 5
      , relude ^>= 0.7.0.0
      , libmpd
      , brick
