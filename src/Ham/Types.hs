@@ -12,6 +12,7 @@ data HState =
   HState { chan :: !(BC.BChan HamEvent)
            ,view :: !View
            ,status :: !(Maybe MPD.Status)
+           ,mode :: !Mode
            ,currentSong :: !(Maybe MPD.Song)
            ,queue :: !SongList
            ,extentMap :: !(Map Name (Maybe (Extent Name)))
@@ -26,6 +27,7 @@ data HState =
            }
 --  deriving (Show) --, Eq)
 
+data Mode = NormalMode | ExMode | SearchMode | SongModeMode
 type SongList = List Name (Song, Highlight)
 
 type HamEvent = Either Tick (Response [Subsystem])
@@ -51,7 +53,6 @@ data View = QueueView | LibraryView | PlaylistsView
  deriving (Show,Eq,Ord)
 
 type Highlight = Bool
-
 
 data Tick = Tick
 

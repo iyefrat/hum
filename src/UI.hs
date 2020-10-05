@@ -38,6 +38,7 @@ drawUI st =
 
 buildInitialState :: BC.BChan HamEvent -> IO HState
 buildInitialState chan = do
+  let mode = NormalMode
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   queueVec <- V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
@@ -66,6 +67,7 @@ buildInitialState chan = do
   let playlistSongs = list PlaylistSongs playlistSongsVec 1
   pure HState { chan
               , view
+              , mode
               , status
               , currentSong
               , queue
@@ -108,6 +110,7 @@ handleEvent s e = case e of
         Right MPD.Stopped -> liftIO (withMPD $ MPD.play Nothing)
         Right MPD.Playing -> liftIO (withMPD $ MPD.pause True)
       continue s
+    EvKey (KChar 'm') [] -> error "show options for modes"
     EvKey (KChar '.') [] -> do
       _    <- liftIO (withMPD MPD.next)
       song <- liftIO (withMPD MPD.currentSong)
