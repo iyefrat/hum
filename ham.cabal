@@ -123,6 +123,8 @@ library
              , Ham.Views.Library
              , Ham.Views.Playlists
              , Ham.Utils
+             , Ham.Modes
+             , Ham.Modes.SongMode
   -- Modules included in this library but not exported.
   -- other-modules:
 

@@ -16,6 +16,7 @@ import qualified Data.Vector                   as V
 import           Data.Time                      ( getCurrentTime )
 import           Ham.Attributes
 import           Ham.Views
+import           Ham.Modes
 import           Ham.Utils
 import qualified Data.Map.Strict               as Map
 import           Lens.Micro                     ( (?~)
@@ -39,13 +40,16 @@ app = App { appDraw         = drawUI
 
 drawUI :: HState -> [Widget Name]
 drawUI st =
-  [ drawNowPlaying st
-      <=> (case view st of
-            QueueView     -> drawViewQueue st
-            LibraryView   -> drawViewLibrary st
-            PlaylistsView -> drawViewPlaylists st
-          )
-      <=> (hCenter . txt $ show (st ^. modeL))
+  [ case mode st of
+    SongModeMode -> drawSongModeHelp
+    _            -> emptyWidget
+  , drawNowPlaying st
+    <=> (case view st of
+          QueueView     -> drawViewQueue st
+          LibraryView   -> drawViewLibrary st
+          PlaylistsView -> drawViewPlaylists st
+        )
+    <=> (hCenter . txt $ show (st ^. modeL))
   ]
 
 buildInitialState :: BC.BChan HamEvent -> IO HState
@@ -133,6 +137,38 @@ handleEvent s e = case e of
         Right MPD.Playing -> liftIO (withMPD $ MPD.pause True)
       continue s
     EvKey (KChar 'm') [] -> continue $ toggleSongMode s
+    EvKey (KChar 's') [] -> do
+      _ <- liftIO
+        (withMPD $ MPD.single (maybe False (not . MPD.stSingle) (status s)))
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      continue s { status }
+    EvKey (KChar 'c') [] -> do
+      _ <- liftIO
+        (withMPD $ MPD.consume (maybe False (not . MPD.stConsume) (status s)))
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      continue s { status }
+    EvKey (KChar 'x') [] -> do
+      _ <- liftIO
+        (withMPD $ MPD.crossfade
+          ( (\case
+              0 -> 5
+              _ -> 0
+            )
+          $ maybe 0 MPD.stXFadeWidth (status s)
+          )
+        )
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      continue s { status }
+    EvKey (KChar 'r') [] -> do
+      _ <- liftIO
+        (withMPD $ MPD.repeat (maybe False (not . MPD.stRepeat) (status s)))
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      continue s { status }
+    EvKey (KChar 'R') [] -> do
+      _ <- liftIO
+        (withMPD $ MPD.random (maybe False (not . MPD.stRandom) (status s)))
+      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+      continue s { status }
     EvKey (KChar '.') [] -> do
       _    <- liftIO (withMPD MPD.next)
       song <- liftIO (withMPD MPD.currentSong)
