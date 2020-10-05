@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module UI where
 
 
@@ -6,6 +7,7 @@ import           Brick.Types
 import qualified Brick.BChan                   as BC
 import           Brick.Widgets.Core
 import           Brick.Widgets.List
+import           Brick.Widgets.Center
 import           Graphics.Vty.Input.Events
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
@@ -16,6 +18,15 @@ import           Ham.Attributes
 import           Ham.Views
 import           Ham.Utils
 import qualified Data.Map.Strict               as Map
+import           Lens.Micro                     ( (?~)
+                                                , (^.)
+                                                , (^?)
+                                                , (.~)
+                                                , (%~)
+                                                , _2
+                                                , _head
+                                                , set
+                                                )
 
 app :: App HState HamEvent Name
 
@@ -34,6 +45,7 @@ drawUI st =
             LibraryView   -> drawViewLibrary st
             PlaylistsView -> drawViewPlaylists st
           )
+      <=> (hCenter . txt $ show (st ^. modeL))
   ]
 
 buildInitialState :: BC.BChan HamEvent -> IO HState
@@ -91,6 +103,16 @@ hBoxPad _ []       = emptyWidget
 hBoxPad _ [w     ] = w
 hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
 
+toggleSongMode :: HState -> HState
+toggleSongMode s =
+  s
+    &  modeL
+    %~ (\case
+         NormalMode   -> SongModeMode
+         SongModeMode -> NormalMode
+         m            -> m
+       )
+
 seekCurEventM :: MPD.FractionalSeconds -> HState -> EventM Name (Next HState)
 seekCurEventM i s = do
   _      <- liftIO (withMPD $ MPD.seekCur False i)
@@ -110,7 +132,7 @@ handleEvent s e = case e of
         Right MPD.Stopped -> liftIO (withMPD $ MPD.play Nothing)
         Right MPD.Playing -> liftIO (withMPD $ MPD.pause True)
       continue s
-    EvKey (KChar 'm') [] -> error "show options for modes"
+    EvKey (KChar 'm') [] -> continue $ toggleSongMode s
     EvKey (KChar '.') [] -> do
       _    <- liftIO (withMPD MPD.next)
       song <- liftIO (withMPD MPD.currentSong)

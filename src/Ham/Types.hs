@@ -28,6 +28,7 @@ data HState =
 --  deriving (Show) --, Eq)
 
 data Mode = NormalMode | ExMode | SearchMode | SongModeMode
+  deriving (Show,Eq)
 type SongList = List Name (Song, Highlight)
 
 type HamEvent = Either Tick (Response [Subsystem])
