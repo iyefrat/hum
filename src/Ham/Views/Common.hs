@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 -- |
 
 module Ham.Views.Common where
@@ -12,6 +13,7 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import qualified Data.Vector                   as V
+import qualified Data.Text                     as T
 
 drawNowPlaying :: HState -> Widget Name
 drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
@@ -24,11 +26,32 @@ drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
       <=> hCenter title
       <=> hCenter (artist <+> txt " - " <+> album)
       <=> progbar
+      <=> (padRight Max playing <+> padLeft Max mode)
    where
     title   = withAttr queueTitleAttr $ txt $ meta "<no title>" MPD.Title song
     album   = withAttr queueAlbumAttr $ txt $ meta "<no album>" MPD.Album song
     artist  = withAttr queueArtistAttr $ txt $ meta "<no one>" MPD.Artist song
     progbar = withAttr queueTimeAttr $ drawProgressBar st
+    playing = txt $ maybe
+      "[       ]"
+      ((\t -> "[" <> t <> "]") . T.toLower . show . MPD.stState)
+      (status st)
+    formatMode t modeFun = maybe
+      "-"
+      ( (\case
+          False -> "-"
+          True  -> t
+        )
+      . modeFun
+      )
+      (status st)
+    repeatmpd = formatMode "r" MPD.stRepeat
+    random    = formatMode "z" MPD.stRandom
+    single    = formatMode "s" MPD.stSingle
+    consume   = formatMode "c" MPD.stConsume
+    crossfade = formatMode "x" ((/= 0) . MPD.stXFadeWidth)
+    mode =
+      txt $ "[" <> repeatmpd <> random <> single <> consume <> crossfade <> "]"
 
 drawProgressBar :: HState -> Widget Name
 drawProgressBar st = case width of

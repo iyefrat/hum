@@ -164,7 +164,7 @@ handleEvent s e = case e of
         (withMPD $ MPD.repeat (maybe False (not . MPD.stRepeat) (status s)))
       status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
       continue s { status }
-    EvKey (KChar 'R') [] -> do
+    EvKey (KChar 'z') [] -> do
       _ <- liftIO
         (withMPD $ MPD.random (maybe False (not . MPD.stRandom) (status s)))
       status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
