@@ -26,13 +26,14 @@ hamAttrMap = attrMap
   , (queueTitleAttr         , BU.fg Vty.cyan)
   , (queueArtistAttr        , BU.fg Vty.green)
   , (queueTimeAttr          , BU.fg Vty.blue)
+  , (queueDateAttr          , BU.fg Vty.yellow)
   , ( queueNowPlayingAttr
     , Vty.withStyle (Vty.withStyle defAttr Vty.bold) Vty.underline
     )
   , (queueTitleBoldAttr, Vty.withStyle defAttr Vty.bold)
   ]
 
-queueAttr, queueAlbumAttr, queueTitleAttr, queueTrackAttr, queueArtistAttr, queueTimeAttr
+queueAttr, queueAlbumAttr, queueTitleAttr, queueTrackAttr, queueArtistAttr, queueTimeAttr, queueDateAttr
   :: AttrName
 queueAttr = "queue"
 queueAlbumAttr = queueAttr <> "album"
@@ -40,6 +41,7 @@ queueTitleAttr = queueAttr <> "title"
 queueTrackAttr = queueAttr <> "track"
 queueArtistAttr = queueAttr <> "artist"
 queueTimeAttr = queueAttr <> "time"
+queueDateAttr = queueAttr <> "date"
 
 headerAttr :: AttrName
 headerAttr = "header"

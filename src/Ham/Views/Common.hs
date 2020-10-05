@@ -28,8 +28,12 @@ drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
       <=> progbar
       <=> (padRight Max playing <+> padLeft Max mode)
    where
-    title   = withAttr queueTitleAttr $ txt $ meta "<no title>" MPD.Title song
-    album   = withAttr queueAlbumAttr $ txt $ meta "<no album>" MPD.Album song
+    title = withAttr queueTitleAttr $ txt $ meta "<no title>" MPD.Title song
+    album =
+      (withAttr queueAlbumAttr $ txt $ (meta "<no album>" MPD.Album song))
+        <+> txt " ("
+        <+> (withAttr queueDateAttr $ txt $ (meta "????" MPD.Date song))
+        <+> txt ")"
     artist  = withAttr queueArtistAttr $ txt $ meta "<no one>" MPD.Artist song
     progbar = withAttr queueTimeAttr $ drawProgressBar st
     playing = txt $ maybe
