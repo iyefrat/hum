@@ -51,12 +51,12 @@ drawUI st =
           LibraryView   -> drawViewLibrary st
           PlaylistsView -> drawViewPlaylists st
         )
-    <=> renderEditor (txt . T.unlines) (st ^. focusL . focExL) (search st)
-    <=> (hCenter . txt $ show (st ^. focusL . focExL))
+    <=> renderEditor (txt . T.unlines) (st ^. focusL . focSearchL) (search st)
+    <=> (hCenter . txt $ show (st ^. focusL . focSearchL))
   ]
 
 chooseCursor :: HState -> [CursorLocation Name] -> Maybe (CursorLocation Name)
-chooseCursor st ls = if (st ^. focusL . focExL)
+chooseCursor st ls = if (st ^. focusL . focSearchL)
   then listToMaybe $ filter isCurrent ls
   else Nothing
   where isCurrent cl = cl ^. cursorLocationNameL == Just SearchEditor
@@ -80,10 +80,10 @@ buildInitialState chan = do
   let clipboard = list Clipboard V.empty 1
   songsVec <- songsOfAlbum (snd <$> listSelectedElement albums)
   let songs = list SongsList songsVec 1
-  let focus = Focus { focQueue = FocQueue
-                    , focLib   = FocArtists
-                    , focPlay  = FocPlaylists
-                    , focEx    = False
+  let focus = Focus { focQueue  = FocQueue
+                    , focLib    = FocArtists
+                    , focPlay   = FocPlaylists
+                    , focSearch = False
                     }
   playlistsVec <- V.fromList . fromRight [] <$> withMPD (MPD.listPlaylists)
   let playlists = list PlaylistList playlistsVec 1
@@ -184,7 +184,7 @@ handleEvent s e = case e of
         status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
         continue s { status }
       EvKey (KChar '/') [] ->
-        continue $ s & modeL .~ SearchMode & focusL . focExL .~ True
+        continue $ s & modeL .~ SearchMode & focusL . focSearchL .~ True
       EvKey (KChar '.') [] -> do
         _    <- liftIO (withMPD MPD.next)
         song <- liftIO (withMPD MPD.currentSong)
