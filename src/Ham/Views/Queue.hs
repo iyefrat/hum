@@ -8,6 +8,7 @@ import           Brick.Types
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.List
+import           Brick.Widgets.Edit
 import           Ham.Song
 import           Ham.Attributes
 import           Ham.Queue
@@ -17,6 +18,9 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import qualified Data.Vector                   as V
+import qualified Data.Text                     as T
+import qualified Data.Text.Zipper              as Z
+import           Lens.Micro                     ( (^.) )
 
 drawViewQueue :: HState -> Widget Name
 drawViewQueue st =
@@ -126,6 +130,23 @@ handleEventQueue s e = case e of
     EvKey (KChar 'k') [] -> do
       extentMap <- updateExtentMap
       continue s { queue = listMoveUp $ queue s, extentMap }
+    EvKey (KChar 'n') [] -> do
+      extentMap <- updateExtentMap
+      continue s
+        { queue     = listFindBy
+                          ( songSearch
+                              (  s
+                              ^. searchL
+                              .  editContentsL
+                              &  T.drop 1
+                              .  Z.currentLine
+                              )
+                              [MPD.Artist, MPD.Album, MPD.Title]
+                          . fst
+                          )
+                        $ queue s
+        , extentMap
+        }
     EvKey KEnter [] -> do
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)

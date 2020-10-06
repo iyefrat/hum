@@ -15,6 +15,7 @@ data HState =
            ,status :: !(Maybe MPD.Status)
            ,mode :: !Mode
            ,search :: !(Editor Text Name)
+           ,searchHistory :: !([Text])
            ,currentSong :: !(Maybe MPD.Song)
            ,queue :: !SongList
            ,extentMap :: !(Map Name (Maybe (Extent Name)))

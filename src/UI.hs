@@ -63,8 +63,9 @@ chooseCursor st ls = if st ^. focusL . focSearchL
 
 buildInitialState :: BC.BChan HamEvent -> IO HState
 buildInitialState chan = do
-  let mode   = NormalMode
+  let mode          = NormalMode
   let search = editorText SearchEditor (Just 1) "/"
+  let searchHistory = []
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   queueVec <- V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
@@ -96,6 +97,7 @@ buildInitialState chan = do
               , view
               , mode
               , search
+              , searchHistory
               , status
               , currentSong
               , queue
@@ -235,6 +237,7 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 -----
+TODO impliment search history
 TODO go over entire project and tidy up
 TODO search!
 TODO playlist editing

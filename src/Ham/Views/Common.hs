@@ -106,3 +106,8 @@ songBulkAdd play songs s = do
             (V.drop 1 songPaths)
   song <- liftIO (withMPD MPD.currentSong)
   continue s { currentSong = fromRight Nothing song, queue = queue s }
+-- HACK there must by a better way that QqQqQq
+songSearch :: Text -> [MPD.Metadata] -> MPD.Song -> Bool
+songSearch text metadata song =
+  let tags = T.toLower . (\tag -> meta "QqQqQqQqQq" tag song) <$> metadata
+  in  T.isInfixOf (T.toLower text) <$> tags & any id

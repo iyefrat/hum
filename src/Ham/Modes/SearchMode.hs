@@ -26,7 +26,15 @@ handleSearchEvent
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleSearchEvent s e = case e of
   VtyEvent (EvKey KEnter []) ->
-    continue $ s & modeL .~ NormalMode & focusL . focSearchL .~ False
+    continue
+      $  s
+      &  searchHistoryL
+      %~ ((s ^. searchL . editContentsL & Z.currentLine) :)
+      &  modeL
+      .~ NormalMode
+      &  focusL
+      .  focSearchL
+      .~ False
   VtyEvent vtye ->
     continue =<< handleEventLensed s searchL handleSearchEditorEvent vtye
   _ -> continue s
