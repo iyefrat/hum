@@ -28,7 +28,7 @@ handleSearchEvent s e = case e of
   VtyEvent (EvKey KEnter []) ->
     continue $ s & modeL .~ NormalMode & focusL . focSearchL .~ False
   VtyEvent vtye ->
-    continue =<< handleEventLensed s (searchL) handleSearchEditorEvent vtye
+    continue =<< handleEventLensed s searchL handleSearchEditorEvent vtye
   _ -> continue s
 
 handleSearchEditorEvent

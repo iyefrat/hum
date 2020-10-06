@@ -56,8 +56,8 @@ drawUI st =
   ]
 
 chooseCursor :: HState -> [CursorLocation Name] -> Maybe (CursorLocation Name)
-chooseCursor st ls = if (st ^. focusL . focSearchL)
-  then listToMaybe $ filter isCurrent ls
+chooseCursor st ls = if st ^. focusL . focSearchL
+  then find isCurrent ls
   else Nothing
   where isCurrent cl = cl ^. cursorLocationNameL == Just SearchEditor
 
@@ -85,11 +85,11 @@ buildInitialState chan = do
                     , focPlay   = FocPlaylists
                     , focSearch = False
                     }
-  playlistsVec <- V.fromList . fromRight [] <$> withMPD (MPD.listPlaylists)
+  playlistsVec <- V.fromList . fromRight [] <$> withMPD MPD.listPlaylists
   let playlists = list PlaylistList playlistsVec 1
   playlistSongsVec <- V.fromList . fromRight [] <$> withMPD
-    (MPD.listPlaylistInfo
-      (fromMaybe "<no playlists>" $ snd <$> listSelectedElement playlists)
+    ( MPD.listPlaylistInfo
+    $ maybe "<no playlists>" snd (listSelectedElement playlists)
     )
   let playlistSongs = list PlaylistSongs playlistSongsVec 1
   pure HState { chan
@@ -138,7 +138,7 @@ seekCurEventM i s = do
 
 handleEvent :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
-  VtyEvent vtye -> case (s ^. modeL) of
+  VtyEvent vtye -> case s ^. modeL of
     SearchMode -> handleSearchEvent s e
     NormalMode -> case vtye of
       EvKey (KChar 'q') [] -> halt s
@@ -235,7 +235,6 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 -----
-TODO update visuals
 TODO go over entire project and tidy up
 TODO search!
 TODO playlist editing

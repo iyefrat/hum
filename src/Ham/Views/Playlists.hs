@@ -94,7 +94,7 @@ playlistSongRow st song =
 
 drawViewPlaylists :: HState -> Widget Name
 drawViewPlaylists st =
-  (hLimitPercent 25 $ drawPlaylistLeft st) <+> drawPlaylistRight st
+  hLimitPercent 25 (drawPlaylistLeft st) <+> drawPlaylistRight st
 
 playlistsMove
   :: (forall e . List Name e -> List Name e)
@@ -108,10 +108,7 @@ playlistsMove moveFunc s =
           playlistSongsVec <- liftIO
             (V.fromList . fromRight [] <$> withMPD
               (MPD.listPlaylistInfo
-                (   fromMaybe "<no playlists>"
-                $   snd
-                <$> listSelectedElement playlists'
-                )
+                (maybe "<no playlists>" snd (listSelectedElement playlists'))
               )
             )
           let playlistSongs = list PlaylistSongs playlistSongsVec 1
