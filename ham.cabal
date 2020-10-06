@@ -69,6 +69,7 @@ common deps
 --     , microlens-th
      , time
      , template-haskell
+     , text-zipper
 
   mixins:
       base hiding (Prelude)
@@ -125,6 +126,7 @@ library
              , Ham.Utils
              , Ham.Modes
              , Ham.Modes.SongMode
+             , Ham.Modes.SearchMode
   -- Modules included in this library but not exported.
   -- other-modules:
 

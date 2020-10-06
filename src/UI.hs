@@ -8,11 +8,13 @@ import qualified Brick.BChan                   as BC
 import           Brick.Widgets.Core
 import           Brick.Widgets.List
 import           Brick.Widgets.Center
+import           Brick.Widgets.Edit
 import           Graphics.Vty.Input.Events
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Ham.Types
 import qualified Data.Vector                   as V
+import qualified Data.Text                     as T
 import           Data.Time                      ( getCurrentTime )
 import           Ham.Attributes
 import           Ham.Views
@@ -49,12 +51,14 @@ drawUI st =
           LibraryView   -> drawViewLibrary st
           PlaylistsView -> drawViewPlaylists st
         )
+    <=> renderEditor (txt . T.unlines) False (search st)
     <=> (hCenter . txt $ show (st ^. modeL))
   ]
 
 buildInitialState :: BC.BChan HamEvent -> IO HState
 buildInitialState chan = do
-  let mode = NormalMode
+  let mode   = NormalMode
+  let search = editorText SearchEditor (Just 1) "/"
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   queueVec <- V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
@@ -84,6 +88,7 @@ buildInitialState chan = do
   pure HState { chan
               , view
               , mode
+              , search
               , status
               , currentSong
               , queue
@@ -126,77 +131,80 @@ seekCurEventM i s = do
 
 handleEvent :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
-  VtyEvent vtye -> case vtye of
-    EvKey (KChar 'q') [] -> halt s
-    EvKey (KChar 't') [] -> do
-      st <- liftIO ((MPD.stState <$>) <$> withMPD MPD.status)
-      _  <- case st of
-        Left  _           -> liftIO (withMPD $ MPD.pause True)
-        Right MPD.Paused  -> liftIO (withMPD $ MPD.play Nothing)
-        Right MPD.Stopped -> liftIO (withMPD $ MPD.play Nothing)
-        Right MPD.Playing -> liftIO (withMPD $ MPD.pause True)
-      continue s
-    EvKey (KChar 'm') [] -> continue $ toggleSongMode s
-    EvKey (KChar 's') [] -> do
-      _ <- liftIO
-        (withMPD $ MPD.single (maybe False (not . MPD.stSingle) (status s)))
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      continue s { status }
-    EvKey (KChar 'c') [] -> do
-      _ <- liftIO
-        (withMPD $ MPD.consume (maybe False (not . MPD.stConsume) (status s)))
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      continue s { status }
-    EvKey (KChar 'x') [] -> do
-      _ <- liftIO
-        (withMPD $ MPD.crossfade
-          ( (\case
-              0 -> 5
-              _ -> 0
+  VtyEvent vtye -> case (s ^. modeL) of
+    SearchMode -> handleSearchEvent s e
+    NormalMode -> case vtye of
+      EvKey (KChar 'q') [] -> halt s
+      EvKey (KChar 't') [] -> do
+        st <- liftIO ((MPD.stState <$>) <$> withMPD MPD.status)
+        _  <- case st of
+          Left  _           -> liftIO (withMPD $ MPD.pause True)
+          Right MPD.Paused  -> liftIO (withMPD $ MPD.play Nothing)
+          Right MPD.Stopped -> liftIO (withMPD $ MPD.play Nothing)
+          Right MPD.Playing -> liftIO (withMPD $ MPD.pause True)
+        continue s
+      EvKey (KChar 'm') [] -> continue $ toggleSongMode s
+      EvKey (KChar 's') [] -> do
+        _ <- liftIO
+          (withMPD $ MPD.single (maybe False (not . MPD.stSingle) (status s)))
+        status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+        continue s { status }
+      EvKey (KChar 'c') [] -> do
+        _ <- liftIO
+          (withMPD $ MPD.consume (maybe False (not . MPD.stConsume) (status s)))
+        status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+        continue s { status }
+      EvKey (KChar 'x') [] -> do
+        _ <- liftIO
+          (withMPD $ MPD.crossfade
+            ( (\case
+                0 -> 5
+                _ -> 0
+              )
+            $ maybe 0 MPD.stXFadeWidth (status s)
             )
-          $ maybe 0 MPD.stXFadeWidth (status s)
           )
-        )
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      continue s { status }
-    EvKey (KChar 'r') [] -> do
-      _ <- liftIO
-        (withMPD $ MPD.repeat (maybe False (not . MPD.stRepeat) (status s)))
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      continue s { status }
-    EvKey (KChar 'z') [] -> do
-      _ <- liftIO
-        (withMPD $ MPD.random (maybe False (not . MPD.stRandom) (status s)))
-      status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-      continue s { status }
-    EvKey (KChar '.') [] -> do
-      _    <- liftIO (withMPD MPD.next)
-      song <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song }
-    EvKey (KChar ',') [] -> do
-      _    <- liftIO (withMPD MPD.previous)
-      song <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song }
-    EvKey (KChar ']') [] -> seekCurEventM 5 s
-    EvKey (KChar '[') [] -> seekCurEventM (-5) s
-    EvKey (KChar '}') [] -> seekCurEventM 30 s
-    EvKey (KChar '{') [] -> seekCurEventM (-30) s
-    EvKey (KChar '1') [] -> do
-      _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
-      continue s { view = QueueView }
-    EvKey (KChar '2') [] -> do
-      _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
-      continue s { view = LibraryView }
-    EvKey (KChar '3') [] -> do
-      _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
-      continue s { view = PlaylistsView }
-    EvResize _ _ -> do
-      extentMap <- updateExtentMap
-      continue s { extentMap }
-    _ -> case view s of
-      QueueView     -> handleEventQueue s e
-      LibraryView   -> handleEventLibrary s e
-      PlaylistsView -> handleEventPlaylists s e
+        status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+        continue s { status }
+      EvKey (KChar 'r') [] -> do
+        _ <- liftIO
+          (withMPD $ MPD.repeat (maybe False (not . MPD.stRepeat) (status s)))
+        status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+        continue s { status }
+      EvKey (KChar 'z') [] -> do
+        _ <- liftIO
+          (withMPD $ MPD.random (maybe False (not . MPD.stRandom) (status s)))
+        status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+        continue s { status }
+      EvKey (KChar '/') [] -> continue $ s & modeL .~ SearchMode
+      EvKey (KChar '.') [] -> do
+        _    <- liftIO (withMPD MPD.next)
+        song <- liftIO (withMPD MPD.currentSong)
+        continue s { currentSong = fromRight Nothing song }
+      EvKey (KChar ',') [] -> do
+        _    <- liftIO (withMPD MPD.previous)
+        song <- liftIO (withMPD MPD.currentSong)
+        continue s { currentSong = fromRight Nothing song }
+      EvKey (KChar ']') [] -> seekCurEventM 5 s
+      EvKey (KChar '[') [] -> seekCurEventM (-5) s
+      EvKey (KChar '}') [] -> seekCurEventM 30 s
+      EvKey (KChar '{') [] -> seekCurEventM (-30) s
+      EvKey (KChar '1') [] -> do
+        _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
+        continue s { view = QueueView }
+      EvKey (KChar '2') [] -> do
+        _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
+        continue s { view = LibraryView }
+      EvKey (KChar '3') [] -> do
+        _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
+        continue s { view = PlaylistsView }
+      EvResize _ _ -> do
+        extentMap <- updateExtentMap
+        continue s { extentMap }
+      _ -> case view s of
+        QueueView     -> handleEventQueue s e
+        LibraryView   -> handleEventLibrary s e
+        PlaylistsView -> handleEventPlaylists s e
   (AppEvent (Left Tick)) -> do
     extentMap <- updateExtentMap
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))

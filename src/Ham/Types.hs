@@ -4,6 +4,7 @@ module Ham.Types where
 import           Network.MPD                   as MPD
 import qualified Brick.BChan                   as BC
 import           Brick.Types
+import           Brick.Widgets.Edit
 import           Brick.Widgets.List
 import           Data.Time                      ( UTCTime )
 
@@ -13,6 +14,7 @@ data HState =
            ,view :: !View
            ,status :: !(Maybe MPD.Status)
            ,mode :: !Mode
+           ,search :: !(Editor Text Name)
            ,currentSong :: !(Maybe MPD.Song)
            ,queue :: !SongList
            ,extentMap :: !(Map Name (Maybe (Extent Name)))
@@ -37,6 +39,7 @@ data Name = NowPlaying | Clipboard
   | Queue | QueueList
   | Library | ArtistsList | LibraryLeft | AlbumsList | LibraryMid| SongsList | LibraryRight
   | PlaylistList | PlaylistLeft | PlaylistSongs | PlaylistRight
+  | SearchEditor
  deriving (Show, Eq, Ord)
 
 data FocQueue = FocQueue
