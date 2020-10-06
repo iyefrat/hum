@@ -34,7 +34,7 @@ import           Lens.Micro                     ( (?~)
 app :: App HState HamEvent Name
 
 app = App { appDraw         = drawUI
-          , appChooseCursor = showFirstCursor
+          , appChooseCursor = chooseCursor
           , appHandleEvent  = handleEvent
           , appStartEvent   = hamStartEvent
           , appAttrMap      = const hamAttrMap
@@ -51,9 +51,15 @@ drawUI st =
           LibraryView   -> drawViewLibrary st
           PlaylistsView -> drawViewPlaylists st
         )
-    <=> renderEditor (txt . T.unlines) False (search st)
-    <=> (hCenter . txt $ show (st ^. modeL))
+    <=> renderEditor (txt . T.unlines) (st ^. focusL . focExL) (search st)
+    <=> (hCenter . txt $ show (st ^. focusL . focExL))
   ]
+
+chooseCursor :: HState -> [CursorLocation Name] -> Maybe (CursorLocation Name)
+chooseCursor st ls = if (st ^. focusL . focExL)
+  then listToMaybe $ filter isCurrent ls
+  else Nothing
+  where isCurrent cl = cl ^. cursorLocationNameL == Just SearchEditor
 
 buildInitialState :: BC.BChan HamEvent -> IO HState
 buildInitialState chan = do
@@ -77,6 +83,7 @@ buildInitialState chan = do
   let focus = Focus { focQueue = FocQueue
                     , focLib   = FocArtists
                     , focPlay  = FocPlaylists
+                    , focEx    = False
                     }
   playlistsVec <- V.fromList . fromRight [] <$> withMPD (MPD.listPlaylists)
   let playlists = list PlaylistList playlistsVec 1
@@ -176,7 +183,8 @@ handleEvent s e = case e of
           (withMPD $ MPD.random (maybe False (not . MPD.stRandom) (status s)))
         status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
         continue s { status }
-      EvKey (KChar '/') [] -> continue $ s & modeL .~ SearchMode
+      EvKey (KChar '/') [] ->
+        continue $ s & modeL .~ SearchMode & focusL . focExL .~ True
       EvKey (KChar '.') [] -> do
         _    <- liftIO (withMPD MPD.next)
         song <- liftIO (withMPD MPD.currentSong)

@@ -50,7 +50,8 @@ data FocPlay = FocPlaylists | FocPSongs
   deriving(Show,Eq,Ord,Enum)
 data Focus = Focus { focQueue :: FocQueue
                      ,focLib :: FocLib
-                     ,focPlay :: FocPlay}
+                     ,focPlay :: FocPlay
+                     ,focEx :: Bool}
   deriving(Show,Eq,Ord)
 
 data View = QueueView | LibraryView | PlaylistsView
