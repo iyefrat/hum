@@ -1,2 +1,2 @@
 packages: ./*.cabal
-optional-packages:            ./libmpd,./vty
+optional-packages:            ./libmpd
