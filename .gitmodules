@@ -4,3 +4,6 @@
 [submodule "vty"]
 	path = vty
 	url = https://github.com/jtdaugherty/vty
+[submodule "brick"]
+	path = brick
+	url = https://github.com/jtdaugherty/brick

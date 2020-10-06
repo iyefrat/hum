@@ -22,7 +22,6 @@ import           Lens.Micro                     ( (?~)
                                                 , set
                                                 )
 
-
 handleSearchEvent
   :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
 handleSearchEvent s e = case e of

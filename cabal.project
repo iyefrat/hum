@@ -1,2 +1,2 @@
 packages: ./*.cabal
-optional-packages:            ./libmpd
+optional-packages:            ./libmpd, ./brick
