@@ -19,13 +19,13 @@ synopsis:            A TUI MPD client, inspired by ncmpcpp
 
 -- A longer description of the package.
 description:         A TUI MPD client, inspired by ncmpcpp.
-                     Built With the brick and using libmpd haskell packages
+                     Built using brick and libmpd.
 
 -- A URL where users can report bugs.
 -- bug-reports:
 
 -- The license under which the package is released.
-license:             GPL-2.0-only
+license:             GPL-2.0-or-later
 
 -- The file containing the license text.
 license-file:        LICENSE
