@@ -12,14 +12,14 @@ import           Brick.Widgets.Edit
 import           Graphics.Vty.Input.Events
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
-import           Ham.Types
+import           Hmm.Types
 import qualified Data.Vector                   as V
 import qualified Data.Text                     as T
 import           Data.Time                      ( getCurrentTime )
-import           Ham.Attributes
-import           Ham.Views
-import           Ham.Modes
-import           Ham.Utils
+import           Hmm.Attributes
+import           Hmm.Views
+import           Hmm.Modes
+import           Hmm.Utils
 import qualified Data.Map.Strict               as Map
 import           Lens.Micro                     ( (?~)
                                                 , (^.)
@@ -31,13 +31,13 @@ import           Lens.Micro                     ( (?~)
                                                 , set
                                                 )
 
-app :: App HState HamEvent Name
+app :: App HState HmmEvent Name
 
 app = App { appDraw         = drawUI
           , appChooseCursor = chooseCursor
           , appHandleEvent  = handleEvent
-          , appStartEvent   = hamStartEvent
-          , appAttrMap      = const hamAttrMap
+          , appStartEvent   = hmmStartEvent
+          , appAttrMap      = const hmmAttrMap
           }
 
 drawUI :: HState -> [Widget Name]
@@ -61,7 +61,7 @@ chooseCursor st ls = if st ^. focusL . focSearchL
   else Nothing
   where isCurrent cl = cl ^. cursorLocationNameL == Just SearchEditor
 
-buildInitialState :: BC.BChan HamEvent -> IO HState
+buildInitialState :: BC.BChan HmmEvent -> IO HState
 buildInitialState chan = do
   let mode          = NormalMode
   let search = editorText SearchEditor (Just 1) "/"
@@ -112,8 +112,8 @@ buildInitialState chan = do
               , playlistSongs
               }
 
-hamStartEvent :: HState -> EventM Name HState
-hamStartEvent s = do
+hmmStartEvent :: HState -> EventM Name HState
+hmmStartEvent s = do
   pure s
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
@@ -138,7 +138,7 @@ seekCurEventM i s = do
   song   <- liftIO (withMPD MPD.currentSong)
   continue s { currentSong = fromRight Nothing song, status }
 
-handleEvent :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
+handleEvent :: HState -> BrickEvent Name HmmEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case s ^. modeL of
     SearchMode -> handleSearchEvent s e

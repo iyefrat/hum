@@ -1,9 +1,9 @@
 {-#LANGUAGE RankNTypes#-}
 -- |
 
-module Ham.Views.Library where
+module Hmm.Views.Library where
 import           Prelude                 hiding ( Down )
-import           Ham.Types
+import           Hmm.Types
 import           Brick.Types
 import           Graphics.Vty.Input.Events
 import           Brick.Main
@@ -24,15 +24,15 @@ import           Lens.Micro                     ( (^.)
                                                 )
 
 import           Brick.Widgets.List
-import           Ham.Song
-import           Ham.Attributes
-import           Ham.Views.Common
+import           Hmm.Song
+import           Hmm.Attributes
+import           Hmm.Views.Common
 import qualified Data.Text                     as T
 import qualified Data.Vector                   as V
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
-import           Ham.Utils
+import           Hmm.Utils
 
 
 
@@ -178,7 +178,7 @@ libraryAdd play s =
           continue s { currentSong = fromRight Nothing song, queue = queue s }
 
 handleEventLibrary
-  :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
+  :: HState -> BrickEvent Name HmmEvent -> EventM Name (Next HState)
 handleEventLibrary s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> libraryMove listMoveDown s

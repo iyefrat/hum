@@ -1,6 +1,6 @@
 #+TITLE: CHANGELOG
 
-*  Revision history for ham
+*  Revision history for hmm
 
 ** 0.0.0.0 -- YYYY-mm-dd
 

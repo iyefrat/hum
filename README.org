@@ -1,4 +1,4 @@
 #+TITLE: README
 
-* Ham: a Haskell Music Player
+* Hmm: a Haskell Music Manager
 A TUI mpd client, currently in alpha.

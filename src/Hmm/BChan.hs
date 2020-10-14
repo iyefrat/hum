@@ -1,6 +1,6 @@
 -- |
-module Ham.BChan where
+module Hmm.BChan where
 --import           Network.MPD
---import           Ham.Types
+--import           Hmm.Types
 
 -- put stuff dealing with Types here later

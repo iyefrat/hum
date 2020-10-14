@@ -1,14 +1,14 @@
 {-# LANGUAGE LambdaCase #-}
 -- |
 
-module Ham.Views.Common where
-import           Ham.Types
+module Hmm.Views.Common where
+import           Hmm.Types
 import           Brick.Types
 import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
-import           Ham.Song
-import           Ham.Attributes
+import           Hmm.Song
+import           Hmm.Attributes
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map

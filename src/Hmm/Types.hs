@@ -1,6 +1,6 @@
 -- |
 
-module Ham.Types where
+module Hmm.Types where
 import           Network.MPD                   as MPD
 import qualified Brick.BChan                   as BC
 import           Brick.Types
@@ -10,7 +10,7 @@ import           Data.Time                      ( UTCTime )
 
 
 data HState =
-  HState { chan :: !(BC.BChan HamEvent)
+  HState { chan :: !(BC.BChan HmmEvent)
            ,view :: !View
            ,status :: !(Maybe MPD.Status)
            ,mode :: !Mode
@@ -34,7 +34,7 @@ data Mode = NormalMode | ExMode | SearchMode | SongModeMode
   deriving (Show,Eq)
 type SongList = List Name (Song, Highlight)
 
-type HamEvent = Either Tick (Response [Subsystem])
+type HmmEvent = Either Tick (Response [Subsystem])
 
 data Name = NowPlaying | Clipboard
   | Queue | QueueList

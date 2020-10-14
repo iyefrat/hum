@@ -1,7 +1,7 @@
 -- |
 
-module Ham.Views.Queue where
-import           Ham.Types
+module Hmm.Views.Queue where
+import           Hmm.Types
 import           Brick.Main
 import           Graphics.Vty.Input.Events
 import           Brick.Types
@@ -9,11 +9,11 @@ import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.List
 import           Brick.Widgets.Edit
-import           Ham.Song
-import           Ham.Attributes
-import           Ham.Queue
-import           Ham.Utils
-import           Ham.Views.Common
+import           Hmm.Song
+import           Hmm.Attributes
+import           Hmm.Queue
+import           Hmm.Utils
+import           Hmm.Views.Common
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
@@ -121,7 +121,7 @@ pasteDeleteCleanup s clip = do
     }
 
 handleEventQueue
-  :: HState -> BrickEvent Name HamEvent -> EventM Name (Next HState)
+  :: HState -> BrickEvent Name HmmEvent -> EventM Name (Next HState)
 handleEventQueue s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> do

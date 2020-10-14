@@ -1,14 +1,14 @@
 -- |
 
-module Ham.Views
-  ( module Ham.Views.Common
-  , module Ham.Views.Queue
-  , module Ham.Views.Library
-  , module Ham.Views.Playlists
+module Hmm.Views
+  ( module Hmm.Views.Common
+  , module Hmm.Views.Queue
+  , module Hmm.Views.Library
+  , module Hmm.Views.Playlists
   )
 where
 
-import           Ham.Views.Common
-import           Ham.Views.Queue
-import           Ham.Views.Library
-import           Ham.Views.Playlists
+import           Hmm.Views.Common
+import           Hmm.Views.Queue
+import           Hmm.Views.Library
+import           Hmm.Views.Playlists
