@@ -113,7 +113,6 @@ library
   exposed-modules:
                UI
              , Ham.Song
-             , Brick.Widgets.List
              , Ham.Types
              , Ham.Queue
              , Ham.BChan
