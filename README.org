@@ -2,3 +2,7 @@
 
 * Hmm: a Haskell Music Manager
 A TUI mpd client, currently in alpha.
+
+The documentation of this project is lacking at the moment (but will be added later!). If you want to check it out anyway, use =1= =2= and =3= to move between the queue, library and playlist screen respectively, and use vi keybindings to move around, and search/enter to add songs to the queue. =t= for play/pause, on the queue you can cut, copy, and paste with =d=, =y=, and =p=, and search with =/=, =n=, and =N=. Like I said, alpha.
+
+The overall goal of this project is to essentially recreate ncmpcpp in haskell, with vi keybindings by default, and other general improvements.
