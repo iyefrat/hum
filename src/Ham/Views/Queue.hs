@@ -147,6 +147,24 @@ handleEventQueue s e = case e of
                         $ queue s
         , extentMap
         }
+    EvKey (KChar 'N') [] -> do
+      extentMap <- updateExtentMap
+      continue s
+        { queue     = listReverse
+                      . listFindBy
+                          ( songSearch
+                              (  s
+                              ^. searchL
+                              .  editContentsL
+                              &  T.drop 1
+                              .  Z.currentLine
+                              )
+                              [MPD.Artist, MPD.Album, MPD.Title]
+                          . fst
+                          )
+                      $ listReverse (queue s)
+        , extentMap
+        }
     EvKey KEnter [] -> do
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)
