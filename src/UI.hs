@@ -52,7 +52,7 @@ drawUI st =
           PlaylistsView -> drawViewPlaylists st
         )
     <=> renderEditor (txt . T.unlines) (st ^. focusL . focSearchL) (search st)
-    <=> (hCenter . txt $ show (st ^. focusL . focSearchL))
+--    <=> (hCenter . txt $ show (st ^. focusL . focSearchL))
   ]
 
 chooseCursor :: HState -> [CursorLocation Name] -> Maybe (CursorLocation Name)
