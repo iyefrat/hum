@@ -110,4 +110,4 @@ songBulkAdd play songs s = do
 songSearch :: Text -> [MPD.Metadata] -> MPD.Song -> Bool
 songSearch text metadata song =
   let tags = T.toLower . (\tag -> meta "QqQqQqQqQq" tag song) <$> metadata
-  in  T.isInfixOf (T.toLower text) <$> tags & any id
+  in  or $ T.isInfixOf (T.toLower text) <$> tags
