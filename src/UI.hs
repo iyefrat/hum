@@ -141,7 +141,10 @@ seekCurEventM i s = do
 handleEvent :: HState -> BrickEvent Name HmmEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case s ^. modeL of
-    SearchMode -> handleSearchEvent s e
+    SearchMode   -> handleSearchEvent s e
+    SongModeMode -> case vtye of
+      EvKey (KChar 'm') [] -> continue $ toggleSongMode s
+      _                    -> continue s
     NormalMode -> case vtye of
       EvKey (KChar 'q') [] -> halt s
       EvKey (KChar 't') [] -> do
@@ -215,6 +218,7 @@ handleEvent s e = case e of
         QueueView     -> handleEventQueue s e
         LibraryView   -> handleEventLibrary s e
         PlaylistsView -> handleEventPlaylists s e
+    _ -> continue s
   (AppEvent (Left Tick)) -> do
     extentMap <- updateExtentMap
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
