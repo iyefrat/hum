@@ -36,33 +36,5 @@ handleSearchEvent s e = case e of
       .  focSearchL
       .~ False
   VtyEvent vtye ->
-    continue =<< handleEventLensed s searchL handleSearchEditorEvent vtye
+    continue =<< handleEventLensed s searchL handleEditorEvent vtye
   _ -> continue s
-
-handleSearchEditorEvent
-  :: (DecodeUtf8 t, Eq t, Monoid t)
-  => Event
-  -> Editor t n
-  -> EventM n (Editor t n)
-handleSearchEditorEvent e ed =
-  let f = case e of
-        EvPaste bs -> case E.decodeUtf8 bs of
-          Left  _ -> id
-          Right t -> Z.insertMany t
-        EvKey (KChar 'a') [MCtrl]      -> Z.gotoBOL
-        EvKey (KChar 'e') [MCtrl]      -> Z.gotoEOL
-        EvKey (KChar 'd') [MCtrl]      -> Z.deleteChar
-        EvKey (KChar 'k') [MCtrl]      -> Z.killToEOL
-        EvKey (KChar 'u') [MCtrl]      -> Z.killToBOL
-        EvKey KEnter      []           -> Z.breakLine
-        EvKey KDel        []           -> Z.deleteChar
-        EvKey (KChar c) [] | c /= '\t' -> Z.insertChar c
-        EvKey KUp    []                -> Z.moveUp
-        EvKey KDown  []                -> Z.moveDown
-        EvKey KLeft  []                -> Z.moveLeft
-        EvKey KRight []                -> Z.moveRight
-        EvKey KBS    []                -> Z.deletePrevChar
-        EvKey KHome  []                -> Z.gotoBOL
-        EvKey KEnd   []                -> Z.gotoEOL
-        _                              -> id
-  in  pure $ applyEdit f ed

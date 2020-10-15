@@ -236,7 +236,7 @@ handleEvent s e = case e of
     continue s { currentSong, status, queue = queueNew }
   _ -> continue s
 
---handleEvent s (VtyEvent e) = continue =<< handleListEventVi handleListEvent e s
+
 
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
