@@ -13,6 +13,12 @@ meta notFound tag song = maybe
   (T.intercalate ",")
   (MPD.toText <<$>> Map.lookup tag (MPD.sgTags song))
 
+-- | like meta, but returns a Maybe for future use
+mmeta :: MPD.Metadata -> MPD.Song -> Maybe Text
+mmeta tag song =
+  (T.intercalate ",") <$> (MPD.toText <<$>> Map.lookup tag (MPD.sgTags song))
+
+
 secondsToTime :: Integer -> Text
 secondsToTime sec =
   let (minutes, seconds) = divMod sec 60
