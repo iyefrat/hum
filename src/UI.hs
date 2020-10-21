@@ -241,15 +241,16 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 -----
+TODO restructure HState to contain the State of each view
+TODO have search work on current list
 TODO impliment search history
 TODO go over entire project and tidy up
-TODO search!
 TODO playlist editing
-TODO go over HState, nest? lenses?
 TODO Stop and lint everything
 TODO Various Artists
 TODO hackage?
 TODO more vim motions
-TODO random song order (and friends)
+TODO display random song order
+TODO tags
 TODO (oneday) album art stuff, look into hip and jucypixels on hackage
 -}
