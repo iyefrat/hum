@@ -6,7 +6,6 @@ import qualified Brick.BChan                   as BC
 import           Brick.Types
 import           Brick.Widgets.Edit
 import           Brick.Widgets.List
-import           Data.Time                      ( UTCTime )
 
 
 data HState =
@@ -20,7 +19,6 @@ data HState =
            ,queue :: !SongList
            ,extentMap :: !(Map Name (Maybe (Extent Name)))
            ,clipboard :: !SongList
-           ,currentTime :: !UTCTime
            ,artists :: !(List Name Value)
            ,albums :: !(List Name Value)
            ,songs :: !(List Name Song)

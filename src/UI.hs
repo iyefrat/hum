@@ -70,8 +70,7 @@ buildInitialState chan = do
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   queueVec <- V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue = (, False) <$> list QueueList queueVec 1
-  currentTime <- getCurrentTime
-  artistsVec  <- V.fromList . fromRight [] <$> withMPD
+  artistsVec <- V.fromList . fromRight [] <$> withMPD
     (MPD.list MPD.AlbumArtist Nothing)
   let artists = list ArtistsList artistsVec 1
   albumsVec <- albumsOfArtist (snd <$> listSelectedElement artists)
@@ -103,7 +102,6 @@ buildInitialState chan = do
               , queue
               , extentMap
               , clipboard
-              , currentTime
               , artists
               , songs
               , focus
@@ -221,9 +219,8 @@ handleEvent s e = case e of
     _ -> continue s
   (AppEvent (Left Tick)) -> do
     extentMap <- updateExtentMap
-    status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-    currentTime <- liftIO getCurrentTime
-    continue s { currentTime, status, extentMap }
+    status    <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+    continue s { status, extentMap }
   (AppEvent (Right (Right _))) -> do
     currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
