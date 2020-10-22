@@ -19,8 +19,8 @@ data HState =
            ,queue :: !SongList
            ,extentMap :: !(Map Name (Maybe (Extent Name)))
            ,clipboard :: !SongList
-           ,artists :: !(List Name Value)
-           ,albums :: !(List Name Value)
+           ,artists :: !(List Name MPD.Value)
+           ,albums :: !(List Name MPD.Value)
            ,songs :: !(List Name Song)
            ,focus :: !Focus
            ,playlists :: !(List Name PlaylistName)

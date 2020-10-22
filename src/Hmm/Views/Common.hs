@@ -14,6 +14,7 @@ import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import qualified Data.Vector                   as V
 import qualified Data.Text                     as T
+import qualified Data.Text.Encoding            as TE
 
 drawNowPlaying :: HState -> Widget Name
 drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
@@ -111,3 +112,7 @@ songSearch :: Text -> [MPD.Metadata] -> MPD.Song -> Bool
 songSearch text metadata song =
   let mtags = (T.toLower <$>) . (\tag -> mmeta tag song) <$> metadata
   in  or $ fromMaybe False <$> (T.isInfixOf (T.toLower text) <<$>> mtags)
+
+valueSearch :: Text -> MPD.Value -> Bool
+valueSearch text value =
+  T.isInfixOf (T.toLower text) (T.toLower . MPD.toText $ value)

@@ -10,19 +10,8 @@ import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.Border
-import           Lens.Micro                     ( (^.)
-                                                , (%~) {- (?~)
-                                                  (^.)
-                                                , (^?)
-                                                , (&)
-                                                , (.~)
-                                                , (%~)
-                                                , _2
-                                                , _head
-                                                , set
-                                                -}
-                                                )
-
+import           Brick.Widgets.Edit
+import           Lens.Micro
 import           Brick.Widgets.List
 import           Hmm.Song
 import           Hmm.Attributes
@@ -33,6 +22,7 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import           Hmm.Utils
+import qualified Data.Text.Zipper              as Z
 
 
 
@@ -177,6 +167,56 @@ libraryAdd play s =
           song <- liftIO (withMPD MPD.currentSong)
           continue s { currentSong = fromRight Nothing song, queue = queue s }
 
+librarySearch :: Bool -> HState -> EventM Name (Next HState)
+librarySearch direction s =
+  let
+    libfoc = s ^. focusL . focLibL
+    dir    = if direction then id else listReverse
+  in
+    case libfoc of
+      FocArtists -> do
+        extentMap <- updateExtentMap
+        continue s
+          { artists   =
+            dir
+            . listFindBy
+                (valueSearch
+                  (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
+                )
+            $ dir (artists s)
+          , extentMap
+          }
+      FocAlbums -> do
+        extentMap <- updateExtentMap
+        continue s
+          { albums    =
+            dir
+            . listFindBy
+                (valueSearch
+                  (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
+                )
+            $ dir (albums s)
+          , extentMap
+          }
+      FocSongs -> do
+        extentMap <- updateExtentMap
+        continue s
+          { songs     = dir
+                        . listFindBy
+                            (songSearch
+                              (  s
+                              ^. searchL
+                              .  editContentsL
+                              &  T.drop 1
+                              .  Z.currentLine
+                              )
+                              [MPD.Title]
+                            )
+                        $ dir (songs s)
+          , extentMap
+          }
+
+
 handleEventLibrary
   :: HState -> BrickEvent Name HmmEvent -> EventM Name (Next HState)
 handleEventLibrary s e = case e of
@@ -187,6 +227,8 @@ handleEventLibrary s e = case e of
       continue $ s & focusL . focLibL %~ libraryMoveRight
     EvKey (KChar 'h') [] -> do
       continue $ s & focusL . focLibL %~ libraryMoveLeft
+    EvKey (KChar 'n') [] -> librarySearch True s
+    EvKey (KChar 'N') [] -> librarySearch False s
     EvKey KEnter      [] -> libraryAdd True s
     EvKey (KChar ' ') [] -> libraryAdd False s
     EvKey (KChar 'G') [] -> libraryMove (\ls -> listMoveBy (length ls) ls) s
