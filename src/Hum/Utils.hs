@@ -1,7 +1,7 @@
 -- |
 
-module Hmm.Utils where
-import           Hmm.Types
+module Hum.Utils where
+import           Hum.Types
 import           Brick.Types
 import           Brick.Main
 import           Data.Vector                   as V

@@ -1,14 +1,14 @@
 -- |
 
-module Hmm.Views
-  ( module Hmm.Views.Common
-  , module Hmm.Views.Queue
-  , module Hmm.Views.Library
-  , module Hmm.Views.Playlists
+module Hum.Views
+  ( module Hum.Views.Common
+  , module Hum.Views.Queue
+  , module Hum.Views.Library
+  , module Hum.Views.Playlists
   )
 where
 
-import           Hmm.Views.Common
-import           Hmm.Views.Queue
-import           Hmm.Views.Library
-import           Hmm.Views.Playlists
+import           Hum.Views.Common
+import           Hum.Views.Queue
+import           Hum.Views.Library
+import           Hum.Views.Playlists

@@ -9,7 +9,7 @@ import           UI                             ( buildInitialState
 import           Control.Concurrent             ( threadDelay
                                                 , forkIO
                                                 )
-import           Hmm.Types
+import           Hum.Types
 import           Network.MPD                    ( withMPD
                                                 , idle
                                                 )
@@ -25,12 +25,12 @@ main = do
   _          <- customMain initialVty buildVty (Just chan) app initialState
   pass
 
-mpdListenForever :: BC.BChan HmmEvent -> IO ()
+mpdListenForever :: BC.BChan HumEvent -> IO ()
 mpdListenForever chan = forever $ do
   response <- withMPD $ idle []
   BC.writeBChan chan (Right response)
 
-tickTock :: BC.BChan HmmEvent -> IO ()
+tickTock :: BC.BChan HumEvent -> IO ()
 tickTock chan = forever $ do
   BC.writeBChan chan (Left Tick)
   threadDelay 1000000

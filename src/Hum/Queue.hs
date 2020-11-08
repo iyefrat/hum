@@ -1,9 +1,9 @@
 -- |
 
-module Hmm.Queue where
+module Hum.Queue where
 
 import           Brick.Widgets.List
-import           Hmm.Types
+import           Hum.Types
 import qualified Network.MPD                   as MPD
 import qualified Data.Vector                   as V
 

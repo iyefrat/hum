@@ -1,13 +1,13 @@
 -- |
 
-module Hmm.Modes.SearchMode where
+module Hum.Modes.SearchMode where
 
 import           Brick.Widgets.Edit      hiding ( decodeUtf8 )
 import qualified Brick.Widgets.Edit            as E
                                                 ( decodeUtf8 )
 import           Brick.Types
 import           Brick.Main
-import           Hmm.Types
+import           Hum.Types
 import           Graphics.Vty.Input.Events
 import qualified Data.Text.Zipper              as Z
                                          hiding ( textZipper )
@@ -23,7 +23,7 @@ import           Lens.Micro                     ( (?~)
                                                 )
 
 handleSearchEvent
-  :: HState -> BrickEvent Name HmmEvent -> EventM Name (Next HState)
+  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleSearchEvent s e = case e of
   VtyEvent (EvKey KEnter []) ->
     continue

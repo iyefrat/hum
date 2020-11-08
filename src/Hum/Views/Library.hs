@@ -1,9 +1,9 @@
 {-#LANGUAGE RankNTypes#-}
 -- |
 
-module Hmm.Views.Library where
+module Hum.Views.Library where
 import           Prelude                 hiding ( Down )
-import           Hmm.Types
+import           Hum.Types
 import           Brick.Types
 import           Graphics.Vty.Input.Events
 import           Brick.Main
@@ -13,15 +13,15 @@ import           Brick.Widgets.Border
 import           Brick.Widgets.Edit
 import           Lens.Micro
 import           Brick.Widgets.List
-import           Hmm.Song
-import           Hmm.Attributes
-import           Hmm.Views.Common
+import           Hum.Song
+import           Hum.Attributes
+import           Hum.Views.Common
 import qualified Data.Text                     as T
 import qualified Data.Vector                   as V
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
-import           Hmm.Utils
+import           Hum.Utils
 import qualified Data.Text.Zipper              as Z
 
 
@@ -218,7 +218,7 @@ librarySearch direction s =
 
 
 handleEventLibrary
-  :: HState -> BrickEvent Name HmmEvent -> EventM Name (Next HState)
+  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEventLibrary s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> libraryMove listMoveDown s

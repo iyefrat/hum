@@ -1,10 +1,10 @@
 -- |
 
-module Hmm.Modes
-  ( module Hmm.Modes.SongMode
-  , module Hmm.Modes.SearchMode
+module Hum.Modes
+  ( module Hum.Modes.SongMode
+  , module Hum.Modes.SearchMode
   )
 where
 
-import           Hmm.Modes.SongMode
-import           Hmm.Modes.SearchMode
+import           Hum.Modes.SongMode
+import           Hum.Modes.SearchMode

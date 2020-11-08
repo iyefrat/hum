@@ -1,6 +1,6 @@
 -- |
 
-module Hmm.Attributes where
+module Hum.Attributes where
 
 import           Brick.AttrMap
 import           Brick.Types
@@ -14,8 +14,8 @@ import           Graphics.Vty                   ( defAttr )
 import qualified Graphics.Vty                  as Vty
 
 
-hmmAttrMap :: AttrMap
-hmmAttrMap = attrMap
+humAttrMap :: AttrMap
+humAttrMap = attrMap
   defAttr
   [ (listSelectedAttr       , Vty.withStyle defAttr Vty.underline)
   , (listSelectedFocusedAttr, Vty.withStyle defAttr Vty.reverseVideo)

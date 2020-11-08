@@ -1,6 +1,6 @@
 -- |
 
-module Hmm.Modes.SongMode where
+module Hum.Modes.SongMode where
 import           Brick.Types
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
