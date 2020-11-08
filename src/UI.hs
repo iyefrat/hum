@@ -238,6 +238,8 @@ handleEvent s e = case e of
 {-
 TODO write generic Response handler to pring the MPDError instead of doing the thing.
 -----
+BUG library doesn't reload after searc
+BUG G doesn't work properly on playlists
 TODO restructure HState to contain the State of each view
 TODO have search work on current list
 TODO impliment search history
