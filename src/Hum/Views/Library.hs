@@ -40,7 +40,7 @@ drawLibraryLeft st =
         <=> hCenter
               (renderList (const $ libraryRow st LibraryLeft)
                           ((focLib . focus $ st) == FocArtists)
-                          (MPD.toText <$> artists st)
+                          (MPD.toText <$> st ^. libraryL . artistsL)
               )
         )
 drawLibraryMid :: HState -> Widget Name
@@ -57,7 +57,7 @@ drawLibraryMid st =
         <=> hCenter
               (renderList (const $ libraryRow st LibraryMid)
                           ((focLib . focus $ st) == FocAlbums)
-                          (MPD.toText <$> albums st)
+                          (MPD.toText <$> st ^. libraryL . albumsL)
               )
         )
 
@@ -76,7 +76,7 @@ drawLibraryRight st =
         <=> hCenter
               (renderList (const $ librarySongRow st)
                           ((focLib . focus $ st) == FocSongs)
-                          (songs st)
+                          (st ^. libraryL . songsL)
               )
         )
 
@@ -125,21 +125,24 @@ libraryMove moveFunc s =
   in
     case libfoc of
       FocArtists -> do
-        let artists' = moveFunc $ artists s
+        let artists' = moveFunc $ s ^. libraryL . artistsL
         albumsVec <- liftIO
           (albumsOfArtist (snd <$> listSelectedElement artists'))
-        let albums = list AlbumsList albumsVec 1
-        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums))
-        let songs = list SongsList songsVec 1
-        continue s { artists = artists', songs, albums }
-      FocAlbums -> do
-        let albums' = moveFunc $ albums s
+        let albums' = list AlbumsList albumsVec 1
         songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums'))
-        let songs = list SongsList songsVec 1
-        continue s { songs, albums = albums' }
+        let songs' = list SongsList songsVec 1
+        continue $ s & libraryL . artistsL .~ artists'
+                     & libraryL . albumsL .~ albums'
+                     & libraryL . songsL .~ songs'
+      FocAlbums -> do
+        let albums' = moveFunc $ s ^. libraryL . albumsL
+        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums'))
+        let songs' = list SongsList songsVec 1
+        continue $ s & libraryL . albumsL .~ albums'
+                     & libraryL . songsL .~ songs'
+        
       FocSongs -> do
-        let songs' = moveFunc $ songs s
-        continue s { songs = songs' }
+        continue $ s & libraryL . songsL %~ moveFunc
 
 libraryAdd :: Bool -> HState -> EventM Name (Next HState)
 libraryAdd play s =
@@ -147,15 +150,15 @@ libraryAdd play s =
   in  case libfoc of
         FocArtists -> do
           songs <- liftIO
-            (songsOfArtist (snd <$> listSelectedElement (artists s)))
+            (songsOfArtist (snd <$> listSelectedElement (s ^. libraryL . artistsL)))
           songBulkAdd play songs s
         FocAlbums -> do
           songs <- liftIO
-            (songsOfAlbum (snd <$> listSelectedElement (albums s)))
+            (songsOfAlbum (snd <$> listSelectedElement (s ^. libraryL . albumsL)))
           songBulkAdd play songs s
         FocSongs -> do
           let maybeFilePath =
-                MPD.sgFilePath . snd <$> listSelectedElement (songs s)
+                MPD.sgFilePath . snd <$> listSelectedElement (s^. libraryL . songsL)
           traverse_
             (\sel -> liftIO
               (withMPD $ MPD.addId sel Nothing >>= if play
@@ -176,32 +179,26 @@ librarySearch direction s =
     case libfoc of
       FocArtists -> do
         extentMap <- updateExtentMap
-        continue s
-          { artists   =
-            dir
+        continue $ (s {extentMap}) & libraryL . artistsL .~
+            (dir
             . listFindBy
                 (valueSearch
                   (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
                 )
-            $ dir (artists s)
-          , extentMap
-          }
+            $ dir (s ^. libraryL . artistsL))
       FocAlbums -> do
         extentMap <- updateExtentMap
-        continue s
-          { albums    =
-            dir
+        continue $ s {extentMap} & libraryL . albumsL .~
+            (dir
             . listFindBy
                 (valueSearch
                   (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
                 )
-            $ dir (albums s)
-          , extentMap
-          }
+            $ dir (s ^. libraryL . albumsL))
       FocSongs -> do
         extentMap <- updateExtentMap
-        continue s
-          { songs     = dir
+        continue $ s {extentMap} & libraryL . songsL .~
+                      (dir
                         . listFindBy
                             (songSearch
                               (  s
@@ -212,9 +209,7 @@ librarySearch direction s =
                               )
                               [MPD.Title]
                             )
-                        $ dir (songs s)
-          , extentMap
-          }
+                        $ dir (s^.libraryL . songsL))
 
 
 handleEventLibrary

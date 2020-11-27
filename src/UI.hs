@@ -92,6 +92,7 @@ buildInitialState chan = do
     $ maybe "<no playlists>" snd (listSelectedElement playlists)
     )
   let playlistSongs = list PlaylistSongs playlistSongsVec 1
+  let library = LibraryState {artists, albums, songs}
   pure HState { chan
               , view
               , mode
@@ -102,10 +103,8 @@ buildInitialState chan = do
               , queue
               , extentMap
               , clipboard
-              , artists
-              , songs
+              , library
               , focus
-              , albums
               , playlists
               , playlistSongs
               }
