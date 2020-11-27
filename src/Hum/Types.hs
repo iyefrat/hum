@@ -34,11 +34,13 @@ data PlaylistsState = PlaylistsState
     , plSongs :: !(List Name Song)
     }
 data ExSubMode = Cmd | FSearch | BSearch
+    deriving (Show, Eq, Ord)
 data ExState = ExState
-    { exPrefix      :: !ExSubMode
-    , exEditor      :: !(Editor Text Name)
-    , searchHistory :: ![Text]
-    , cmdHistory    :: ![Text]
+    { exPrefix        :: !ExSubMode
+    , exEditor        :: !(Editor Text Name)
+    , searchDirection :: !Bool
+    , searchHistory   :: ![Text]
+    , cmdHistory      :: ![Text]
     }
 data Mode = NormalMode | ExMode | SongModeMode
   deriving (Show,Eq)

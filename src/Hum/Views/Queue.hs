@@ -152,8 +152,8 @@ handleEventQueue s e = case e of
     EvKey (KChar 'k') [] -> do
       extentMap <- updateExtentMap
       continue s { queue = listMoveUp $ queue s, extentMap }
-    EvKey (KChar 'n') [] -> queueSearch True s
-    EvKey (KChar 'N') [] -> queueSearch False s
+    EvKey (KChar 'n') [] -> queueSearch (s ^. exL . searchDirectionL) s
+    EvKey (KChar 'N') [] -> queueSearch (s ^. exL . searchDirectionL & not) s
     EvKey KEnter      [] -> do
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)

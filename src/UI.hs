@@ -68,10 +68,11 @@ chooseCursor st ls = if st ^. focusL . focExL
 buildInitialState :: BC.BChan HumEvent -> IO HState
 buildInitialState chan = do
   let mode = NormalMode
-  let ex = ExState { exPrefix      = Cmd
-                   , exEditor      = editorText ExEditor (Just 1) ""
-                   , searchHistory = []
-                   , cmdHistory    = []
+  let ex = ExState { exPrefix        = Cmd
+                   , exEditor        = editorText ExEditor (Just 1) ""
+                   , searchDirection = True
+                   , searchHistory   = []
+                   , cmdHistory      = []
                    }
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
@@ -196,10 +197,12 @@ handleEvent s e = case e of
       EvKey (KChar '/') [] ->
         continue $ s &  modeL .~ ExMode
                      &  exL . exPrefixL .~ FSearch
+                     &  exL . searchDirectionL .~ True
                      &  focusL .  focExL .~ True
       EvKey (KChar '?') [] ->
         continue $ s &  modeL .~ ExMode
                      &  exL . exPrefixL .~ BSearch
+                     &  exL . searchDirectionL .~ False
                      &  focusL .  focExL .~ True
       EvKey (KChar ':') [] ->
         continue $ s &  modeL .~ ExMode

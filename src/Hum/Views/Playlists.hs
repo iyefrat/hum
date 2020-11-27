@@ -164,8 +164,8 @@ handleEventPlaylists s e = case e of
       continue $ s & focusL . focPlayL .~ FocPSongs
     EvKey (KChar 'h') [] -> do
       continue $ s & focusL . focPlayL .~ FocPlaylists
-    EvKey (KChar 'n') [] -> playlistsSearch True s
-    EvKey (KChar 'N') [] -> playlistsSearch False s
+    EvKey (KChar 'n') [] -> playlistsSearch (s ^. exL . searchDirectionL) s
+    EvKey (KChar 'N') [] -> playlistsSearch (s ^. exL . searchDirectionL & not) s
     EvKey KEnter      [] -> playlistsAdd True s
     EvKey (KChar ' ') [] -> playlistsAdd False s
     EvKey (KChar 'G') [] -> playlistsMove (listMoveTo (length . queue $ s)) s

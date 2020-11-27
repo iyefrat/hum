@@ -204,8 +204,8 @@ handleEventLibrary s e = case e of
       continue $ s & focusL . focLibL %~ libraryMoveRight
     EvKey (KChar 'h') [] -> do
       continue $ s & focusL . focLibL %~ libraryMoveLeft
-    EvKey (KChar 'n') [] -> librarySearch True s
-    EvKey (KChar 'N') [] -> librarySearch False s
+    EvKey (KChar 'n') [] -> librarySearch (s ^. exL . searchDirectionL) s
+    EvKey (KChar 'N') [] -> librarySearch (s ^. exL . searchDirectionL & not) s
     EvKey KEnter      [] -> libraryAdd True s
     EvKey (KChar ' ') [] -> libraryAdd False s
     EvKey (KChar 'G') [] -> libraryMove (\ls -> listMoveBy (length ls) ls) s

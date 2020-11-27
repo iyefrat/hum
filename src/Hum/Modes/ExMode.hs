@@ -27,15 +27,17 @@ import           Lens.Micro                     ( (?~)
 exEnd :: HState -> EventM Name (Next HState)
 exEnd s =
     let searched = (s ^. exL . exEditorL . editContentsL & Z.currentLine)
-        s'= s & exL . searchHistoryL %~ (searched :)
-              & exL . exEditorL .~ editorText ExEditor (Just 1) ""
+        s'= s & exL . exEditorL .~ editorText ExEditor (Just 1) ""
               & modeL .~ NormalMode
               & focusL . focExL .~ False
-    in  case view s' of
-                QueueView     -> queueSearch True s'
-                LibraryView   -> librarySearch True s'
-                PlaylistsView -> playlistsSearch True s'
-
+    in
+          case s ^. exL . exPrefixL of
+            Cmd -> continue (s' & exL . cmdHistoryL %~ (searched :) )
+            srch -> case view s' of
+                QueueView     -> queueSearch (srch == FSearch) s''
+                LibraryView   -> librarySearch (srch == FSearch) s''
+                PlaylistsView -> playlistsSearch (srch == FSearch) s''
+                where s''= s' & exL . searchHistoryL %~ (searched :)
 handleExEvent
     :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleExEvent s e = case e of
