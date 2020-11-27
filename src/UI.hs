@@ -186,7 +186,9 @@ handleEvent s e = case e of
         status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
         continue s { status }
       EvKey (KChar '/') [] ->
-        continue $ s & modeL .~ SearchMode & focusL . focSearchL .~ True
+        continue $ s & modeL .~ SearchMode
+                     & focusL . focSearchL .~ True
+                     & searchL .~ editorText SearchEditor (Just 1) "/"
       EvKey (KChar '.') [] -> do
         _    <- liftIO (withMPD MPD.next)
         song <- liftIO (withMPD MPD.currentSong)
