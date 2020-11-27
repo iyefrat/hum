@@ -18,11 +18,10 @@ data HState =
            ,currentSong :: !(Maybe MPD.Song)
            ,queue :: !SongList
            ,library :: !LibraryState
+           ,playlists :: !PlaylistsState
            ,extentMap :: !(Map Name (Maybe (Extent Name)))
            ,clipboard :: !SongList
            ,focus :: !Focus
-           ,playlists :: !(List Name PlaylistName)
-           ,playlistSongs :: !(List Name Song)
            }
 --  deriving (Show) --, Eq)
 
@@ -30,6 +29,9 @@ data LibraryState =
   LibraryState { artists :: !(List Name MPD.Value)
                  ,albums :: !(List Name MPD.Value)
                  ,songs :: !(List Name Song)}
+data PlaylistsState =
+  PlaylistsState { plList :: !(List Name PlaylistName)
+                   ,plSongs :: !(List Name Song)}
 
 data Mode = NormalMode | ExMode | SearchMode | SongModeMode
   deriving (Show,Eq)
@@ -66,3 +68,4 @@ data Tick = Tick
 suffixLenses ''HState
 suffixLenses ''Focus
 suffixLenses ''LibraryState
+suffixLenses ''PlaylistsState

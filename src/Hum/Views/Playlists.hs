@@ -50,7 +50,7 @@ drawPlaylistLeft st =
         <=> hCenter
               (renderList (const $ playlistRow st)
                           ((focPlay . focus $ st) == FocPlaylists)
-                          (MPD.toText <$> playlists st)
+                          (MPD.toText <$> st ^. playlistsL . plListL)
               )
         )
 drawPlaylistRight :: HState -> Widget Name
@@ -67,7 +67,7 @@ drawPlaylistRight st =
         <=> hCenter
               (renderList (const $ playlistSongRow st)
                           ((focPlay . focus $ st) == FocPSongs)
-                          (playlistSongs st)
+                          (st ^. playlistsL . plSongsL)
               )
         )
 
@@ -104,28 +104,28 @@ playlistsMove moveFunc s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
         FocPlaylists -> do
-          let playlists' = moveFunc $ playlists s
-          playlistSongsVec <- liftIO
+          let plList' = moveFunc $ s ^. playlistsL . plListL
+          plSongsVec <- liftIO
             (V.fromList . fromRight [] <$> withMPD
               (MPD.listPlaylistInfo
-                (maybe "<no playlists>" snd (listSelectedElement playlists'))
+                (maybe "<no playlists>" snd (listSelectedElement plList'))
               )
             )
-          let playlistSongs = list PlaylistSongs playlistSongsVec 1
-          continue s { playlists = playlists', playlistSongs }
+          let plSongs' = list PlaylistSongs plSongsVec 1
+          continue $ s & playlistsL . plListL .~ plList'
+                       & playlistsL . plSongsL .~ plSongs'
         FocPSongs -> do
-          let playlistSongs' = moveFunc $ playlistSongs s
-          continue s { playlistSongs = playlistSongs' }
+          continue $ s & playlistsL . plSongsL %~ moveFunc
 
 playlistsAdd :: Bool -> HState -> EventM Name (Next HState)
 playlistsAdd play s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
         FocPlaylists -> do
-          songBulkAdd play (listElements (playlistSongs s)) s
+          songBulkAdd play (listElements (s ^. playlistsL . plSongsL)) s
         FocPSongs -> do
           let maybeFilePath =
-                MPD.sgFilePath . snd <$> listSelectedElement (playlistSongs s)
+                MPD.sgFilePath . snd <$> listSelectedElement (s ^. playlistsL . plSongsL)
           traverse_
             (\sel -> liftIO
               (withMPD $ MPD.addId sel Nothing >>= if play

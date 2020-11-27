@@ -85,14 +85,15 @@ buildInitialState chan = do
                     , focPlay   = FocPlaylists
                     , focSearch = False
                     }
-  playlistsVec <- V.fromList . fromRight [] <$> withMPD MPD.listPlaylists
-  let playlists = list PlaylistList playlistsVec 1
-  playlistSongsVec <- V.fromList . fromRight [] <$> withMPD
+  plListVec <- V.fromList . fromRight [] <$> withMPD MPD.listPlaylists
+  let plList = list PlaylistList plListVec 1
+  plSongsVec <- V.fromList . fromRight [] <$> withMPD
     ( MPD.listPlaylistInfo
-    $ maybe "<no playlists>" snd (listSelectedElement playlists)
+    $ maybe "<no playlists>" snd (listSelectedElement plList)
     )
-  let playlistSongs = list PlaylistSongs playlistSongsVec 1
+  let plSongs = list PlaylistSongs plSongsVec 1
   let library = LibraryState {artists, albums, songs}
+  let playlists = PlaylistsState {plList,plSongs}
   pure HState { chan
               , view
               , mode
@@ -104,9 +105,8 @@ buildInitialState chan = do
               , extentMap
               , clipboard
               , library
-              , focus
               , playlists
-              , playlistSongs
+              , focus
               }
 
 humStartEvent :: HState -> EventM Name HState
