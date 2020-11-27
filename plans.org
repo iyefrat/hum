@@ -3,7 +3,6 @@
 
 * Near future
 ** TODO impliment search history
-** BUG G doesn't work properly on playlists
 ** TODO playlist editing
 ** TODO Various Artists
 ** TODO hackage?

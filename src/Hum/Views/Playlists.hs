@@ -168,7 +168,7 @@ handleEventPlaylists s e = case e of
     EvKey (KChar 'N') [] -> playlistsSearch (s ^. exL . searchDirectionL & not) s
     EvKey KEnter      [] -> playlistsAdd True s
     EvKey (KChar ' ') [] -> playlistsAdd False s
-    EvKey (KChar 'G') [] -> playlistsMove (listMoveTo (length . queue $ s)) s
+    EvKey (KChar 'G') [] -> playlistsMove (\ls -> listMoveBy (length ls) ls) s
     EvKey (KChar 'g') [] -> playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     _                    -> continue s
   _ -> continue s
