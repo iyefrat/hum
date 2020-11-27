@@ -26,10 +26,11 @@ import           Lens.Micro                     ( (?~)
 
 searchEnd :: HState -> EventM Name (Next HState)
 searchEnd s =
-    let searched = (s ^. searchL . editContentsL & Z.currentLine)
-        s'= s & searchHistoryL %~ (searched :)
+    let searched = (s ^. exL . exEditorL . editContentsL & Z.currentLine)
+        s'= s & exL . searchHistoryL %~ (searched :)
+              & exL . exEditorL .~ editorText ExEditor (Just 1) ""
               & modeL .~ NormalMode
-              & focusL . focSearchL .~ False
+              & focusL . focExL .~ False
     in  case view s' of
                 QueueView     -> queueSearch True s'
                 LibraryView   -> librarySearch True s'
@@ -40,5 +41,5 @@ handleSearchEvent
 handleSearchEvent s e = case e of
     VtyEvent (EvKey KEnter []) -> searchEnd s
     VtyEvent vtye ->
-        continue =<< handleEventLensed s searchL handleEditorEvent vtye
+        continue =<< handleEventLensed s (exL . exEditorL) handleEditorEvent vtye
     _ -> continue s

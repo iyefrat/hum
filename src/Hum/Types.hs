@@ -8,32 +8,39 @@ import           Brick.Widgets.Edit
 import           Brick.Widgets.List
 
 
-data HState =
-  HState { chan :: !(BC.BChan HumEvent)
-           ,view :: !View
-           ,status :: !(Maybe MPD.Status)
-           ,mode :: !Mode
-           ,search :: !(Editor Text Name)
-           ,searchHistory :: ![Text]
-           ,currentSong :: !(Maybe MPD.Song)
-           ,queue :: !SongList
-           ,library :: !LibraryState
-           ,playlists :: !PlaylistsState
-           ,extentMap :: !(Map Name (Maybe (Extent Name)))
-           ,clipboard :: !SongList
-           ,focus :: !Focus
-           }
+data HState = HState
+    { chan        :: !(BC.BChan HumEvent)
+    , view        :: !View
+    , status      :: !(Maybe MPD.Status)
+    , mode        :: !Mode
+    , ex          :: !ExState
+    , currentSong :: !(Maybe MPD.Song)
+    , queue       :: !SongList
+    , library     :: !LibraryState
+    , playlists   :: !PlaylistsState
+    , extentMap   :: !(Map Name (Maybe (Extent Name)))
+    , clipboard   :: !SongList
+    , focus       :: !Focus
+    }
 --  deriving (Show) --, Eq)
 
-data LibraryState =
-  LibraryState { artists :: !(List Name MPD.Value)
-                 ,albums :: !(List Name MPD.Value)
-                 ,songs :: !(List Name Song)}
-data PlaylistsState =
-  PlaylistsState { plList :: !(List Name PlaylistName)
-                   ,plSongs :: !(List Name Song)}
-
-data Mode = NormalMode | ExMode | SearchMode | SongModeMode
+data LibraryState = LibraryState
+    { artists :: !(List Name MPD.Value)
+    , albums  :: !(List Name MPD.Value)
+    , songs   :: !(List Name Song)
+    }
+data PlaylistsState = PlaylistsState
+    { plList  :: !(List Name PlaylistName)
+    , plSongs :: !(List Name Song)
+    }
+data ExSubMode = Cmd | ForwardSearch | BackwardSearch
+data ExState = ExState
+    { exPrefix      :: !ExSubMode
+    , exEditor      :: !(Editor Text Name)
+    , searchHistory :: ![Text]
+    , cmdHistory    :: ![Text]
+    }
+data Mode = NormalMode | ExMode | SongModeMode
   deriving (Show,Eq)
 type SongList = List Name (Song, Highlight)
 
@@ -43,20 +50,22 @@ data Name = NowPlaying | Clipboard
   | Queue | QueueList
   | Library | ArtistsList | LibraryLeft | AlbumsList | LibraryMid| SongsList | LibraryRight
   | PlaylistList | PlaylistLeft | PlaylistSongs | PlaylistRight
-  | SearchEditor
+  | ExEditor
  deriving (Show, Eq, Ord)
 
 data FocQueue = FocQueue
-  deriving(Show,Eq,Ord)
+    deriving (Show, Eq, Ord)
 data FocLib = FocArtists | FocAlbums | FocSongs
   deriving(Show,Eq,Ord,Enum)
 data FocPlay = FocPlaylists | FocPSongs
   deriving(Show,Eq,Ord,Enum)
-data Focus = Focus { focQueue :: FocQueue
-                     ,focLib :: FocLib
-                     ,focPlay :: FocPlay
-                     ,focSearch :: Bool}
-  deriving(Show,Eq,Ord)
+data Focus = Focus
+    { focQueue  :: FocQueue
+    , focLib    :: FocLib
+    , focPlay   :: FocPlay
+    , focEx :: Bool
+    }
+    deriving (Show, Eq, Ord)
 
 data View = QueueView | LibraryView | PlaylistsView
  deriving (Show,Eq,Ord)
@@ -69,3 +78,4 @@ suffixLenses ''HState
 suffixLenses ''Focus
 suffixLenses ''LibraryState
 suffixLenses ''PlaylistsState
+suffixLenses ''ExState

@@ -134,7 +134,7 @@ playlistsSearch :: Bool -> HState -> EventM Name (Next HState)
 playlistsSearch direction s =
   let playfoc   = s ^. focusL . focPlayL
       dir       = if direction then id else listReverse
-      searchkey = fromMaybe "" ((s ^. searchHistoryL) !!? 0)
+      searchkey = fromMaybe "" ((s ^. exL . searchHistoryL) !!? 0)
   in  if searchkey == ""
         then continue s
         else case playfoc of

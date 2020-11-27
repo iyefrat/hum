@@ -51,25 +51,27 @@ drawUI st =
           LibraryView   -> drawViewLibrary st
           PlaylistsView -> drawViewPlaylists st
         )
-    <=> if st ^. focusL . focSearchL
+    <=> if st ^. focusL . focExL
           then txt "/" <+> renderEditor (txt . T.unlines)
-                                        (st ^. focusL . focSearchL)
-                                        (search st)
+                                        (st ^. focusL . focExL)
+                                        (st ^. exL . exEditorL)
           else txt " "
---    <=> (hCenter . txt $ show (st ^. focusL . focSearchL))
   ]
 
 chooseCursor :: HState -> [CursorLocation Name] -> Maybe (CursorLocation Name)
-chooseCursor st ls = if st ^. focusL . focSearchL
+chooseCursor st ls = if st ^. focusL . focExL
   then find isCurrent ls
   else Nothing
-  where isCurrent cl = cl ^. cursorLocationNameL == Just SearchEditor
+  where isCurrent cl = cl ^. cursorLocationNameL == Just ExEditor
 
 buildInitialState :: BC.BChan HumEvent -> IO HState
 buildInitialState chan = do
-  let mode          = NormalMode
-  let search = editorText SearchEditor (Just 1) ""
-  let searchHistory = []
+  let mode = NormalMode
+  let ex = ExState { exPrefix      = Cmd
+              , exEditor      = editorText ExEditor (Just 1) ""
+              , searchHistory = []
+              , cmdHistory    = []
+              }
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   queueVec <- V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
@@ -87,7 +89,7 @@ buildInitialState chan = do
   let focus = Focus { focQueue  = FocQueue
                     , focLib    = FocArtists
                     , focPlay   = FocPlaylists
-                    , focSearch = False
+                    , focEx = False
                     }
   plListVec <- V.fromList . fromRight [] <$> withMPD MPD.listPlaylists
   let plList = list PlaylistList plListVec 1
@@ -101,8 +103,7 @@ buildInitialState chan = do
   pure HState { chan
               , view
               , mode
-              , search
-              , searchHistory
+              , ex
               , status
               , currentSong
               , queue
@@ -141,7 +142,7 @@ seekCurEventM i s = do
 handleEvent :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case s ^. modeL of
-    SearchMode   -> handleSearchEvent s e
+    ExMode   -> handleSearchEvent s e
     SongModeMode -> case vtye of
       EvKey (KChar 'm') [] -> continue $ toggleSongMode s
       _                    -> continue s
@@ -192,13 +193,11 @@ handleEvent s e = case e of
         status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
         continue s { status }
       EvKey (KChar '/') [] ->
-        continue $ s &  modeL .~ SearchMode
-                     &  focusL .  focSearchL .~ True
-                     &  searchL .~ editorText SearchEditor (Just 1) ""
+        continue $ s &  modeL .~ ExMode
+                     &  focusL .  focExL .~ True
       EvKey (KChar '?') [] ->
-        continue $ s &  modeL .~ SearchMode
-                     &  focusL .  focSearchL .~ True
-                     &  searchL .~ editorText SearchEditor (Just 1) ""
+        continue $ s &  modeL .~ ExMode
+                     &  focusL .  focExL .~ True
       EvKey (KChar '.') [] -> do
         _    <- liftIO (withMPD MPD.next)
         song <- liftIO (withMPD MPD.currentSong)

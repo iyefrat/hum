@@ -167,7 +167,7 @@ librarySearch :: Bool -> HState -> EventM Name (Next HState)
 librarySearch direction s =
   let libfoc    = s ^. focusL . focLibL
       dir       = if direction then id else listReverse
-      searchkey = fromMaybe "" ((s ^. searchHistoryL) !!? 0)
+      searchkey = fromMaybe "" ((s ^. exL . searchHistoryL) !!? 0)
   in  if searchkey == ""
         then continue s
         else case libfoc of
