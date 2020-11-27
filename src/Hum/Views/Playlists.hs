@@ -27,6 +27,7 @@ import           Brick.Widgets.List
 import           Hum.Song
 import           Hum.Attributes
 import           Hum.Views.Common
+import           Hum.Rebuild
 import qualified Data.Text                     as T
 import qualified Data.Vector                   as V
 import           Network.MPD                    ( withMPD )
@@ -78,7 +79,7 @@ playlistRow _ val =
 playlistSongRow :: HState -> MPD.Song -> Widget n
 playlistSongRow st song =
   let pathsInQueue =
-          (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
+        (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
   in  withAttr
           (if MPD.sgFilePath song `elem` pathsInQueue
             then queueTitleBoldAttr
@@ -103,18 +104,8 @@ playlistsMove
 playlistsMove moveFunc s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
-        FocPlaylists -> do
-          let plList' = moveFunc $ s ^. playlistsL . plListL
-          plSongsVec <- liftIO
-            (V.fromList . fromRight [] <$> withMPD
-              (MPD.listPlaylistInfo
-                (maybe "<no playlists>" snd (listSelectedElement plList'))
-              )
-            )
-          let plSongs' = list PlaylistSongs plSongsVec 1
-          continue $ s & playlistsL . plListL .~ plList'
-                       & playlistsL . plSongsL .~ plSongs'
-        FocPSongs -> do
+        FocPlaylists -> rebuildPlList $ s & playlistsL . plListL %~ moveFunc
+        FocPSongs    -> do
           continue $ s & playlistsL . plSongsL %~ moveFunc
 
 playlistsAdd :: Bool -> HState -> EventM Name (Next HState)
@@ -124,8 +115,8 @@ playlistsAdd play s =
         FocPlaylists -> do
           songBulkAdd play (listElements (s ^. playlistsL . plSongsL)) s
         FocPSongs -> do
-          let maybeFilePath =
-                MPD.sgFilePath . snd <$> listSelectedElement (s ^. playlistsL . plSongsL)
+          let maybeFilePath = MPD.sgFilePath . snd <$> listSelectedElement
+                (s ^. playlistsL . plSongsL)
           traverse_
             (\sel -> liftIO
               (withMPD $ MPD.addId sel Nothing >>= if play
