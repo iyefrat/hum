@@ -2,7 +2,7 @@
 
 module Hum.Modes
   ( module Hum.Modes.SongMode
-  , module Hum.Modes.SearchMode
+  , module Hum.Modes.ExMode
   )
 where
 

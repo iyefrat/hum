@@ -24,8 +24,8 @@ import           Lens.Micro                     ( (?~)
                                                 , set
                                                 )
 
-searchEnd :: HState -> EventM Name (Next HState)
-searchEnd s =
+exEnd :: HState -> EventM Name (Next HState)
+exEnd s =
     let searched = (s ^. exL . exEditorL . editContentsL & Z.currentLine)
         s'= s & exL . searchHistoryL %~ (searched :)
               & exL . exEditorL .~ editorText ExEditor (Just 1) ""
@@ -36,10 +36,15 @@ searchEnd s =
                 LibraryView   -> librarySearch True s'
                 PlaylistsView -> playlistsSearch True s'
 
-handleSearchEvent
+handleExEvent
     :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
-handleSearchEvent s e = case e of
-    VtyEvent (EvKey KEnter []) -> searchEnd s
+handleExEvent s e = case e of
+    VtyEvent (EvKey KEnter []) -> exEnd s
     VtyEvent vtye ->
         continue =<< handleEventLensed s (exL . exEditorL) handleEditorEvent vtye
     _ -> continue s
+
+exPrefixTxt :: ExSubMode -> Text
+exPrefixTxt Cmd = ":"
+exPrefixTxt FSearch= "/"
+exPrefixTxt BSearch = "?"

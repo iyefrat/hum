@@ -52,9 +52,10 @@ drawUI st =
           PlaylistsView -> drawViewPlaylists st
         )
     <=> if st ^. focusL . focExL
-          then txt "/" <+> renderEditor (txt . T.unlines)
-                                        (st ^. focusL . focExL)
-                                        (st ^. exL . exEditorL)
+          then txt (st ^. exL . exPrefixL & exPrefixTxt) <+> renderEditor
+            (txt . T.unlines)
+            (st ^. focusL . focExL)
+            (st ^. exL . exEditorL)
           else txt " "
   ]
 
@@ -68,10 +69,10 @@ buildInitialState :: BC.BChan HumEvent -> IO HState
 buildInitialState chan = do
   let mode = NormalMode
   let ex = ExState { exPrefix      = Cmd
-              , exEditor      = editorText ExEditor (Just 1) ""
-              , searchHistory = []
-              , cmdHistory    = []
-              }
+                   , exEditor      = editorText ExEditor (Just 1) ""
+                   , searchHistory = []
+                   , cmdHistory    = []
+                   }
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   queueVec <- V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
@@ -86,10 +87,10 @@ buildInitialState chan = do
   let clipboard = list Clipboard V.empty 1
   songsVec <- songsOfAlbum (snd <$> listSelectedElement albums)
   let songs = list SongsList songsVec 1
-  let focus = Focus { focQueue  = FocQueue
-                    , focLib    = FocArtists
-                    , focPlay   = FocPlaylists
-                    , focEx = False
+  let focus = Focus { focQueue = FocQueue
+                    , focLib   = FocArtists
+                    , focPlay  = FocPlaylists
+                    , focEx    = False
                     }
   plListVec <- V.fromList . fromRight [] <$> withMPD MPD.listPlaylists
   let plList = list PlaylistList plListVec 1
@@ -142,7 +143,7 @@ seekCurEventM i s = do
 handleEvent :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case s ^. modeL of
-    ExMode   -> handleSearchEvent s e
+    ExMode   -> handleExEvent s e
     SongModeMode -> case vtye of
       EvKey (KChar 'm') [] -> continue $ toggleSongMode s
       _                    -> continue s
@@ -194,9 +195,15 @@ handleEvent s e = case e of
         continue s { status }
       EvKey (KChar '/') [] ->
         continue $ s &  modeL .~ ExMode
+                     &  exL . exPrefixL .~ FSearch
                      &  focusL .  focExL .~ True
       EvKey (KChar '?') [] ->
         continue $ s &  modeL .~ ExMode
+                     &  exL . exPrefixL .~ BSearch
+                     &  focusL .  focExL .~ True
+      EvKey (KChar ':') [] ->
+        continue $ s &  modeL .~ ExMode
+                     &  exL . exPrefixL .~ Cmd
                      &  focusL .  focExL .~ True
       EvKey (KChar '.') [] -> do
         _    <- liftIO (withMPD MPD.next)

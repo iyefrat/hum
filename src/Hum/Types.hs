@@ -33,7 +33,7 @@ data PlaylistsState = PlaylistsState
     { plList  :: !(List Name PlaylistName)
     , plSongs :: !(List Name Song)
     }
-data ExSubMode = Cmd | ForwardSearch | BackwardSearch
+data ExSubMode = Cmd | FSearch | BSearch
 data ExState = ExState
     { exPrefix      :: !ExSubMode
     , exEditor      :: !(Editor Text Name)
@@ -60,10 +60,10 @@ data FocLib = FocArtists | FocAlbums | FocSongs
 data FocPlay = FocPlaylists | FocPSongs
   deriving(Show,Eq,Ord,Enum)
 data Focus = Focus
-    { focQueue  :: FocQueue
-    , focLib    :: FocLib
-    , focPlay   :: FocPlay
-    , focEx :: Bool
+    { focQueue :: FocQueue
+    , focLib   :: FocLib
+    , focPlay  :: FocPlay
+    , focEx    :: Bool
     }
     deriving (Show, Eq, Ord)
 
