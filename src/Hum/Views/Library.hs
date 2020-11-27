@@ -170,14 +170,14 @@ librarySearch direction s =
             $  (s { extentMap })
             &  libraryL
             .  artistsL
-            %~ (dir . listFindBy (valueSearch searchkey) . dir)
+            %~ (dir . listFindBy (stringySearch searchkey) . dir)
         FocAlbums -> do
           extentMap <- updateExtentMap
           rebuildLibAlbums
             $  (s { extentMap })
             &  libraryL
             .  albumsL
-            %~ (dir . listFindBy (valueSearch searchkey) . dir)
+            %~ (dir . listFindBy (stringySearch searchkey) . dir)
         FocSongs -> do
           extentMap <- updateExtentMap
           continue
