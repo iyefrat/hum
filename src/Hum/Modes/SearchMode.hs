@@ -8,6 +8,7 @@ import qualified Brick.Widgets.Edit            as E
 import           Brick.Types
 import           Brick.Main
 import           Hum.Types
+import           Hum.Views
 import           Graphics.Vty.Input.Events
 import qualified Data.Text.Zipper              as Z
                                          hiding ( textZipper )
@@ -26,15 +27,19 @@ handleSearchEvent
   :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleSearchEvent s e = case e of
   VtyEvent (EvKey KEnter []) ->
-    continue
-      $  s
-      &  searchHistoryL
-      %~ ((s ^. searchL . editContentsL & Z.currentLine) :)
-      &  modeL
-      .~ NormalMode
-      &  focusL
-      .  focSearchL
-      .~ False
+    let s' =
+          s
+            &  searchHistoryL
+            %~ ((s ^. searchL . editContentsL & Z.currentLine) :)
+            &  modeL
+            .~ NormalMode
+            &  focusL
+            .  focSearchL
+            .~ False
+    in case view s' of
+        QueueView     -> queueSearch True s'
+        LibraryView   -> librarySearch True s'
+        PlaylistsView -> playlistsSearch True s'
   VtyEvent vtye ->
     continue =<< handleEventLensed s searchL handleEditorEvent vtye
   _ -> continue s
