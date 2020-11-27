@@ -10,6 +10,7 @@ import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.Border
+import           Brick.Widgets.Edit
 import           Lens.Micro                     ( (^.)
                                                 , (%~)
                                                 , (.~){- (?~)
@@ -30,6 +31,7 @@ import           Hum.Views.Common
 import           Hum.Rebuild
 import qualified Data.Text                     as T
 import qualified Data.Vector                   as V
+import qualified Data.Text.Zipper              as Z
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
@@ -128,6 +130,28 @@ playlistsAdd play s =
           song <- liftIO (withMPD MPD.currentSong)
           continue s { currentSong = fromRight Nothing song, queue = queue s }
 
+playlistsSearch :: Bool -> HState -> EventM Name (Next HState)
+playlistsSearch direction s =
+  let playfoc    = s ^. focusL . focPlayL
+      dir       = if direction then id else listReverse
+      searchkey = (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
+  in  case playfoc of
+        FocPlaylists -> do
+          extentMap <- updateExtentMap
+          rebuildPlList
+            $  (s { extentMap })
+            &  playlistsL
+            .  plListL
+            %~ (dir . listFindBy (stringySearch searchkey) . dir)
+        FocPSongs -> do
+          extentMap <- updateExtentMap
+          continue
+            $  s { extentMap }
+            &  playlistsL
+            .  plSongsL
+            %~ (dir . listFindBy (songSearch searchkey [MPD.Title]) . dir)
+
+
 handleEventPlaylists
   :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEventPlaylists s e = case e of
@@ -138,6 +162,8 @@ handleEventPlaylists s e = case e of
       continue $ s & focusL . focPlayL .~ FocPSongs
     EvKey (KChar 'h') [] -> do
       continue $ s & focusL . focPlayL .~ FocPlaylists
+    EvKey (KChar 'n') [] -> playlistsSearch True s
+    EvKey (KChar 'N') [] -> playlistsSearch False s
     EvKey KEnter      [] -> playlistsAdd True s
     EvKey (KChar ' ') [] -> playlistsAdd False s
     EvKey (KChar 'G') [] -> playlistsMove (listMoveTo (length . queue $ s)) s
