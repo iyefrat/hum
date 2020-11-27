@@ -1,0 +1,18 @@
+#+TITLE: Plans
+
+
+* Near future
+** TODO impliment search history
+** BUG G doesn't work properly on playlists
+** TODO playlist editing
+** TODO Various Artists
+** TODO hackage?
+** TODO tags
+
+* Medium Future
+** TODO display random song order
+** TODO more vim motions
+
+* Far future
+** TODO write generic Response handler to pring the MPDError instead of doing the thing.
+** TODO (oneday) album art stuff, look into hip and jucypixels on hackage

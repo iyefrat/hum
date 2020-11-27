@@ -252,23 +252,3 @@ handleEvent s e = case e of
           Just i  -> listMoveTo i queueUnmoved
     continue s { currentSong, status, queue = queueNew }
   _ -> continue s
-
-
-
-{-
-TODO write generic Response handler to pring the MPDError instead of doing the thing.
------
-BUG library doesn't reload after searc
-BUG G doesn't work properly on playlists
-TODO search shouldn't remember
-TODO impliment search history
-TODO go over entire project and tidy up
-TODO playlist editing
-TODO Stop and lint everything
-TODO Various Artists
-TODO hackage?
-TODO more vim motions
-TODO display random song order
-TODO tags
-TODO (oneday) album art stuff, look into hip and jucypixels on hackage
--}
