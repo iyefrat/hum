@@ -1,6 +1,6 @@
 -- |
 
-module Hum.Modes.SearchMode where
+module Hum.Modes.ExMode where
 
 import           Brick.Widgets.Edit      hiding ( decodeUtf8 )
 import qualified Brick.Widgets.Edit            as E

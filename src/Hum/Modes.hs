@@ -7,4 +7,4 @@ module Hum.Modes
 where
 
 import           Hum.Modes.SongMode
-import           Hum.Modes.SearchMode
+import           Hum.Modes.ExMode
