@@ -20,7 +20,7 @@ import qualified Data.Map.Strict               as Map
 import qualified Data.Vector                   as V
 import qualified Data.Text                     as T
 import qualified Data.Text.Zipper              as Z
-import           Lens.Micro                     ( (^.) )
+import           Lens.Micro
 
 drawViewQueue :: HState -> Widget Name
 drawViewQueue st =
@@ -120,6 +120,19 @@ pasteDeleteCleanup s clip = do
     , extentMap
     }
 
+queueSearch :: Bool -> HState -> EventM Name (Next HState)
+queueSearch direction s =
+  let dir       = if direction then id else listReverse
+      searchkey = (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
+  in
+        do
+          extentMap <- updateExtentMap
+          continue
+            $  s { extentMap }
+            &  queueL
+            %~ (dir . listFindBy (songSearch searchkey [MPD.Title,MPD.Album,MPD.Artist]. fst) . dir)
+
+
 handleEventQueue
   :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEventQueue s e = case e of
@@ -130,41 +143,8 @@ handleEventQueue s e = case e of
     EvKey (KChar 'k') [] -> do
       extentMap <- updateExtentMap
       continue s { queue = listMoveUp $ queue s, extentMap }
-    EvKey (KChar 'n') [] -> do
-      extentMap <- updateExtentMap
-      continue s
-        { queue     = listFindBy
-                          ( songSearch
-                              (  s
-                              ^. searchL
-                              .  editContentsL
-                              &  T.drop 1
-                              .  Z.currentLine
-                              )
-                              [MPD.Artist, MPD.Album, MPD.Title]
-                          . fst
-                          )
-                        $ queue s
-        , extentMap
-        }
-    EvKey (KChar 'N') [] -> do
-      extentMap <- updateExtentMap
-      continue s
-        { queue     = listReverse
-                      . listFindBy
-                          ( songSearch
-                              (  s
-                              ^. searchL
-                              .  editContentsL
-                              &  T.drop 1
-                              .  Z.currentLine
-                              )
-                              [MPD.Artist, MPD.Album, MPD.Title]
-                          . fst
-                          )
-                      $ listReverse (queue s)
-        , extentMap
-        }
+    EvKey (KChar 'n') [] -> queueSearch True s
+    EvKey (KChar 'N') [] -> queueSearch False s
     EvKey KEnter [] -> do
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)
