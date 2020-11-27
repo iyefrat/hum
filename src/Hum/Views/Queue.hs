@@ -122,15 +122,24 @@ pasteDeleteCleanup s clip = do
 
 queueSearch :: Bool -> HState -> EventM Name (Next HState)
 queueSearch direction s =
-  let dir       = if direction then id else listReverse
-      searchkey = (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
+  let
+    dir       = if direction then id else listReverse
+    searchkey = fromMaybe "" ((s ^. searchHistoryL) !!? 0)
   in
-        do
-          extentMap <- updateExtentMap
-          continue
-            $  s { extentMap }
-            &  queueL
-            %~ (dir . listFindBy (songSearch searchkey [MPD.Title,MPD.Album,MPD.Artist]. fst) . dir)
+    if searchkey == ""
+      then continue s
+      else do
+        extentMap <- updateExtentMap
+        continue
+          $  s { extentMap }
+          &  queueL
+          %~ ( dir
+             . listFindBy
+                 ( songSearch searchkey [MPD.Title, MPD.Album, MPD.Artist]
+                 . fst
+                 )
+             . dir
+             )
 
 
 handleEventQueue
@@ -145,7 +154,7 @@ handleEventQueue s e = case e of
       continue s { queue = listMoveUp $ queue s, extentMap }
     EvKey (KChar 'n') [] -> queueSearch True s
     EvKey (KChar 'N') [] -> queueSearch False s
-    EvKey KEnter [] -> do
+    EvKey KEnter      [] -> do
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)
       traverse_ (\sel -> liftIO (withMPD $ MPD.playId sel)) maybeSelectedId

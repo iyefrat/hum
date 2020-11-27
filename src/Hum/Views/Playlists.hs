@@ -132,24 +132,26 @@ playlistsAdd play s =
 
 playlistsSearch :: Bool -> HState -> EventM Name (Next HState)
 playlistsSearch direction s =
-  let playfoc    = s ^. focusL . focPlayL
+  let playfoc   = s ^. focusL . focPlayL
       dir       = if direction then id else listReverse
-      searchkey = (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
-  in  case playfoc of
-        FocPlaylists -> do
-          extentMap <- updateExtentMap
-          rebuildPlList
-            $  (s { extentMap })
-            &  playlistsL
-            .  plListL
-            %~ (dir . listFindBy (stringySearch searchkey) . dir)
-        FocPSongs -> do
-          extentMap <- updateExtentMap
-          continue
-            $  s { extentMap }
-            &  playlistsL
-            .  plSongsL
-            %~ (dir . listFindBy (songSearch searchkey [MPD.Title]) . dir)
+      searchkey = fromMaybe "" ((s ^. searchHistoryL) !!? 0)
+  in  if searchkey == ""
+        then continue s
+        else case playfoc of
+          FocPlaylists -> do
+            extentMap <- updateExtentMap
+            rebuildPlList
+              $  (s { extentMap })
+              &  playlistsL
+              .  plListL
+              %~ (dir . listFindBy (stringySearch searchkey) . dir)
+          FocPSongs -> do
+            extentMap <- updateExtentMap
+            continue
+              $  s { extentMap }
+              &  playlistsL
+              .  plSongsL
+              %~ (dir . listFindBy (songSearch searchkey [MPD.Title]) . dir)
 
 
 handleEventPlaylists

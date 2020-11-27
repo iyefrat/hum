@@ -10,6 +10,7 @@ import           Brick.Main
 import           Hum.Types
 import           Hum.Views
 import           Graphics.Vty.Input.Events
+import qualified Data.Text                     as T
 import qualified Data.Text.Zipper              as Z
                                          hiding ( textZipper )
 import qualified Data.Text.Zipper.Generic      as Z
@@ -30,7 +31,7 @@ handleSearchEvent s e = case e of
     let s' =
           s
             &  searchHistoryL
-            %~ ((s ^. searchL . editContentsL & Z.currentLine) :)
+            %~ ((s ^. searchL . editContentsL & T.drop 1 . Z.currentLine) :)
             &  modeL
             .~ NormalMode
             &  focusL

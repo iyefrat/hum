@@ -96,7 +96,7 @@ libraryRow _ name val =
 librarySongRow :: HState -> MPD.Song -> Widget n
 librarySongRow st song =
   let pathsInQueue =
-          (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
+        (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
   in  withAttr
           (if MPD.sgFilePath song `elem` pathsInQueue
             then queueTitleBoldAttr
@@ -124,67 +124,74 @@ libraryMove
 libraryMove moveFunc s =
   let libfoc = s ^. focusL . focLibL
   in  case libfoc of
-        FocArtists ->
-           rebuildLibArtists $ s & libraryL . artistsL %~ moveFunc
-        FocAlbums ->
-           rebuildLibAlbums $ s & libraryL . albumsL %~ moveFunc
-        FocSongs -> do
+        FocArtists -> rebuildLibArtists $ s & libraryL . artistsL %~ moveFunc
+        FocAlbums  -> rebuildLibAlbums $ s & libraryL . albumsL %~ moveFunc
+        FocSongs   -> do
           continue $ s & libraryL . songsL %~ moveFunc
 
 
 libraryAdd :: Bool -> HState -> EventM Name (Next HState)
 libraryAdd play s =
   let libfoc = s ^. focusL . focLibL
-  in  case libfoc of
-        FocArtists -> do
-          songs <- liftIO
-            (songsOfArtist (snd <$> listSelectedElement (s ^. libraryL . artistsL)))
-          songBulkAdd play songs s
-        FocAlbums -> do
-          songs <- liftIO
-            (songsOfAlbum (snd <$> listSelectedElement (s ^. libraryL . albumsL)))
-          songBulkAdd play songs s
-        FocSongs -> do
-          let maybeFilePath =
-                MPD.sgFilePath . snd <$> listSelectedElement (s^. libraryL . songsL)
-          traverse_
-            (\sel -> liftIO
-              (withMPD $ MPD.addId sel Nothing >>= if play
-                then MPD.playId
-                else const pass
-              )
+  in
+    case libfoc of
+      FocArtists -> do
+        songs <-
+          liftIO
+            (songsOfArtist
+              (snd <$> listSelectedElement (s ^. libraryL . artistsL))
             )
-            maybeFilePath
-          song <- liftIO (withMPD MPD.currentSong)
-          continue s { currentSong = fromRight Nothing song, queue = queue s }
+        songBulkAdd play songs s
+      FocAlbums -> do
+        songs <-
+          liftIO
+            (songsOfAlbum
+              (snd <$> listSelectedElement (s ^. libraryL . albumsL))
+            )
+        songBulkAdd play songs s
+      FocSongs -> do
+        let maybeFilePath = MPD.sgFilePath . snd <$> listSelectedElement
+              (s ^. libraryL . songsL)
+        traverse_
+          (\sel -> liftIO
+            (withMPD $ MPD.addId sel Nothing >>= if play
+              then MPD.playId
+              else const pass
+            )
+          )
+          maybeFilePath
+        song <- liftIO (withMPD MPD.currentSong)
+        continue s { currentSong = fromRight Nothing song, queue = queue s }
 
 librarySearch :: Bool -> HState -> EventM Name (Next HState)
 librarySearch direction s =
   let libfoc    = s ^. focusL . focLibL
       dir       = if direction then id else listReverse
-      searchkey = (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
-  in  case libfoc of
-        FocArtists -> do
-          extentMap <- updateExtentMap
-          rebuildLibArtists
-            $  (s { extentMap })
-            &  libraryL
-            .  artistsL
-            %~ (dir . listFindBy (stringySearch searchkey) . dir)
-        FocAlbums -> do
-          extentMap <- updateExtentMap
-          rebuildLibAlbums
-            $  (s { extentMap })
-            &  libraryL
-            .  albumsL
-            %~ (dir . listFindBy (stringySearch searchkey) . dir)
-        FocSongs -> do
-          extentMap <- updateExtentMap
-          continue
-            $  s { extentMap }
-            &  libraryL
-            .  songsL
-            %~ (dir . listFindBy (songSearch searchkey [MPD.Title]) . dir)
+      searchkey = fromMaybe "" ((s ^. searchHistoryL) !!? 0)
+  in  if searchkey == ""
+        then continue s
+        else case libfoc of
+          FocArtists -> do
+            extentMap <- updateExtentMap
+            rebuildLibArtists
+              $  (s { extentMap })
+              &  libraryL
+              .  artistsL
+              %~ (dir . listFindBy (stringySearch searchkey) . dir)
+          FocAlbums -> do
+            extentMap <- updateExtentMap
+            rebuildLibAlbums
+              $  (s { extentMap })
+              &  libraryL
+              .  albumsL
+              %~ (dir . listFindBy (stringySearch searchkey) . dir)
+          FocSongs -> do
+            extentMap <- updateExtentMap
+            continue
+              $  s { extentMap }
+              &  libraryL
+              .  songsL
+              %~ (dir . listFindBy (songSearch searchkey [MPD.Title]) . dir)
 
 
 handleEventLibrary
