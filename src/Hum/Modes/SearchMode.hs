@@ -24,23 +24,21 @@ import           Lens.Micro                     ( (?~)
                                                 , set
                                                 )
 
+searchEnd :: HState -> EventM Name (Next HState)
+searchEnd s =
+    let searched = (s ^. searchL . editContentsL & Z.currentLine)
+        s'= s & searchHistoryL %~ (searched :)
+              & modeL .~ NormalMode
+              & focusL . focSearchL .~ False
+    in  case view s' of
+                QueueView     -> queueSearch True s'
+                LibraryView   -> librarySearch True s'
+                PlaylistsView -> playlistsSearch True s'
+
 handleSearchEvent
-  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+    :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleSearchEvent s e = case e of
-  VtyEvent (EvKey KEnter []) ->
-    let s' =
-          s
-            &  searchHistoryL
-            %~ ((s ^. searchL . editContentsL & T.drop 1 . Z.currentLine) :)
-            &  modeL
-            .~ NormalMode
-            &  focusL
-            .  focSearchL
-            .~ False
-    in case view s' of
-        QueueView     -> queueSearch True s'
-        LibraryView   -> librarySearch True s'
-        PlaylistsView -> playlistsSearch True s'
-  VtyEvent vtye ->
-    continue =<< handleEventLensed s searchL handleEditorEvent vtye
-  _ -> continue s
+    VtyEvent (EvKey KEnter []) -> searchEnd s
+    VtyEvent vtye ->
+        continue =<< handleEventLensed s searchL handleEditorEvent vtye
+    _ -> continue s

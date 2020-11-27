@@ -51,7 +51,11 @@ drawUI st =
           LibraryView   -> drawViewLibrary st
           PlaylistsView -> drawViewPlaylists st
         )
-    <=> renderEditor (txt . T.unlines) (st ^. focusL . focSearchL) (search st)
+    <=> if st ^. focusL . focSearchL
+          then txt "/" <+> renderEditor (txt . T.unlines)
+                                        (st ^. focusL . focSearchL)
+                                        (search st)
+          else txt " "
 --    <=> (hCenter . txt $ show (st ^. focusL . focSearchL))
   ]
 
@@ -64,7 +68,7 @@ chooseCursor st ls = if st ^. focusL . focSearchL
 buildInitialState :: BC.BChan HumEvent -> IO HState
 buildInitialState chan = do
   let mode          = NormalMode
-  let search = editorText SearchEditor (Just 1) "/"
+  let search = editorText SearchEditor (Just 1) ""
   let searchHistory = []
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
@@ -91,9 +95,9 @@ buildInitialState chan = do
     ( MPD.listPlaylistInfo
     $ maybe "<no playlists>" snd (listSelectedElement plList)
     )
-  let plSongs = list PlaylistSongs plSongsVec 1
-  let library = LibraryState {artists, albums, songs}
-  let playlists = PlaylistsState {plList,plSongs}
+  let plSongs   = list PlaylistSongs plSongsVec 1
+  let library   = LibraryState { artists, albums, songs }
+  let playlists = PlaylistsState { plList, plSongs }
   pure HState { chan
               , view
               , mode
@@ -110,8 +114,7 @@ buildInitialState chan = do
               }
 
 humStartEvent :: HState -> EventM Name HState
-humStartEvent s = do
-  pure s
+humStartEvent s = pure s
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget
@@ -159,8 +162,11 @@ handleEvent s e = case e of
         status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
         continue s { status }
       EvKey (KChar 'c') [] -> do
-        _ <- liftIO
-          (withMPD $ MPD.consume (maybe False (not . MPD.stConsume) (status s)))
+        _ <-
+          liftIO
+            ( withMPD
+            $ MPD.consume (maybe False (not . MPD.stConsume) (status s))
+            )
         status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
         continue s { status }
       EvKey (KChar 'x') [] -> do
@@ -186,9 +192,13 @@ handleEvent s e = case e of
         status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
         continue s { status }
       EvKey (KChar '/') [] ->
-        continue $ s & modeL .~ SearchMode
-                     & focusL . focSearchL .~ True
-                     & searchL .~ editorText SearchEditor (Just 1) "/"
+        continue $ s &  modeL .~ SearchMode
+                     &  focusL .  focSearchL .~ True
+                     &  searchL .~ editorText SearchEditor (Just 1) ""
+      EvKey (KChar '?') [] ->
+        continue $ s &  modeL .~ SearchMode
+                     &  focusL .  focSearchL .~ True
+                     &  searchL .~ editorText SearchEditor (Just 1) ""
       EvKey (KChar '.') [] -> do
         _    <- liftIO (withMPD MPD.next)
         song <- liftIO (withMPD MPD.currentSong)
