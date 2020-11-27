@@ -16,6 +16,7 @@ import           Brick.Widgets.List
 import           Hum.Song
 import           Hum.Attributes
 import           Hum.Views.Common
+import           Hum.Rebuild
 import qualified Data.Text                     as T
 import qualified Data.Vector                   as V
 import           Network.MPD                    ( withMPD )
@@ -122,27 +123,14 @@ libraryMove
   -> EventM Name (Next HState)
 libraryMove moveFunc s =
   let libfoc = s ^. focusL . focLibL
-  in
-    case libfoc of
-      FocArtists -> do
-        let artists' = moveFunc $ s ^. libraryL . artistsL
-        albumsVec <- liftIO
-          (albumsOfArtist (snd <$> listSelectedElement artists'))
-        let albums' = list AlbumsList albumsVec 1
-        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums'))
-        let songs' = list SongsList songsVec 1
-        continue $ s & libraryL . artistsL .~ artists'
-                     & libraryL . albumsL .~ albums'
-                     & libraryL . songsL .~ songs'
-      FocAlbums -> do
-        let albums' = moveFunc $ s ^. libraryL . albumsL
-        songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums'))
-        let songs' = list SongsList songsVec 1
-        continue $ s & libraryL . albumsL .~ albums'
-                     & libraryL . songsL .~ songs'
-        
-      FocSongs -> do
-        continue $ s & libraryL . songsL %~ moveFunc
+  in  case libfoc of
+        FocArtists ->
+           rebuildLibArtists $ s & libraryL . artistsL %~ moveFunc
+        FocAlbums ->
+           rebuildLibAlbums $ s & libraryL . albumsL %~ moveFunc
+        FocSongs -> do
+          continue $ s & libraryL . songsL %~ moveFunc
+
 
 libraryAdd :: Bool -> HState -> EventM Name (Next HState)
 libraryAdd play s =
@@ -172,44 +160,31 @@ libraryAdd play s =
 
 librarySearch :: Bool -> HState -> EventM Name (Next HState)
 librarySearch direction s =
-  let
-    libfoc = s ^. focusL . focLibL
-    dir    = if direction then id else listReverse
-  in
-    case libfoc of
-      FocArtists -> do
-        extentMap <- updateExtentMap
-        continue $ (s {extentMap}) & libraryL . artistsL .~
-            (dir
-            . listFindBy
-                (valueSearch
-                  (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
-                )
-            $ dir (s ^. libraryL . artistsL))
-      FocAlbums -> do
-        extentMap <- updateExtentMap
-        continue $ s {extentMap} & libraryL . albumsL .~
-            (dir
-            . listFindBy
-                (valueSearch
-                  (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
-                )
-            $ dir (s ^. libraryL . albumsL))
-      FocSongs -> do
-        extentMap <- updateExtentMap
-        continue $ s {extentMap} & libraryL . songsL .~
-                      (dir
-                        . listFindBy
-                            (songSearch
-                              (  s
-                              ^. searchL
-                              .  editContentsL
-                              &  T.drop 1
-                              .  Z.currentLine
-                              )
-                              [MPD.Title]
-                            )
-                        $ dir (s^.libraryL . songsL))
+  let libfoc    = s ^. focusL . focLibL
+      dir       = if direction then id else listReverse
+      searchkey = (s ^. searchL . editContentsL & T.drop 1 . Z.currentLine)
+  in  case libfoc of
+        FocArtists -> do
+          extentMap <- updateExtentMap
+          rebuildLibArtists
+            $  (s { extentMap })
+            &  libraryL
+            .  artistsL
+            %~ (dir . listFindBy (valueSearch searchkey) . dir)
+        FocAlbums -> do
+          extentMap <- updateExtentMap
+          rebuildLibAlbums
+            $  (s { extentMap })
+            &  libraryL
+            .  albumsL
+            %~ (dir . listFindBy (valueSearch searchkey) . dir)
+        FocSongs -> do
+          extentMap <- updateExtentMap
+          continue
+            $  s { extentMap }
+            &  libraryL
+            .  songsL
+            %~ (dir . listFindBy (songSearch searchkey [MPD.Title]) . dir)
 
 
 handleEventLibrary

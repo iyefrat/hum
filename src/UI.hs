@@ -239,8 +239,7 @@ TODO write generic Response handler to pring the MPDError instead of doing the t
 -----
 BUG library doesn't reload after searc
 BUG G doesn't work properly on playlists
-TODO restructure HState to contain the State of each view
-TODO have search work on current list
+TODO search shouldn't remember
 TODO impliment search history
 TODO go over entire project and tidy up
 TODO playlist editing
