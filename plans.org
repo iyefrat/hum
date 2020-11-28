@@ -2,15 +2,16 @@
 
 
 * Near future
+** TODO D for queue clear
+** TODO hackage?
 ** TODO impliment search history
 ** TODO playlist editing
 ** TODO Various Artists
-** TODO hackage?
-** TODO tags
 
 * Medium Future
 ** TODO display random song order
 ** TODO more vim motions
+** TODO tags
 
 * Far future
 ** TODO write generic Response handler to pring the MPDError instead of doing the thing.

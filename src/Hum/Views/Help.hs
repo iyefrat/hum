@@ -65,7 +65,7 @@ helpText = unlines
   , "  RET - add song/song collection to queue, and start playing the first one"
   , ""
   , "Commands:"
-  , ":help - gets you here"
+  , ":help - gets you this"
   , ":q    - quits"
   ]
 
