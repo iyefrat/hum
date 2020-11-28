@@ -125,7 +125,6 @@ library
              , Hum.Views.Help
              , Hum.Utils
              , Hum.Modes
-             , Hum.Modes.SongMode
              , Hum.Modes.ExMode
              , Hum.Rebuild
   -- Modules included in this library but not exported.

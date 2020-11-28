@@ -42,10 +42,7 @@ app = App { appDraw         = drawUI
 
 drawUI :: HState -> [Widget Name]
 drawUI st =
-  [ case mode st of
-    SongModeMode -> drawSongModeHelp
-    _            -> emptyWidget
-  , drawNowPlaying st
+  [ drawNowPlaying st
     <=> (case view st of
           QueueView     -> drawViewQueue st
           LibraryView   -> drawViewLibrary st
@@ -125,16 +122,6 @@ hBoxPad _ []       = emptyWidget
 hBoxPad _ [w     ] = w
 hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
 
-toggleSongMode :: HState -> HState
-toggleSongMode s =
-  s
-    &  modeL
-    %~ (\case
-         NormalMode   -> SongModeMode
-         SongModeMode -> NormalMode
-         m            -> m
-       )
-
 seekCurEventM :: MPD.FractionalSeconds -> HState -> EventM Name (Next HState)
 seekCurEventM i s = do
   _      <- liftIO (withMPD $ MPD.seekCur False i)
@@ -146,9 +133,6 @@ handleEvent :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case s ^. modeL of
     ExMode   -> handleExEvent s e
-    SongModeMode -> case vtye of
-      EvKey (KChar 'm') [] -> continue $ toggleSongMode s
-      _                    -> continue s
     NormalMode -> case vtye of
       EvKey (KChar 'q') [] -> halt s
       EvKey (KChar 't') [] -> do
@@ -159,7 +143,6 @@ handleEvent s e = case e of
           Right MPD.Stopped -> liftIO (withMPD $ MPD.play Nothing)
           Right MPD.Playing -> liftIO (withMPD $ MPD.pause True)
         continue s
-      EvKey (KChar 'm') [] -> continue $ toggleSongMode s
       EvKey (KChar 's') [] -> do
         _ <- liftIO
           (withMPD $ MPD.single (maybe False (not . MPD.stSingle) (status s)))
