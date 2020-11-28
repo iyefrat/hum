@@ -69,7 +69,7 @@ data Focus = Focus
     }
     deriving (Show, Eq, Ord)
 
-data View = QueueView | LibraryView | PlaylistsView
+data View = QueueView | LibraryView | PlaylistsView | HelpView
  deriving (Show,Eq,Ord)
 
 type Highlight = Bool

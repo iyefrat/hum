@@ -50,6 +50,7 @@ drawUI st =
           QueueView     -> drawViewQueue st
           LibraryView   -> drawViewLibrary st
           PlaylistsView -> drawViewPlaylists st
+          HelpView      -> drawViewHelp
         )
     <=> if st ^. focusL . focExL
           then txt (st ^. exL . exPrefixL & exPrefixTxt) <+> renderEditor
@@ -236,6 +237,7 @@ handleEvent s e = case e of
         QueueView     -> handleEventQueue s e
         LibraryView   -> handleEventLibrary s e
         PlaylistsView -> handleEventPlaylists s e
+        HelpView -> handleEventHelp s e
     _ -> continue s
   (AppEvent (Left Tick)) -> do
     extentMap <- updateExtentMap

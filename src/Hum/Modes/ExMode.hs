@@ -32,11 +32,12 @@ exEnd s =
               & focusL . focExL .~ False
     in
           case s ^. exL . exPrefixL of
-            Cmd -> continue (s' & exL . cmdHistoryL %~ (searched :) )
+            Cmd -> exCmdExecute searched (s' & exL . cmdHistoryL %~ (searched :) )
             srch -> case view s' of
                 QueueView     -> queueSearch (srch == FSearch) s''
                 LibraryView   -> librarySearch (srch == FSearch) s''
                 PlaylistsView -> playlistsSearch (srch == FSearch) s''
+                HelpView      -> continue s'
                 where s''= s' & exL . searchHistoryL %~ (searched :)
 handleExEvent
     :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
@@ -50,3 +51,8 @@ exPrefixTxt :: ExSubMode -> Text
 exPrefixTxt Cmd = ":"
 exPrefixTxt FSearch= "/"
 exPrefixTxt BSearch = "?"
+
+exCmdExecute :: Text -> HState -> EventM Name (Next HState)
+exCmdExecute "help" s = continue s { view = HelpView }
+exCmdExecute "q" s = halt s
+exCmdExecute _ s = continue s

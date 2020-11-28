@@ -122,6 +122,7 @@ library
              , Hum.Views.Queue
              , Hum.Views.Library
              , Hum.Views.Playlists
+             , Hum.Views.Help
              , Hum.Utils
              , Hum.Modes
              , Hum.Modes.SongMode
