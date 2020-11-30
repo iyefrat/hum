@@ -7,12 +7,18 @@
 ** TODO hackage?
 ** TODO impliment search history
 ** TODO playlist editing
+*** TODO implement =:save= with the protocol
+- also don't override unnamed.m3u
+*** TODO copy and delete individual playlists
+*** TODO playlist contents editing
+- the editing operations should be kept in memory, and saved explicitly
 ** TODO Various Artists
 
 * Medium Future
 ** TODO display random song order
 ** TODO more vim motions
 ** TODO tags
+** TODO undo
 
 * Far future
 ** TODO write generic Response handler to print the MPDError instead of doing the thing.
