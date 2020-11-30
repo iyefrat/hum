@@ -111,7 +111,6 @@ library
   -- Modules exported by the library.
   exposed-modules:
                UI
-             , Hum.Song
              , Hum.Types
              , Hum.BChan
              , Hum.Attributes

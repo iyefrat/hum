@@ -7,8 +7,8 @@ import           Brick.Types
 import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
-import           Hum.Song
 import           Hum.Attributes
+import           Hum.Utils
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map

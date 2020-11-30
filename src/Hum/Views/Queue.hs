@@ -9,7 +9,6 @@ import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.List
 import           Brick.Widgets.Edit
-import           Hum.Song
 import           Hum.Attributes
 import           Hum.Utils
 import           Hum.Views.Common

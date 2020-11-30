@@ -13,7 +13,6 @@ import           Brick.Widgets.Border
 import           Brick.Widgets.Edit
 import           Lens.Micro
 import           Brick.Widgets.List
-import           Hum.Song
 import           Hum.Attributes
 import           Hum.Views.Common
 import           Hum.Rebuild
