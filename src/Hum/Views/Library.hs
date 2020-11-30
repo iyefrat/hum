@@ -120,17 +120,17 @@ drawViewLibrary st =
 libraryMove
   :: (forall e . List Name e -> List Name e)
   -> HState
-  -> EventM Name (Next HState)
+  -> EventM Name HState
 libraryMove moveFunc s =
   let libfoc = s ^. focusL . focLibL
   in  case libfoc of
         FocArtists -> rebuildLibArtists $ s & libraryL . artistsL %~ moveFunc
         FocAlbums  -> rebuildLibAlbums $ s & libraryL . albumsL %~ moveFunc
         FocSongs   -> do
-          continue $ s & libraryL . songsL %~ moveFunc
+          pure $ s & libraryL . songsL %~ moveFunc
 
 
-libraryAdd :: Bool -> HState -> EventM Name (Next HState)
+libraryAdd :: Bool -> HState -> EventM Name HState
 libraryAdd play s =
   let libfoc = s ^. focusL . focLibL
   in
@@ -161,15 +161,15 @@ libraryAdd play s =
           )
           maybeFilePath
         song <- liftIO (withMPD MPD.currentSong)
-        continue s { currentSong = fromRight Nothing song, queue = queue s }
+        pure s { currentSong = fromRight Nothing song, queue = queue s }
 
-librarySearch :: Bool -> HState -> EventM Name (Next HState)
+librarySearch :: Bool -> HState -> EventM Name HState
 librarySearch direction s =
   let libfoc    = s ^. focusL . focLibL
       dir       = if direction then id else listReverse
       searchkey = fromMaybe "" ((s ^. exL . searchHistoryL) !!? 0)
   in  if searchkey == ""
-        then continue s
+        then pure s
         else case libfoc of
           FocArtists -> do
             extentMap <- updateExtentMap
@@ -187,7 +187,7 @@ librarySearch direction s =
               %~ (dir . listFindBy (stringySearch searchkey) . dir)
           FocSongs -> do
             extentMap <- updateExtentMap
-            continue
+            pure
               $  s { extentMap }
               &  libraryL
               .  songsL
@@ -198,17 +198,17 @@ handleEventLibrary
   :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEventLibrary s e = case e of
   VtyEvent vtye -> case vtye of
-    EvKey (KChar 'j') [] -> libraryMove listMoveDown s
-    EvKey (KChar 'k') [] -> libraryMove listMoveUp s
+    EvKey (KChar 'j') [] -> continue =<< libraryMove listMoveDown s
+    EvKey (KChar 'k') [] -> continue =<< libraryMove listMoveUp s
     EvKey (KChar 'l') [] -> do
       continue $ s & focusL . focLibL %~ libraryMoveRight
     EvKey (KChar 'h') [] -> do
       continue $ s & focusL . focLibL %~ libraryMoveLeft
-    EvKey (KChar 'n') [] -> librarySearch (s ^. exL . searchDirectionL) s
-    EvKey (KChar 'N') [] -> librarySearch (s ^. exL . searchDirectionL & not) s
-    EvKey KEnter      [] -> libraryAdd True s
-    EvKey (KChar ' ') [] -> libraryAdd False s
-    EvKey (KChar 'G') [] -> libraryMove (\ls -> listMoveBy (length ls) ls) s
-    EvKey (KChar 'g') [] -> libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
+    EvKey (KChar 'n') [] -> continue =<< librarySearch (s ^. exL . searchDirectionL) s
+    EvKey (KChar 'N') [] -> continue =<< librarySearch (s ^. exL . searchDirectionL & not) s
+    EvKey KEnter      [] -> continue =<< libraryAdd True s
+    EvKey (KChar ' ') [] -> continue =<< libraryAdd False s
+    EvKey (KChar 'G') [] -> continue =<< libraryMove (\ls -> listMoveBy (length ls) ls) s
+    EvKey (KChar 'g') [] -> continue =<< libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     _                    -> continue s
   _ -> continue s

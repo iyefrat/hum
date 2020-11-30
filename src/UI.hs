@@ -122,12 +122,12 @@ hBoxPad _ []       = emptyWidget
 hBoxPad _ [w     ] = w
 hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
 
-seekCurEventM :: MPD.FractionalSeconds -> HState -> EventM Name (Next HState)
+seekCurEventM :: MPD.FractionalSeconds -> HState -> EventM Name HState
 seekCurEventM i s = do
   _      <- liftIO (withMPD $ MPD.seekCur False i)
   status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
   song   <- liftIO (withMPD MPD.currentSong)
-  continue s { currentSong = fromRight Nothing song, status }
+  pure s { currentSong = fromRight Nothing song, status }
 
 handleEvent :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
@@ -200,10 +200,10 @@ handleEvent s e = case e of
         _    <- liftIO (withMPD MPD.previous)
         song <- liftIO (withMPD MPD.currentSong)
         continue s { currentSong = fromRight Nothing song }
-      EvKey (KChar ']') [] -> seekCurEventM 5 s
-      EvKey (KChar '[') [] -> seekCurEventM (-5) s
-      EvKey (KChar '}') [] -> seekCurEventM 30 s
-      EvKey (KChar '{') [] -> seekCurEventM (-30) s
+      EvKey (KChar ']') [] -> continue =<< seekCurEventM 5 s
+      EvKey (KChar '[') [] -> continue =<< seekCurEventM (-5) s
+      EvKey (KChar '}') [] -> continue =<< seekCurEventM 30 s
+      EvKey (KChar '{') [] -> continue =<< seekCurEventM (-30) s
       EvKey (KChar '1') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
         continue s { view = QueueView }

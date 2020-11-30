@@ -101,7 +101,7 @@ queueRow st (song, hl) =
       $ secondsToTime
       $ MPD.sgLength song
 
-pasteDeleteCleanup :: HState -> SongList -> EventM Name (Next HState)
+pasteDeleteCleanup :: HState -> SongList -> EventM Name HState
 pasteDeleteCleanup s clip = do
   let mi = listSelected (queue s)
   extentMap   <- updateExtentMap
@@ -110,7 +110,7 @@ pasteDeleteCleanup s clip = do
   queueVec    <- liftIO
     (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
   let queue = (, False) <$> list QueueList queueVec 1
-  continue s
+  pure s
     { currentSong
     , status
     , queue       = case mi of
@@ -120,17 +120,17 @@ pasteDeleteCleanup s clip = do
     , extentMap
     }
 
-queueSearch :: Bool -> HState -> EventM Name (Next HState)
+queueSearch :: Bool -> HState -> EventM Name HState
 queueSearch direction s =
   let
     dir       = if direction then id else listReverse
     searchkey = fromMaybe "" ((s ^. exL . searchHistoryL) !!? 0)
   in
     if searchkey == ""
-      then continue s
+      then pure s
       else do
         extentMap <- updateExtentMap
-        continue
+        pure
           $  s { extentMap }
           &  queueL
           %~ ( dir
@@ -152,8 +152,8 @@ handleEventQueue s e = case e of
     EvKey (KChar 'k') [] -> do
       extentMap <- updateExtentMap
       continue s { queue = listMoveUp $ queue s, extentMap }
-    EvKey (KChar 'n') [] -> queueSearch (s ^. exL . searchDirectionL) s
-    EvKey (KChar 'N') [] -> queueSearch (s ^. exL . searchDirectionL & not) s
+    EvKey (KChar 'n') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL) s
+    EvKey (KChar 'N') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL & not) s
     EvKey KEnter      [] -> do
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)
@@ -165,17 +165,17 @@ handleEventQueue s e = case e of
     EvKey (KChar 'd') [] -> do
       let clip = getHighlighted (queue s)
       _ <- liftIO (withMPD $ deleteHighlighted (queue s))
-      pasteDeleteCleanup s clip
+      continue =<< pasteDeleteCleanup s clip
     EvKey (KChar 'D') [] -> do
       let clip = queue s
       _ <- liftIO (withMPD $ deleteAll (queue s))
-      pasteDeleteCleanup s clip
+      continue =<< pasteDeleteCleanup s clip
     EvKey (KChar 'y') [] -> do
       continue s { clipboard = getHighlighted (queue s) }
     EvKey (KChar 'p') [] -> do
       let clip = clipboard s
       _ <- liftIO (withMPD $ pasteClipboard clip (queue s))
-      pasteDeleteCleanup s clip
+      continue =<< pasteDeleteCleanup s clip
     EvKey (KChar 'G') [] -> do
       extentMap <- updateExtentMap
       continue s { queue     = listMoveTo (length . queue $ s) $ queue s

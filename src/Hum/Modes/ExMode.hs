@@ -34,9 +34,9 @@ exEnd s =
           case s ^. exL . exPrefixL of
             Cmd -> exCmdExecute searched (s' & exL . cmdHistoryL %~ (searched :) )
             srch -> case view s' of
-                QueueView     -> queueSearch (srch == FSearch) s''
-                LibraryView   -> librarySearch (srch == FSearch) s''
-                PlaylistsView -> playlistsSearch (srch == FSearch) s''
+                QueueView     -> continue =<< queueSearch (srch == FSearch) s''
+                LibraryView   -> continue =<< librarySearch (srch == FSearch) s''
+                PlaylistsView -> continue =<< playlistsSearch (srch == FSearch) s''
                 HelpView      -> continue s'
                 where s''= s' & exL . searchHistoryL %~ (searched :)
 handleExEvent

@@ -100,17 +100,15 @@ drawViewPlaylists st =
   hLimitPercent 25 (drawPlaylistLeft st) <+> drawPlaylistRight st
 
 playlistsMove
-  :: (forall e . List Name e -> List Name e)
-  -> HState
-  -> EventM Name (Next HState)
+  :: (forall e . List Name e -> List Name e) -> HState -> EventM Name HState
 playlistsMove moveFunc s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
         FocPlaylists -> rebuildPlList $ s & playlistsL . plListL %~ moveFunc
         FocPSongs    -> do
-          continue $ s & playlistsL . plSongsL %~ moveFunc
+          pure $ s & playlistsL . plSongsL %~ moveFunc
 
-playlistsAdd :: Bool -> HState -> EventM Name (Next HState)
+playlistsAdd :: Bool -> HState -> EventM Name HState
 playlistsAdd play s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
@@ -128,15 +126,15 @@ playlistsAdd play s =
             )
             maybeFilePath
           song <- liftIO (withMPD MPD.currentSong)
-          continue s { currentSong = fromRight Nothing song, queue = queue s }
+          pure s { currentSong = fromRight Nothing song, queue = queue s }
 
-playlistsSearch :: Bool -> HState -> EventM Name (Next HState)
+playlistsSearch :: Bool -> HState -> EventM Name HState
 playlistsSearch direction s =
   let playfoc   = s ^. focusL . focPlayL
       dir       = if direction then id else listReverse
       searchkey = fromMaybe "" ((s ^. exL . searchHistoryL) !!? 0)
   in  if searchkey == ""
-        then continue s
+        then pure s
         else case playfoc of
           FocPlaylists -> do
             extentMap <- updateExtentMap
@@ -147,7 +145,7 @@ playlistsSearch direction s =
               %~ (dir . listFindBy (stringySearch searchkey) . dir)
           FocPSongs -> do
             extentMap <- updateExtentMap
-            continue
+            pure
               $  s { extentMap }
               &  playlistsL
               .  plSongsL
@@ -158,17 +156,20 @@ handleEventPlaylists
   :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEventPlaylists s e = case e of
   VtyEvent vtye -> case vtye of
-    EvKey (KChar 'j') [] -> playlistsMove listMoveDown s
-    EvKey (KChar 'k') [] -> playlistsMove listMoveUp s
+    EvKey (KChar 'j') [] -> continue =<< playlistsMove listMoveDown s
+    EvKey (KChar 'k') [] -> continue =<< playlistsMove listMoveUp s
     EvKey (KChar 'l') [] -> do
       continue $ s & focusL . focPlayL .~ FocPSongs
     EvKey (KChar 'h') [] -> do
       continue $ s & focusL . focPlayL .~ FocPlaylists
-    EvKey (KChar 'n') [] -> playlistsSearch (s ^. exL . searchDirectionL) s
-    EvKey (KChar 'N') [] -> playlistsSearch (s ^. exL . searchDirectionL & not) s
-    EvKey KEnter      [] -> playlistsAdd True s
-    EvKey (KChar ' ') [] -> playlistsAdd False s
-    EvKey (KChar 'G') [] -> playlistsMove (\ls -> listMoveBy (length ls) ls) s
-    EvKey (KChar 'g') [] -> playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
+    EvKey (KChar 'n') [] ->
+      continue =<< playlistsSearch (s ^. exL . searchDirectionL) s
+    EvKey (KChar 'N') [] ->
+      continue =<< playlistsSearch (s ^. exL . searchDirectionL & not) s
+    EvKey KEnter      [] -> continue =<< playlistsAdd True s
+    EvKey (KChar ' ') [] -> continue =<< playlistsAdd False s
+    EvKey (KChar 'G') [] ->
+      continue =<< playlistsMove (\ls -> listMoveBy (length ls) ls) s
+    EvKey (KChar 'g') [] -> continue =<< playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     _                    -> continue s
   _ -> continue s
