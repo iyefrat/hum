@@ -14,11 +14,15 @@ deleteHighlighted ls =
         >> whenJust
              ((MPD.sgId . fst . snd) =<< listSelectedElement ls)
              MPD.deleteId
+
+deleteAll :: MPD.MonadMPD m => SongList -> m ()
+deleteAll ls = for_ ls (\s -> whenJust (MPD.sgId . fst $ s) MPD.deleteId)
+
 pasteClipboard :: MPD.MonadMPD m => SongList -> SongList -> m ()
 pasteClipboard clip ls =
-  let pos         = fromMaybe 0 (listSelected ls)
+  let pos         = listSelected ls
       indexedClip = V.indexed $ MPD.sgFilePath . fst <$> listElements clip
-  in  for_ indexedClip (\(n, song) -> MPD.addId song (Just (pos + n + 1)))
+  in  for_ indexedClip (\(n, song) -> MPD.addId song $ (+ (n + 1)) <$> pos)
 
 getHighlighted :: SongList -> SongList
 getHighlighted ls = hls where

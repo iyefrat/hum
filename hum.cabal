@@ -46,11 +46,10 @@ category: Sound
 -- README.
 extra-source-files:
   CHANGELOG.org
-           
+
 source-repository head
   type: git
   location: https://gitlab.com/iyefrat/hum.git
-
 
 common deps
   build-depends:

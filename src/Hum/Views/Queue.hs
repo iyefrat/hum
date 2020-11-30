@@ -166,6 +166,10 @@ handleEventQueue s e = case e of
       let clip = getHighlighted (queue s)
       _ <- liftIO (withMPD $ deleteHighlighted (queue s))
       pasteDeleteCleanup s clip
+    EvKey (KChar 'D') [] -> do
+      let clip = queue s
+      _ <- liftIO (withMPD $ deleteAll (queue s))
+      pasteDeleteCleanup s clip
     EvKey (KChar 'y') [] -> do
       continue s { clipboard = getHighlighted (queue s) }
     EvKey (KChar 'p') [] -> do

@@ -2,7 +2,6 @@
 
 
 * Near future
-** TODO D for queue clear
 ** TODO hackage?
 ** TODO impliment search history
 ** TODO playlist editing
