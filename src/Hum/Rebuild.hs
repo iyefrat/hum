@@ -6,7 +6,6 @@ import           Hum.Types
 import           Hum.Utils
 import           Lens.Micro
 import           Brick.Widgets.List
-import           Brick.Main
 import           Brick.Types
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD

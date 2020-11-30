@@ -7,7 +7,6 @@ import           Brick.Types
 import qualified Brick.BChan                   as BC
 import           Brick.Widgets.Core
 import           Brick.Widgets.List
-import           Brick.Widgets.Center
 import           Brick.Widgets.Edit
 import           Graphics.Vty.Input.Events
 import           Network.MPD                    ( withMPD )
@@ -15,22 +14,12 @@ import qualified Network.MPD                   as MPD
 import           Hum.Types
 import qualified Data.Vector                   as V
 import qualified Data.Text                     as T
-import           Data.Time                      ( getCurrentTime )
 import           Hum.Attributes
 import           Hum.Views
 import           Hum.Modes
 import           Hum.Utils
 import qualified Data.Map.Strict               as Map
-import           Lens.Micro                     ( (?~)
-                                                , (^.)
-                                                , (^?)
-                                                , (.~)
-                                                , (%~)
-                                                , _2
-                                                , _head
-                                                , set
-                                                )
-
+import           Lens.Micro
 app :: App HState HumEvent Name
 
 app = App { appDraw         = drawUI
@@ -221,7 +210,6 @@ handleEvent s e = case e of
         LibraryView   -> handleEventLibrary s e
         PlaylistsView -> handleEventPlaylists s e
         HelpView -> handleEventHelp s e
-    _ -> continue s
   (AppEvent (Left Tick)) -> do
     extentMap <- updateExtentMap
     status    <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))

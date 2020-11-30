@@ -8,7 +8,6 @@ import           Brick.Types
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.List
-import           Brick.Widgets.Edit
 import           Hum.Attributes
 import           Hum.Utils
 import           Hum.Views.Common
@@ -16,8 +15,6 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import qualified Data.Vector                   as V
-import qualified Data.Text                     as T
-import qualified Data.Text.Zipper              as Z
 import           Lens.Micro
 
 drawViewQueue :: HState -> Widget Name

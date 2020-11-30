@@ -3,8 +3,6 @@
 module Hum.Modes.ExMode where
 
 import           Brick.Widgets.Edit      hiding ( decodeUtf8 )
-import qualified Brick.Widgets.Edit            as E
-                                                ( decodeUtf8 )
 import           Brick.Types
 import           Brick.Main
 import           Hum.Types
@@ -12,19 +10,9 @@ import           Hum.Views
 import           Hum.Utils
 import           Hum.Rebuild
 import           Graphics.Vty.Input.Events
-import qualified Data.Text                     as T
 import qualified Data.Text.Zipper              as Z
                                          hiding ( textZipper )
-import qualified Data.Text.Zipper.Generic      as Z
-import           Lens.Micro                     ( (?~)
-                                                , (^.)
-                                                , (^?)
-                                                , (.~)
-                                                , (%~)
-                                                , _2
-                                                , _head
-                                                , set
-                                                )
+import           Lens.Micro
 import qualified Network.MPD                   as MPD
 
 exEnd :: HState -> EventM Name (Next HState)

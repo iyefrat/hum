@@ -10,27 +10,12 @@ import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.Border
-import           Brick.Widgets.Edit
-import           Lens.Micro                     ( (^.)
-                                                , (%~)
-                                                , (.~){- (?~)
-                                                  (^.)
-                                                , (^?)
-                                                , (&)
-                                                , (%~)
-                                                , _2
-                                                , _head
-                                                , set
-                                                -}
-                                                )
-
+import           Lens.Micro
 import           Brick.Widgets.List
 import           Hum.Attributes
 import           Hum.Views.Common
 import           Hum.Rebuild
 import qualified Data.Text                     as T
-import qualified Data.Vector                   as V
-import qualified Data.Text.Zipper              as Z
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
