@@ -158,16 +158,16 @@ handleEventPlaylists s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> continue =<< playlistsMove listMoveDown s
     EvKey (KChar 'k') [] -> continue =<< playlistsMove listMoveUp s
-    EvKey (KChar 'l') [] -> do
-      continue $ s & focusL . focPlayL .~ FocPSongs
-    EvKey (KChar 'h') [] -> do
-      continue $ s & focusL . focPlayL .~ FocPlaylists
+    EvKey (KChar 'l') [] -> continue $ s & focusL . focPlayL .~ FocPSongs
+    EvKey (KChar 'h') [] -> continue $ s & focusL . focPlayL .~ FocPlaylists
     EvKey (KChar 'n') [] ->
       continue =<< playlistsSearch (s ^. exL . searchDirectionL) s
     EvKey (KChar 'N') [] ->
       continue =<< playlistsSearch (s ^. exL . searchDirectionL & not) s
-    EvKey KEnter      [] -> continue =<< playlistsAdd True s
-    EvKey (KChar ' ') [] -> continue =<< playlistsAdd False s
+    EvKey KEnter [] ->
+      continue =<< playlistsMove listMoveDown =<< playlistsAdd True s
+    EvKey (KChar ' ') [] ->
+      continue =<< playlistsMove listMoveDown =<< playlistsAdd False s
     EvKey (KChar 'G') [] ->
       continue =<< playlistsMove (\ls -> listMoveBy (length ls) ls) s
     EvKey (KChar 'g') [] -> continue =<< playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow

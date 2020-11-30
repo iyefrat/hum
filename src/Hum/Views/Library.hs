@@ -118,9 +118,7 @@ drawViewLibrary st =
   drawLibraryLeft st <+> drawLibraryMid st <+> drawLibraryRight st
 
 libraryMove
-  :: (forall e . List Name e -> List Name e)
-  -> HState
-  -> EventM Name HState
+  :: (forall e . List Name e -> List Name e) -> HState -> EventM Name HState
 libraryMove moveFunc s =
   let libfoc = s ^. focusL . focLibL
   in  case libfoc of
@@ -200,15 +198,18 @@ handleEventLibrary s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> continue =<< libraryMove listMoveDown s
     EvKey (KChar 'k') [] -> continue =<< libraryMove listMoveUp s
-    EvKey (KChar 'l') [] -> do
-      continue $ s & focusL . focLibL %~ libraryMoveRight
-    EvKey (KChar 'h') [] -> do
-      continue $ s & focusL . focLibL %~ libraryMoveLeft
-    EvKey (KChar 'n') [] -> continue =<< librarySearch (s ^. exL . searchDirectionL) s
-    EvKey (KChar 'N') [] -> continue =<< librarySearch (s ^. exL . searchDirectionL & not) s
-    EvKey KEnter      [] -> continue =<< libraryAdd True s
-    EvKey (KChar ' ') [] -> continue =<< libraryAdd False s
-    EvKey (KChar 'G') [] -> continue =<< libraryMove (\ls -> listMoveBy (length ls) ls) s
+    EvKey (KChar 'l') [] -> continue $ s & focusL . focLibL %~ libraryMoveRight
+    EvKey (KChar 'h') [] -> continue $ s & focusL . focLibL %~ libraryMoveLeft
+    EvKey (KChar 'n') [] ->
+      continue =<< librarySearch (s ^. exL . searchDirectionL) s
+    EvKey (KChar 'N') [] ->
+      continue =<< librarySearch (s ^. exL . searchDirectionL & not) s
+    EvKey KEnter [] ->
+      continue =<< libraryMove listMoveDown =<< libraryAdd True s
+    EvKey (KChar ' ') [] ->
+      continue =<< libraryMove listMoveDown =<< libraryAdd False s
+    EvKey (KChar 'G') [] ->
+      continue =<< libraryMove (\ls -> listMoveBy (length ls) ls) s
     EvKey (KChar 'g') [] -> continue =<< libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     _                    -> continue s
   _ -> continue s
