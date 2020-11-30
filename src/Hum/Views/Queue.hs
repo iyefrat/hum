@@ -11,7 +11,6 @@ import           Brick.Widgets.List
 import           Brick.Widgets.Edit
 import           Hum.Song
 import           Hum.Attributes
-import           Hum.Queue
 import           Hum.Utils
 import           Hum.Views.Common
 import           Network.MPD                    ( withMPD )

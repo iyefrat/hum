@@ -2,10 +2,8 @@
 
 
 * Near future
-** TODO add go down on space for the library and playlist
-requires changing all the functions from =EventM Name (Next HState)= to
- =EventM Name HState= and having the =continue= explicit in the keybindigns, which
- is probably a better idea anyway.
+** TODO implement completion in cmds
+** TODO implement search in help screen
 ** TODO hackage?
 ** TODO impliment search history
 ** TODO playlist editing

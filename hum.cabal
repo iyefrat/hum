@@ -113,7 +113,6 @@ library
                UI
              , Hum.Song
              , Hum.Types
-             , Hum.Queue
              , Hum.BChan
              , Hum.Attributes
              , Hum.Views
