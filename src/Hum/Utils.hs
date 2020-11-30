@@ -6,6 +6,7 @@ import           Brick.Types
 import           Brick.Main
 import           Brick.Widgets.List
 import           Data.Vector                   as V
+import           Data.Text                     as T
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
@@ -80,3 +81,9 @@ listPaste p ls =
 -- | toggle selected items highlight status
 listToggleHighlight :: SongList -> SongList
 listToggleHighlight = listModify (second not)
+
+saveListToPl :: MPD.MonadMPD m => SongList -> Text -> m ()
+saveListToPl ls name =
+  let songpaths = MPD.sgFilePath . fst <$> listElements ls
+      name'     = fromString . T.unpack $ name
+  in  for_ songpaths (MPD.playlistAdd name')

@@ -65,8 +65,9 @@ helpText = unlines
   , "  RET - add song/song collection to queue, and start playing the first one"
   , ""
   , "Commands:"
-  , ":help - gets you this"
-  , ":q    - quits"
+  , ":help       - gets you this"
+  , ":q          - quits"
+  , ":save $name - saves the queue to a playlist called $name"
   ]
 
 handleEventHelp
