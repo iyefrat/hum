@@ -14,6 +14,19 @@ import qualified Data.Vector                   as V
 -- in which we have funcitons to rebuild the state when it changes.
 
 
+rebuildLib :: HState -> EventM Name HState
+rebuildLib s = do
+    artistsVec <- liftIO (V.fromList . fromRight [] <$> withMPD
+      (MPD.list MPD.AlbumArtist Nothing))
+    let artists' = list ArtistsList artistsVec 1
+    albumsVec <- liftIO (albumsOfArtist (snd <$> listSelectedElement artists'))
+    let albums' = list AlbumsList albumsVec 1
+    songsVec <- liftIO (songsOfAlbum (snd <$> listSelectedElement albums'))
+    let songs' = list SongsList songsVec 1
+    pure $ s &  libraryL . artistsL .~ artists'
+             &  libraryL . albumsL .~ albums'
+             &  libraryL . songsL .~ songs'
+
 rebuildLibArtists :: HState -> EventM Name HState
 rebuildLibArtists s = do
     let artists' = s ^. libraryL . artistsL
@@ -32,6 +45,20 @@ rebuildLibAlbums s = do
     let songs' = list SongsList songsVec 1
     pure $ s & libraryL . albumsL .~ albums' & libraryL . songsL .~ songs'
 
+rebuildPl :: HState -> EventM Name HState
+rebuildPl s = do
+  plListVec <- liftIO (V.fromList . fromRight [] <$> withMPD MPD.listPlaylists)
+  let plList' = list PlaylistList plListVec 1
+  plSongsVec <- liftIO
+       (V.fromList . fromRight [] <$> withMPD
+           (MPD.listPlaylistInfo
+               (maybe "<no playlists>" snd (listSelectedElement plList'))
+           )
+       )
+  let plSongs' = list PlaylistSongs plSongsVec 1
+  pure $ s & playlistsL . plListL .~ plList'
+            & playlistsL . plSongsL.~ plSongs'
+
 rebuildPlList :: HState -> EventM Name HState
 rebuildPlList s = do
     let plList' = s ^. playlistsL . plListL
@@ -43,4 +70,4 @@ rebuildPlList s = do
         )
     let plSongs' = list PlaylistSongs plSongsVec 1
     pure $ s & playlistsL . plListL .~ plList'
-            & playlistsL . plSongsL.~ plSongs'
+             & playlistsL . plSongsL.~ plSongs'
