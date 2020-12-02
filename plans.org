@@ -13,9 +13,11 @@
 *** TODO playlist contents editing
 - the editing operations should be kept in memory, and saved explicitly
 ** TODO Various Artists
+** TODO various modes for the library
 
 * Medium Future
 ** TODO display random song order
+** TODO rethink the extentmap
 ** TODO more vim motions
 ** TODO tags
 ** TODO undo
