@@ -54,7 +54,7 @@ rebuildPl s = do
                (maybe "<no playlists>" snd (listSelectedElement plList'))
            )
        )
-  let plSongs' = list PlaylistSongs plSongsVec 1
+  let plSongs' = (, False) <$> list PlaylistSongs plSongsVec 1
   pure $ s & playlistsL . plListL .~ plList'
             & playlistsL . plSongsL.~ plSongs'
 
@@ -67,6 +67,6 @@ rebuildPlList s = do
                 (maybe "<no playlists>" snd (listSelectedElement plList'))
             )
         )
-    let plSongs' = list PlaylistSongs plSongsVec 1
+    let plSongs' = (, False) <$> list PlaylistSongs plSongsVec 1
     pure $ s & playlistsL . plListL .~ plList'
              & playlistsL . plSongsL.~ plSongs'

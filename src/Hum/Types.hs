@@ -21,6 +21,7 @@ data HState = HState
     , extentMap   :: !(Map Name (Maybe (Extent Name)))
     , clipboard   :: !SongList
     , focus       :: !Focus
+    , editable    :: !Bool
     }
 --  deriving (Show) --, Eq)
 
@@ -31,7 +32,7 @@ data LibraryState = LibraryState
     }
 data PlaylistsState = PlaylistsState
     { plList  :: !(List Name PlaylistName)
-    , plSongs :: !(List Name Song)
+    , plSongs :: !SongList
     }
 data ExSubMode = Cmd | FSearch | BSearch
     deriving (Show, Eq, Ord)

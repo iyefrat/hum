@@ -111,6 +111,7 @@ songSearch text metadata song =
   let mtags = (T.toLower <$>) . (\tag -> mmeta tag song) <$> metadata
   in  or $ fromMaybe False <$> (T.isInfixOf (T.toLower text) <<$>> mtags)
 
+
 stringySearch :: MPD.ToString a => Text -> a -> Bool
 stringySearch text value =
   T.isInfixOf (T.toLower text) (T.toLower . MPD.toText $ value)

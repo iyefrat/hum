@@ -86,9 +86,10 @@ buildInitialState chan = do
     ( MPD.listPlaylistInfo
     $ maybe "<no playlists>" snd (listSelectedElement plList)
     )
-  let plSongs   = list PlaylistSongs plSongsVec 1
+  let plSongs   =  (,False) <$> list PlaylistSongs plSongsVec 1
   let library   = LibraryState { artists, albums, songs }
   let playlists = PlaylistsState { plList, plSongs }
+  let editable = False
   pure HState { chan
               , view
               , mode
@@ -101,6 +102,7 @@ buildInitialState chan = do
               , library
               , playlists
               , focus
+              , editable
               }
 
 humStartEvent :: HState -> EventM Name HState
@@ -121,7 +123,7 @@ seekCurEventM i s = do
 handleEvent :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case s ^. modeL of
-    ExMode   -> handleExEvent s e
+    ExMode     -> handleExEvent s e
     NormalMode -> case vtye of
       EvKey (KChar 'q') [] -> halt s
       EvKey (KChar 't') [] -> do
@@ -195,13 +197,16 @@ handleEvent s e = case e of
       EvKey (KChar '{') [] -> continue =<< seekCurEventM (-30) s
       EvKey (KChar '1') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
-        continue $ s & viewL .~ QueueView
+        continue $ s & editableL .~ False
+                     & viewL .~ QueueView
       EvKey (KChar '2') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
-        continue $ s & viewL .~ LibraryView
+        continue $ s & editableL .~ False
+                     & viewL .~ LibraryView
       EvKey (KChar '3') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
-        continue $ s & viewL .~ PlaylistsView
+        continue $ s & editableL .~ False
+                     & viewL .~ PlaylistsView
       EvResize _ _ -> do
         extentMap <- updateExtentMap
         continue s { extentMap }

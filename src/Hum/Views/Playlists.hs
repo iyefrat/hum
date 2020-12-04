@@ -62,11 +62,11 @@ playlistRow :: HState -> T.Text -> Widget n
 playlistRow _ val =
   withAttr queueAlbumAttr $ column Nothing (Pad 1) Max $ txt val
 
-playlistSongRow :: HState -> MPD.Song -> Widget n
-playlistSongRow st song =
+playlistSongRow :: HState -> (MPD.Song,Highlight) -> Widget n
+playlistSongRow st (song,hl) =
   let pathsInQueue =
         (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
-  in  withAttr
+  in (if hl then highlightOverQueueAttrs else id) . withAttr
           (if MPD.sgFilePath song `elem` pathsInQueue
             then queueTitleBoldAttr
             else queueTitleAttr
@@ -97,9 +97,9 @@ playlistsAdd play s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
         FocPlaylists -> do
-          songBulkAdd play (listElements (s ^. playlistsL . plSongsL)) s
+          songBulkAdd play (fst <$> listElements (s ^. playlistsL . plSongsL)) s
         FocPSongs -> do
-          let maybeFilePath = MPD.sgFilePath . snd <$> listSelectedElement
+          let maybeFilePath = MPD.sgFilePath . fst . snd <$> listSelectedElement
                 (s ^. playlistsL . plSongsL)
           traverse_
             (\sel -> liftIO
@@ -133,7 +133,7 @@ playlistsSearch direction s =
               $  s { extentMap }
               &  playlistsL
               .  plSongsL
-              %~ (dir . listFindBy (songSearch searchkey [MPD.Title]) . dir)
+              %~ (dir . listFindBy (songSearch searchkey [MPD.Title] . fst) . dir)
 
 
 handleEventPlaylists
@@ -150,10 +150,13 @@ handleEventPlaylists s e = case e of
       continue =<< playlistsSearch (s ^. exL . searchDirectionL & not) s
     EvKey KEnter [] ->
       continue =<< playlistsMove listMoveDown =<< playlistsAdd True s
-    EvKey (KChar ' ') [] ->
+    EvKey (KChar ' ') [] -> if s ^. editableL then
+      continue $ s & playlistsL . plSongsL %~ (listMoveDown . listToggleHighlight)
+      else
       continue =<< playlistsMove listMoveDown =<< playlistsAdd False s
     EvKey (KChar 'G') [] ->
       continue =<< playlistsMove (\ls -> listMoveBy (length ls) ls) s
     EvKey (KChar 'g') [] -> continue =<< playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
+    EvKey (KChar 'e') [] -> continue $ s & editableL %~ not
     _                    -> continue s
   _ -> continue s
