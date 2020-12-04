@@ -156,7 +156,7 @@ handleEventQueue s e = case e of
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song, queue = queue s }
     EvKey (KChar ' ') [] -> do
-      continue s { queue = listMoveDown $ listToggleHighlight (queue s) }
+      continue $ s & queueL %~ (listMoveDown . listToggleHighlight) 
     EvKey (KChar 'd') [] -> do
       let clip = getHighlighted (queue s)
       _ <- liftIO (withMPD $ deleteHighlighted (queue s))

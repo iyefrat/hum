@@ -195,13 +195,13 @@ handleEvent s e = case e of
       EvKey (KChar '{') [] -> continue =<< seekCurEventM (-30) s
       EvKey (KChar '1') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
-        continue s { view = QueueView }
+        continue $ s & viewL .~ QueueView
       EvKey (KChar '2') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
-        continue s { view = LibraryView }
+        continue $ s & viewL .~ LibraryView
       EvKey (KChar '3') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
-        continue s { view = PlaylistsView }
+        continue $ s & viewL .~ PlaylistsView
       EvResize _ _ -> do
         extentMap <- updateExtentMap
         continue s { extentMap }
