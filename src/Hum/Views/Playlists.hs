@@ -10,6 +10,7 @@ import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.Border
+import           Brick.Widgets.Border.Style
 import           Lens.Micro
 import           Brick.Widgets.List
 import           Hum.Attributes
@@ -50,7 +51,14 @@ drawPlaylistRight st =
         .   visible
         .   vLimit vsize
         .   center
-        $   hBorder
+        $   (if st ^. editableL
+              then
+                withDefAttr listHighlightedAttr
+                . withBorderStyle (borderStyleFromChar '=')
+                $ hBorderWithLabel
+                $ txt "editing"
+              else hBorder
+            )
         <=> hCenter
               (renderList (const $ playlistSongRow st)
                           ((focPlay . focus $ st) == FocPSongs)
