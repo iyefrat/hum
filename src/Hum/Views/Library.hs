@@ -209,3 +209,6 @@ handleEventLibrary s e = case e of
     EvKey (KChar 'g') [] -> continue =<< libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     _                    -> continue s
   _ -> continue s
+
+addToPl :: EventM Name HState
+addToPl = error "not implemented"

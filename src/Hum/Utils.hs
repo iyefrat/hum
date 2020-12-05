@@ -107,3 +107,4 @@ saveListToPl ls name =
   let songpaths = MPD.sgFilePath . fst <$> listElements ls
       name'     = fromString . T.unpack $ name
   in  for_ songpaths (MPD.playlistAdd name')
+
