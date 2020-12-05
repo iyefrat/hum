@@ -3,7 +3,7 @@ module Main where
 import           Brick.Main
 import qualified Brick.BChan                   as BC
 import qualified Graphics.Vty                  as Vty
-import           UI                             ( buildInitialState
+import           Hum.UI                         ( buildInitialState
                                                 , app
                                                 )
 import           Control.Concurrent             ( threadDelay

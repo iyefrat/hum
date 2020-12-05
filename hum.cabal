@@ -111,7 +111,7 @@ library
   import: deps
   -- Modules exported by the library.
   exposed-modules:
-               UI
+               Hum.UI
              , Hum.Types
              , Hum.BChan
              , Hum.Attributes

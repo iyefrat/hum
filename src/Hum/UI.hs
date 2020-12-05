@@ -1,5 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
-module UI where
+module Hum.UI where
 
 
 import           Brick.Main
