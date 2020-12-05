@@ -90,8 +90,8 @@ column maxWidth left right w = case maxWidth of
   Just (Col m) -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
 
-songBulkAdd :: Bool -> V.Vector MPD.Song -> HState -> EventM n HState
-songBulkAdd play songs s = do
+songBulkAddtoQ :: Bool -> V.Vector MPD.Song -> HState -> EventM n HState
+songBulkAddtoQ play songs s = do
   let songPaths = MPD.sgFilePath <$> songs
   traverse_
     (\sel -> liftIO

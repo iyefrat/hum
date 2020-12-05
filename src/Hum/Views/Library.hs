@@ -124,8 +124,8 @@ libraryMove moveFunc s =
           pure $ s & libraryL . songsL %~ moveFunc
 
 
-libraryAdd :: Bool -> HState -> EventM Name HState
-libraryAdd play s =
+libraryAddtoQ :: Bool -> HState -> EventM Name HState
+libraryAddtoQ play s =
   let libfoc = s ^. focusL . focLibL
   in
     case libfoc of
@@ -135,14 +135,14 @@ libraryAdd play s =
             (songsOfArtist
               (snd <$> listSelectedElement (s ^. libraryL . artistsL))
             )
-        songBulkAdd play songs s
+        songBulkAddtoQ play songs s
       FocAlbums -> do
         songs <-
           liftIO
             (songsOfAlbum
               (snd <$> listSelectedElement (s ^. libraryL . albumsL))
             )
-        songBulkAdd play songs s
+        songBulkAddtoQ play songs s
       FocSongs -> do
         let maybeFilePath = MPD.sgFilePath . snd <$> listSelectedElement
               (s ^. libraryL . songsL)
@@ -201,9 +201,9 @@ handleEventLibrary s e = case e of
     EvKey (KChar 'N') [] ->
       continue =<< librarySearch (s ^. exL . searchDirectionL & not) s
     EvKey KEnter [] ->
-      continue =<< libraryMove listMoveDown =<< libraryAdd True s
+      continue =<< libraryMove listMoveDown =<< libraryAddtoQ True s
     EvKey (KChar ' ') [] ->
-      continue =<< libraryMove listMoveDown =<< libraryAdd False s
+      continue =<< libraryMove listMoveDown =<< libraryAddtoQ False s
     EvKey (KChar 'G') [] ->
       continue =<< libraryMove (\ls -> listMoveBy (length ls) ls) s
     EvKey (KChar 'g') [] -> continue =<< libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow

@@ -100,12 +100,12 @@ playlistsMove moveFunc s =
         FocPSongs    -> do
           pure $ s & playlistsL . plSongsL %~ moveFunc
 
-playlistsAdd :: Bool -> HState -> EventM Name HState
-playlistsAdd play s =
+playlistsAddtoQ :: Bool -> HState -> EventM Name HState
+playlistsAddtoQ play s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
         FocPlaylists -> do
-          songBulkAdd play (fst <$> listElements (s ^. playlistsL . plSongsL)) s
+          songBulkAddtoQ play (fst <$> listElements (s ^. playlistsL . plSongsL)) s
         FocPSongs -> do
           let maybeFilePath = MPD.sgFilePath . fst . snd <$> listSelectedElement
                 (s ^. playlistsL . plSongsL)
@@ -157,11 +157,11 @@ handleEventPlaylists s e = case e of
     EvKey (KChar 'N') [] ->
       continue =<< playlistsSearch (s ^. exL . searchDirectionL & not) s
     EvKey KEnter [] ->
-      continue =<< playlistsMove listMoveDown =<< playlistsAdd True s
+      continue =<< playlistsMove listMoveDown =<< playlistsAddtoQ True s
     EvKey (KChar ' ') [] -> if s ^. editableL then
       continue $ s & playlistsL . plSongsL %~ (listMoveDown . listToggleHighlight)
       else
-      continue =<< playlistsMove listMoveDown =<< playlistsAdd False s
+      continue =<< playlistsMove listMoveDown =<< playlistsAddtoQ False s
     EvKey (KChar 'G') [] ->
       continue =<< playlistsMove (\ls -> listMoveBy (length ls) ls) s
     EvKey (KChar 'g') [] -> continue =<< playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
