@@ -124,6 +124,7 @@ library
              , Hum.Utils
              , Hum.Modes
              , Hum.Modes.ExMode
+             , Hum.Modes.PromptMode
              , Hum.Rebuild
   -- Modules included in this library but not exported.
   -- other-modules:

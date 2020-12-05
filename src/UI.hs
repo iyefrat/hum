@@ -31,7 +31,8 @@ app = App { appDraw         = drawUI
 
 drawUI :: HState -> [Widget Name]
 drawUI st =
-  [ drawNowPlaying st
+  [if st ^. modeL == PromptMode then drawPrompt else emptyWidget,
+   drawNowPlaying st
     <=> (case view st of
           QueueView     -> drawViewQueue st
           LibraryView   -> drawViewLibrary st
@@ -124,6 +125,7 @@ handleEvent :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case s ^. modeL of
     ExMode     -> handleExEvent s e
+    PromptMode -> handlePromptEvent s e
     NormalMode -> case vtye of
       EvKey (KChar 'q') [] -> halt s
       EvKey (KChar 't') [] -> do
@@ -156,7 +158,7 @@ handleEvent s e = case e of
               )
             $ maybe 0 MPD.stXFadeWidth (status s)
             )
-          )
+          ) -- TODO
         status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
         continue s { status }
       EvKey (KChar 'r') [] -> do

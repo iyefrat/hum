@@ -43,7 +43,7 @@ data ExState = ExState
     , searchHistory   :: ![Text]
     , cmdHistory      :: ![Text]
     }
-data Mode = NormalMode | ExMode
+data Mode = NormalMode | ExMode | PromptMode
   deriving (Show,Eq)
 type SongList = List Name (Song, Highlight)
 

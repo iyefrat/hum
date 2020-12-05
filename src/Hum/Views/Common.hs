@@ -6,6 +6,7 @@ import           Hum.Types
 import           Brick.Types
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
+import           Brick.Widgets.Border
 import           Hum.Attributes
 import           Hum.Utils
 import           Hum.Rebuild
@@ -128,3 +129,6 @@ songSearch text metadata song =
 stringySearch :: MPD.ToString a => Text -> a -> Bool
 stringySearch text value =
   T.isInfixOf (T.toLower text) (T.toLower . MPD.toText $ value)
+
+drawPrompt :: Widget Name
+drawPrompt = centerLayer . border . setAvailableSize (30, 6) . center $ txt "sup"

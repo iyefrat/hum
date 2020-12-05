@@ -140,8 +140,7 @@ queueSearch direction s =
 queueAddToPl :: HState -> String -> EventM Name HState
 queueAddToPl s plName =
   let songs =
-        s
-          ^.  queueL
+        s ^.  queueL
           &   listFilter
                 (\sg ->
                   snd sg
@@ -166,6 +165,7 @@ handleEventQueue s e = case e of
     EvKey (KChar 'n') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL) s
     EvKey (KChar 'N') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL & not) s
     EvKey (KChar 'a') [] -> continue =<< queueAddToPl s "temp"
+    EvKey (KChar 'A') [] -> continue $ s & modeL .~ PromptMode
     EvKey KEnter      [] -> do
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)
