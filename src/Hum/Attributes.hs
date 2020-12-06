@@ -17,7 +17,8 @@ import qualified Graphics.Vty                  as Vty
 humAttrMap :: AttrMap
 humAttrMap = attrMap
   defAttr
-  [ (listSelectedAttr       , Vty.withStyle defAttr Vty.underline)
+  [ (listAttr               , Vty.withStyle (BU.fg Vty.white) Vty.defaultStyleMask)
+  , (listSelectedAttr       , Vty.withStyle defAttr Vty.underline)
   , (listSelectedFocusedAttr, Vty.withStyle defAttr Vty.reverseVideo)
   , (listHighlightedAttr    , BU.fg Vty.yellow)
   , (headerAttr             , Vty.withStyle defAttr Vty.underline)
@@ -32,6 +33,9 @@ humAttrMap = attrMap
     )
   , (queueTitleBoldAttr, Vty.withStyle defAttr Vty.bold)
   ]
+
+wobAttr :: AttrName
+wobAttr = "white on black"
 
 queueAttr, queueAlbumAttr, queueTitleAttr, queueTrackAttr, queueArtistAttr, queueTimeAttr, queueDateAttr
   :: AttrName

@@ -14,11 +14,17 @@ import qualified Data.Text.Zipper              as Z
                                          hiding ( textZipper )
 import           Lens.Micro
 import qualified Network.MPD                   as MPD
+import Brick.Widgets.List
 
 handlePromptEvent
     :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handlePromptEvent s e = case e of
-    VtyEvent (EvKey KEsc []) -> continue $ s & modeL .~ NormalMode
-    VtyEvent vtye ->
-        continue =<< handleEventLensed s (exL . exEditorL) handleEditorEvent vtye
+  VtyEvent vtye -> case vtye of
+    EvKey KEsc [] -> continue $ s & modeL .~ NormalMode
+    EvKey (KChar 'q') [] -> continue $ s & modeL .~ NormalMode
+    EvKey (KChar 'j') [] -> do
+      continue $ s & promptL %~ listMoveDown
+    EvKey (KChar 'k') [] -> do
+      continue $ s & promptL %~ listMoveUp
     _ -> continue s
+  _ -> continue s

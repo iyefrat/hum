@@ -31,7 +31,7 @@ app = App { appDraw         = drawUI
 
 drawUI :: HState -> [Widget Name]
 drawUI st =
-  [if st ^. modeL == PromptMode then drawPrompt else emptyWidget,
+  [if st ^. modeL == PromptMode then drawPrompt st else emptyWidget,
    drawNowPlaying st
     <=> (case view st of
           QueueView     -> drawViewQueue st
@@ -91,6 +91,7 @@ buildInitialState chan = do
   let library   = LibraryState { artists, albums, songs }
   let playlists = PlaylistsState { plList, plSongs }
   let editable = False
+  let prompt   =  listInsert 0 (fromString "Create new playlist...") plList
   pure HState { chan
               , view
               , mode
@@ -104,6 +105,7 @@ buildInitialState chan = do
               , playlists
               , focus
               , editable
+              , prompt
               }
 
 humStartEvent :: HState -> EventM Name HState

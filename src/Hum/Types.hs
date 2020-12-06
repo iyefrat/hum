@@ -22,6 +22,7 @@ data HState = HState
     , clipboard   :: !SongList
     , focus       :: !Focus
     , editable    :: !Bool
+    , prompt      :: !(List Name PlaylistName)
     }
 --  deriving (Show) --, Eq)
 
@@ -30,12 +31,15 @@ data LibraryState = LibraryState
     , albums  :: !(List Name MPD.Value)
     , songs   :: !(List Name Song)
     }
+
 data PlaylistsState = PlaylistsState
     { plList  :: !(List Name PlaylistName)
     , plSongs :: !SongList
     }
+
 data ExSubMode = Cmd | FSearch | BSearch
     deriving (Show, Eq, Ord)
+
 data ExState = ExState
     { exPrefix        :: !ExSubMode
     , exEditor        :: !(Editor Text Name)
@@ -43,8 +47,10 @@ data ExState = ExState
     , searchHistory   :: ![Text]
     , cmdHistory      :: ![Text]
     }
+
 data Mode = NormalMode | ExMode | PromptMode
   deriving (Show,Eq)
+
 type SongList = List Name (Song, Highlight)
 
 type HumEvent = Either Tick (Response [Subsystem])

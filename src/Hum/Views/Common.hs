@@ -15,6 +15,8 @@ import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import qualified Data.Vector                   as V
 import qualified Data.Text                     as T
+import           Brick.Widgets.List
+import           Lens.Micro
 
 drawNowPlaying :: HState -> Widget Name
 drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
@@ -73,7 +75,7 @@ drawProgressBar st = case width of
   completed = (\w (i, j) -> round ((i / j) * fromIntegral w)) width songTime
   bar       = str
     (zipWith
-      (\a b -> if a `elem` ("1234567890/:" :: [Char]) then a else b)
+      (\a b -> if a `elem` ("1234567890/:" :: String) then a else b)
       (replicate (-5 + div width 2) ' ' ++ timeText ++ replicate
         (-3 + div width 2)
         ' '
@@ -122,7 +124,7 @@ songBulkAddtoPl pl songs s = do
 
 songSearch :: Text -> [MPD.Metadata] -> MPD.Song -> Bool
 songSearch text metadata song =
-  let mtags = (T.toLower <$>) . (\tag -> mmeta tag song) <$> metadata
+  let mtags = (T.toLower <$>) . (`mmeta` song) <$> metadata
   in  or $ fromMaybe False <$> (T.isInfixOf (T.toLower text) <<$>> mtags)
 
 
@@ -130,5 +132,13 @@ stringySearch :: MPD.ToString a => Text -> a -> Bool
 stringySearch text value =
   T.isInfixOf (T.toLower text) (T.toLower . MPD.toText $ value)
 
-drawPrompt :: Widget Name
-drawPrompt = centerLayer . border . setAvailableSize (30, 6) . center $ txt "sup"
+drawPrompt :: HState -> Widget Name
+drawPrompt st = centerLayer . border . setAvailableSize (30, 6) . center
+ $ renderListWithIndex (choosePlRow st)
+              True
+              (st ^. promptL)
+
+choosePlRow :: HState -> Int -> Bool -> MPD.PlaylistName -> Widget n
+choosePlRow st i _ pl = if i==0 then
+  str (MPD.toString pl) <=> (forceAttr listAttr hBorder)
+  else str (MPD.toString pl)
