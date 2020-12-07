@@ -46,7 +46,8 @@ tested-with: GHC == 8.10.2, GHC == 8.8.4, GHC == 8.6.5, GHC == 8.4.4
 -- Extra files to be distributed with the package, such as examples or a
 -- README.
 extra-source-files:
-  CHANGELOG.org
+  CHANGELOG.md
+  README.md
 
 source-repository head
   type: git
