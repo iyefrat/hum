@@ -66,6 +66,14 @@ buildInitialState chan = do
                    }
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
+  let view      = QueueView
+  let extentMap = Map.empty
+  let focus = Focus { focQueue = FocQueue
+                    , focLib   = FocArtists
+                    , focPlay  = FocPlaylists
+                    , focEx    = False
+                    }
+  let clipboard = list Clipboard V.empty 1
   queueVec <- V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue = (, False) <$> list QueueList queueVec 1
   artistsVec <- V.fromList . fromRight [] <$> withMPD
@@ -73,16 +81,8 @@ buildInitialState chan = do
   let artists = list ArtistsList artistsVec 1
   albumsVec <- albumsOfArtist (snd <$> listSelectedElement artists)
   let albums    = list AlbumsList albumsVec 1
-  let view      = QueueView
-  let extentMap = Map.empty
-  let clipboard = list Clipboard V.empty 1
   songsVec <- songsOfAlbum (snd <$> listSelectedElement albums)
   let songs = list SongsList songsVec 1
-  let focus = Focus { focQueue = FocQueue
-                    , focLib   = FocArtists
-                    , focPlay  = FocPlaylists
-                    , focEx    = False
-                    }
   plListVec <- V.fromList . fromRight [] <$> withMPD MPD.listPlaylists
   let plList = list PlaylistList plListVec 1
   plSongsVec <- V.fromList . fromRight [] <$> withMPD
