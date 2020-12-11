@@ -67,5 +67,11 @@ rebuildPlList s = do
             )
         )
     let plSongs' = (, False) <$> list PlaylistSongs plSongsVec 1
-    pure $ s & playlistsL . plListL .~ plList'
-             & playlistsL . plSongsL.~ plSongs'
+    pure $ s & playlistsL . plListL  .~ plList'
+             & playlistsL . plSongsL .~ plSongs'
+
+rebuildQueue :: MonadIO m => HState -> m HState
+rebuildQueue s = do
+  queueVec  <- liftIO $ V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
+  let queue' = (, False) <$> list QueueList queueVec 1
+  pure $ s & queueL .~ queue'
