@@ -1,29 +1,34 @@
 #+TITLE: Plans
 
-
-* Near future
-** TODO implement completion in cmds
-** TODO implement search in help screen
-** TODO hackage?
-** TODO impliment search history
+* PROJ Uploading to hackage
 ** TODO playlist editing
+*** STRT add song to playlist
+*** TODO copy and delete individual playlists
+*** TODO edit playlist my copying and pasting stuff, then saving
+** TODO implement scroll in help screen
+** TODO implement search in help screen
+** TODO improve docs
+** TODO upload to hackage
+
+* PROJ Near future
+** TODO implement completion in cmds
+** TODO generalize prompt
+** TODO impliment search history
 *** TODO implement =:save= with the protocol
 - also don't override unnamed.m3u
-*** TODO copy and delete individual playlists
 *** TODO playlist contents editing
 - the editing operations should be kept in memory, and saved explicitly
 ** TODO Various Artists
 ** TODO various modes for the library
-** TODO make prompt
 ** TODO make refactor pasteDeleteCleanup
 
-* Medium Future
+* PROJ Medium Future
 ** TODO display random song order
 ** TODO rethink the extentmap
 ** TODO more vim motions
 ** TODO tags
 ** TODO undo
 
-* Far future
+* PROJ Far future
 ** TODO write generic Response handler to print the MPDError instead of doing the thing.
 ** TODO (oneday) album art stuff, look into hip and jucypixels on hackage
