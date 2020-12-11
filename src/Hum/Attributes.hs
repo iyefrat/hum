@@ -32,10 +32,11 @@ humAttrMap = attrMap
     , Vty.withStyle (Vty.withStyle defAttr Vty.bold) Vty.underline
     )
   , (queueTitleBoldAttr, Vty.withStyle defAttr Vty.bold)
+  , (editorAttr          , BU.bg Vty.black)
   ]
 
-wobAttr :: AttrName
-wobAttr = "white on black"
+wobAttr :: Vty.Attr
+wobAttr = BU.fg Vty.white
 
 queueAttr, queueAlbumAttr, queueTitleAttr, queueTrackAttr, queueArtistAttr, queueTimeAttr, queueDateAttr
   :: AttrName
@@ -57,6 +58,10 @@ queueNowPlayingAttr = queueAttr <> "now playing"
 
 queueTitleBoldAttr :: AttrName
 queueTitleBoldAttr = queueTitleAttr <> "bold"
+
+
+editorAttr :: AttrName
+editorAttr = "editor"
 
 highlightOverQueueAttrs :: Widget n -> Widget n
 highlightOverQueueAttrs = updateAttrMap

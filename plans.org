@@ -2,7 +2,7 @@
 
 * PROJ Uploading to hackage
 ** TODO playlist editing
-*** STRT add song to playlist
+*** DONE add song to playlist
 *** TODO copy and delete individual playlists
 *** TODO edit playlist my copying and pasting stuff, then saving
 ** TODO implement scroll in help screen

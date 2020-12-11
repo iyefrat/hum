@@ -6,6 +6,7 @@ import           Hum.Types
 import           Brick.Types
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
+import           Brick.Widgets.Edit
 import           Brick.Widgets.Border
 import           Hum.Attributes
 import           Hum.Utils
@@ -133,12 +134,29 @@ stringySearch text value =
   T.isInfixOf (T.toLower text) (T.toLower . MPD.toText $ value)
 
 drawPrompt :: HState -> Widget Name
-drawPrompt st = centerLayer . border . setAvailableSize (30, 6) . center
- $ renderListWithIndex (choosePlRow st)
-              True
-              (st ^. promptL)
+drawPrompt st = case st ^. promptsL . currentPromptL of
+  PlSelectPrompt ->
+    centerLayer
+      .   border
+      .   setAvailableSize (30, 10)
+      .   center
+      $   (hCenter . txt $ st ^. promptsL . promptTitleL)
+      <=> hBorder
+      <=> renderListWithIndex choosePlRow
+                              True
+                              (st ^. promptsL . plSelectPromptL)
+  TextPrompt ->
+    centerLayer
+      .   border
+      .   setAvailableSize (30, 3)
+      .   center
+      $   (hCenter . txt $ st ^. promptsL . promptTitleL)
+      <=> hBorder
+      <=> (center . setAvailableSize (25, 1) . withDefAttr editorAttr)
+            (renderEditor (txt . T.unlines) True (st ^. promptsL . textPromptL))
+  YNPrompt -> txt "todo"
 
-choosePlRow :: HState -> Int -> Bool -> MPD.PlaylistName -> Widget n
-choosePlRow st i _ pl = if i==0 then
-  str (MPD.toString pl) <=> (forceAttr listAttr hBorder)
-  else str (MPD.toString pl)
+choosePlRow :: Int -> Bool -> Maybe MPD.PlaylistName -> Widget n
+choosePlRow i _ pl = if i==0 then
+  str "New Playlist" <=> modifyDefAttr (const wobAttr) hBorder
+  else str (MPD.toString $ fromMaybe "<error getting playlist name>" pl)

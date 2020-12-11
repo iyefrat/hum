@@ -22,7 +22,7 @@ data HState = HState
     , clipboard   :: !SongList
     , focus       :: !Focus
     , editable    :: !Bool
-    , prompt      :: !(List Name PlaylistName)
+    , prompts      :: !Prompts
     }
 --  deriving (Show) --, Eq)
 
@@ -48,6 +48,17 @@ data ExState = ExState
     , cmdHistory      :: ![Text]
     }
 
+data Prompts = Prompts { currentPrompt  :: !PromptType
+                        ,promptTitle :: Text
+                        ,plSelectPrompt :: !(List Name (Maybe PlaylistName))
+                        ,textPrompt :: !(Editor Text Name)
+                        ,exitPrompt :: HState -> EventM Name HState
+                       }
+
+data PromptType = PlSelectPrompt | YNPrompt | TextPrompt
+  deriving (Show,Eq)
+
+
 data Mode = NormalMode | ExMode | PromptMode
   deriving (Show,Eq)
 
@@ -57,9 +68,10 @@ type HumEvent = Either Tick (Response [Subsystem])
 
 data Name = NowPlaying | Clipboard
   | Queue | QueueList
-  | Library | ArtistsList | LibraryLeft | AlbumsList | LibraryMid| SongsList | LibraryRight
+  | Library | ArtistsList | LibraryLeft | AlbumsList | LibraryMid | SongsList | LibraryRight
   | PlaylistList | PlaylistLeft | PlaylistSongs | PlaylistRight
   | ExEditor
+  | TextPromptEditor
  deriving (Show, Eq, Ord)
 
 data FocQueue = FocQueue
@@ -88,3 +100,4 @@ suffixLenses ''Focus
 suffixLenses ''LibraryState
 suffixLenses ''PlaylistsState
 suffixLenses ''ExState
+suffixLenses ''Prompts

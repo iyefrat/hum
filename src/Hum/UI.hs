@@ -48,10 +48,12 @@ drawUI st =
   ]
 
 chooseCursor :: HState -> [CursorLocation Name] -> Maybe (CursorLocation Name)
-chooseCursor st ls = if st ^. focusL . focExL
-  then find isCurrent ls
-  else Nothing
-  where isCurrent cl = cl ^. cursorLocationNameL == Just ExEditor
+chooseCursor st ls
+  | st ^. focusL . focExL = find (isCurrent ExEditor) ls
+  | st ^. promptsL . currentPromptL == TextPrompt = find (isCurrent TextPromptEditor) ls
+  | otherwise = Nothing
+  where
+      isCurrent n cl = cl ^. cursorLocationNameL == Just n
 
 buildInitialState :: BC.BChan HumEvent -> IO HState
 buildInitialState chan = do
@@ -87,11 +89,17 @@ buildInitialState chan = do
     ( MPD.listPlaylistInfo
     $ maybe "<no playlists>" snd (listSelectedElement plList)
     )
-  let plSongs   =  (,False) <$> list PlaylistSongs plSongsVec 1
-  let library   = LibraryState { artists, albums, songs }
+  let plSongs = (, False) <$> list PlaylistSongs plSongsVec 1
+  let library = LibraryState { artists, albums, songs }
   let playlists = PlaylistsState { plList, plSongs }
-  let editable = False
-  let prompt   =  listInsert 0 (fromString "Create new playlist...") plList
+  let editable  = False
+  let prompts = Prompts
+        { currentPrompt  = PlSelectPrompt
+        , promptTitle    = ""
+        , textPrompt     = editorText TextPromptEditor (Just 1) ""
+        , plSelectPrompt = listInsert 0 Nothing (Just <$> plList)
+        , exitPrompt     = \s -> pure $ s & modeL .~ NormalMode
+        }
   pure HState { chan
               , view
               , mode
@@ -105,11 +113,11 @@ buildInitialState chan = do
               , playlists
               , focus
               , editable
-              , prompt
+              , prompts
               }
 
 humStartEvent :: HState -> EventM Name HState
-humStartEvent s = pure s
+humStartEvent = pure
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
 hBoxPad _ []       = emptyWidget

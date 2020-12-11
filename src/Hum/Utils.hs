@@ -64,7 +64,7 @@ updateExtentMap = do
 
 deleteHighlighted :: MPD.MonadMPD m => SongList -> m ()
 deleteHighlighted ls =
-  let hls = listFilter snd ls
+  let (hls :: SongList) = listFilter snd ls
   in  for_ hls (\s -> whenJust (MPD.sgId . fst $ s) MPD.deleteId)
         >> whenJust
              ((MPD.sgId . fst . snd) =<< listSelectedElement ls)
@@ -82,8 +82,8 @@ pasteClipboard clip ls =
 getHighlighted :: SongList -> SongList
 getHighlighted ls = hls where
   hls = listFilter
-    (\(el :: (MPD.Song, Highlight)) ->
-      snd el || Just True == ((el ==) <$> (snd <$> listSelectedElement ls))
+    (\(song,hl) ->
+      hl || Just (song,hl) == (snd <$> listSelectedElement ls)
     )
     ls
 

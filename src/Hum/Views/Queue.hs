@@ -24,7 +24,7 @@ drawViewQueue st =
         Nothing -> 60
   in  reportExtent Queue $ hCenter
         (   viewport Queue Vertical
-        .   visible
+--        .   visible
         .   vLimit vsize
         .   center
         $   hCenter header
@@ -136,21 +136,16 @@ queueSearch direction s =
              . dir
              )
 
-
 queueAddToPl :: HState -> String -> EventM Name HState
 queueAddToPl s plName =
   let songs =
-        s ^.  queueL
-          &   listFilter
-                (\sg ->
-                  snd sg
-                    || (s ^.  queueL
-                         &   listSelectedElement
-                         <&> (== sg) . snd
-                         &   fromMaybe False))
+        (s ^.  queueL)
+          &   getHighlighted
           &   listElements
           <&> fst
   in  songBulkAddtoPl plName songs s
+
+
 
 handleEventQueue
   :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
@@ -164,8 +159,9 @@ handleEventQueue s e = case e of
       continue s { queue = listMoveUp $ queue s, extentMap }
     EvKey (KChar 'n') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL) s
     EvKey (KChar 'N') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL & not) s
-    EvKey (KChar 'a') [] -> continue =<< queueAddToPl s "temp"
-    EvKey (KChar 'A') [] -> continue $ s & modeL .~ PromptMode
+    EvKey (KChar 'a') [] -> continue $ s & modeL .~ PromptMode
+                                         & promptsL . currentPromptL .~ PlSelectPrompt
+                                         & promptsL . promptTitleL .~ "Add selected Item(s) to:"
     EvKey KEnter      [] -> do
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)
