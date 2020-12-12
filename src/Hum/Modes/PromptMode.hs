@@ -40,6 +40,12 @@ handlePlSelectPromptEvent s e = case e of
         Nothing -> continue $ s & promptsL . currentPromptL .~ TextPrompt
                                 & promptsL . exitPromptL .~ songBulkAddtoNewPl songs
         Just plname -> continue =<< songBulkAddtoPl (MPD.toString plname) songs s
+    EvKey KEnter [] -> do -- HACK find a way to unduplucate this
+      let songs = s ^. queueL & getHighlighted <&> fst & listElements
+      case s ^. promptsL . plSelectPromptL & listSelectedElement <&> snd & join of
+        Nothing -> continue $ s & promptsL . currentPromptL .~ TextPrompt
+                                & promptsL . exitPromptL .~ songBulkAddtoNewPl songs
+        Just plname -> continue =<< songBulkAddtoPl (MPD.toString plname) songs s
     _ -> continue s
   _ -> continue s
 
