@@ -25,7 +25,7 @@ You can install `hum` either by running `cabal install hum` to install directly 
 -   playback keys
 -   Viewing the Queue, Library, and Playlists screens
 -   Editing the Queue with vim like cut copy and paste
--   adding and bulk adding songs from the Library and Playlists
+-   adding and bulk adding songs from the Library and Play  nlists
 -   vim style search
 -   a help command
 -   playlist editing

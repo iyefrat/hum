@@ -61,6 +61,7 @@ common deps
      ,containers           >= 0.6.2 && < 0.7
      ,text                 >= 1.2.3 && < 1.3
      ,mtl                  >= 2.2.2 && < 2.3
+     ,transformers         >= 0.5.6.2 && < 0.6
      ,template-haskell     >= 2.13.0 && < 2.17
      ,filepath             >= 1.4.2 && < 1.5
      ,directory            >= 1.3.6.1 && < 1.4
@@ -129,7 +130,7 @@ library
              , Hum.Modes.PromptMode
              , Hum.Rebuild
   -- Modules included in this library but not exported.
-  -- other-modules:
+  other-modules: Brick.Widgets.List
 
   -- Other library packages from which modules are imported.
  -- Directories containing source files.
