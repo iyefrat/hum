@@ -10,11 +10,8 @@ import           Brick.Widgets.Edit
 import           Brick.Widgets.Border
 import           Hum.Attributes
 import           Hum.Utils
-import           Hum.Rebuild
-import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
-import qualified Data.Vector                   as V
 import qualified Data.Text                     as T
 import           Brick.Widgets.List
 import           Control.Lens

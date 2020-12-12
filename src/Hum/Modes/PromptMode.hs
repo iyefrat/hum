@@ -6,7 +6,6 @@ import           Brick.Widgets.Edit      hiding ( decodeUtf8 )
 import           Brick.Types
 import           Brick.Main
 import           Hum.Types
-import           Hum.Views
 import           Hum.Utils
 import           Graphics.Vty.Input.Events
 import qualified Data.Text.Zipper              as Z
