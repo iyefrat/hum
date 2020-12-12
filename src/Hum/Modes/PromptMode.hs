@@ -8,7 +8,6 @@ import           Brick.Main
 import           Hum.Types
 import           Hum.Views
 import           Hum.Utils
-import           Hum.Rebuild
 import           Graphics.Vty.Input.Events
 import qualified Data.Text.Zipper              as Z
                                          hiding ( textZipper )
@@ -62,4 +61,4 @@ handleTextPromptEvent s e = case e of
 -- TODO
 handleYNPromptEvent
     :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
-handleYNPromptEvent s e = continue s
+handleYNPromptEvent s _ = continue s

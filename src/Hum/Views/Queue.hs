@@ -10,11 +10,11 @@ import           Brick.Widgets.Center
 import           Brick.Widgets.List
 import           Hum.Attributes
 import           Hum.Utils
+import           Hum.Rebuild
 import           Hum.Views.Common
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
-import qualified Data.Vector                   as V
 import           Lens.Micro
 
 drawViewQueue :: HState -> Widget Name
@@ -102,18 +102,12 @@ pasteDeleteCleanup s clip = do
   extentMap   <- updateExtentMap
   currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
   status      <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-  queueVec    <- liftIO
-    (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
-  let queue = (, False) <$> list QueueList queueVec 1
-  pure s
-    { currentSong
-    , status
-    , queue       = case mi of
-                      Just i  -> listMoveTo i queue
-                      Nothing -> queue
-    , clipboard   = clip
-    , extentMap
-    }
+  s'          <- rebuildQueue s
+  pure (s' & queueL %~ maybe id listMoveTo mi) { currentSong
+                                               , status
+                                               , clipboard   = clip
+                                               , extentMap
+                                               }
 
 queueSearch :: Bool -> HState -> EventM Name HState
 queueSearch direction s =
@@ -169,7 +163,7 @@ handleEventQueue s e = case e of
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song, queue = queue s }
     EvKey (KChar ' ') [] -> do
-      continue $ s & queueL %~ (listMoveDown . listToggleHighlight) 
+      continue $ s & queueL %~ (listMoveDown . listToggleHighlight)
     EvKey (KChar 'd') [] -> do
       let clip = getHighlighted (queue s)
       _ <- liftIO (withMPD $ deleteHighlighted (queue s))
