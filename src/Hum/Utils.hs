@@ -103,11 +103,11 @@ listPaste
   => GenericList n t e
   -> GenericList n t e
   -> GenericList n t e
-listPaste p ls =
+listPaste paste ls =
   let es         = listElements ls
       pos        = fromMaybe 0 (listSelected ls)
       (es1, es2) = Brick.Widgets.List.splitAt (pos + 1) es
-  in  ls { listElements = es1 <> listElements p <> es2 }
+  in  ls { listElements = es1 <> listElements paste <> es2 }
 
 deleteHighlighted ::  HState
     -> Lens' HState SongList
