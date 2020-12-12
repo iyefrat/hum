@@ -1,12 +1,5 @@
 #+TITLE: Plans
 
-* PROJ Uploading to hackage
-** DONE playlist editing
-*** DONE add song to playlist
-*** DONE copy and delete individual playlists
-*** DONE edit playlist my copying and pasting stuff, then saving
-** TODO upload to hackage
-
 * PROJ Near future
 ** TODO improve docs
 ** TODO implement scroll in help screen
@@ -14,7 +7,6 @@
 ** TODO on Queue implement 'D' with MPD.clear
 ** TODO paste back deleted playlists
 ** TODO implement completion in cmds
-** TODO generalize prompt
 ** TODO impliment search history
 *** TODO implement =:save= with the protocol
 - also don't override unnamed.m3u
