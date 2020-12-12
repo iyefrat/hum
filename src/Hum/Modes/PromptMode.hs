@@ -50,15 +50,22 @@ songBulkAddtoNewPl songs st = songBulkAddtoPl
   st
 
 handleTextPromptEvent
-    :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleTextPromptEvent s e = case e of
-    VtyEvent (EvKey KEsc []) -> continue (s & modeL .~ NormalMode)
-    VtyEvent (EvKey KEnter []) -> continue =<< (s ^. promptsL . exitPromptL) (s & modeL .~ NormalMode)
-    VtyEvent vtye ->
-        continue =<< handleEventLensed s (promptsL . textPromptL) handleEditorEvent vtye
-    _ -> continue s
+  VtyEvent (EvKey KEsc []) -> continue (s & modeL .~ NormalMode)
+  VtyEvent (EvKey KEnter []) ->
+    continue =<< (s ^. promptsL . exitPromptL) (s & modeL .~ NormalMode)
+  VtyEvent vtye ->
+    continue
+      =<< handleEventLensed s (promptsL . textPromptL) handleEditorEvent vtye
+  _ -> continue s
 
--- TODO
 handleYNPromptEvent
-    :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
-handleYNPromptEvent s _ = continue s
+  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+handleYNPromptEvent s e = case e of
+  VtyEvent (EvKey KEsc []) -> continue (s & modeL .~ NormalMode)
+  VtyEvent (EvKey (KChar 'y') []) ->
+    continue =<< (s ^. promptsL . exitPromptL) (s & modeL .~ NormalMode)
+  VtyEvent (EvKey (KChar 'n') []) -> continue (s & modeL .~ NormalMode)
+  VtyEvent (EvKey (KChar 'q') []) -> continue (s & modeL .~ NormalMode)
+  _                               -> continue s

@@ -154,7 +154,13 @@ drawPrompt st = case st ^. promptsL . currentPromptL of
       <=> hBorder
       <=> (center . setAvailableSize (25, 1) . withDefAttr editorAttr)
             (renderEditor (txt . T.unlines) True (st ^. promptsL . textPromptL))
-  YNPrompt -> txt "todo"
+  YNPrompt ->
+    centerLayer
+      .   border
+      .   hLimit 30
+      $   (hCenter . txt $ st ^. promptsL . promptTitleL)
+      <=> (hCenter . txt $ "[y/n]")
+
 
 choosePlRow :: Int -> Bool -> Maybe MPD.PlaylistName -> Widget n
 choosePlRow i _ pl = if i==0 then
