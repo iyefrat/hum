@@ -109,9 +109,23 @@ listPaste p ls =
       (es1, es2) = Brick.Widgets.List.splitAt (pos + 1) es
   in  ls { listElements = es1 <> listElements p <> es2 }
 
+deleteHighlighted ::  HState
+    -> Lens' HState SongList
+    -> HState
+deleteHighlighted st lns = st & clipboardL .~ (st ^. lns & listHighlight ? W.filter snd ? listUnhighlightAll)
+                              & lns %~ listHighlight ? W.filter (not . snd)
+
 -- | toggle selected items highlight status
-listToggleHighlight :: SongList -> SongList
+listToggleHighlight :: Traversable t => GenericList n t (e,Highlight) -> GenericList n t (e,Highlight)
 listToggleHighlight = listModify (second not)
+
+
+-- | Highlight selcted item status
+listHighlight :: Traversable t => GenericList n t (e,Highlight) -> GenericList n t (e,Highlight)
+listHighlight = listModify (second (const True))
+
+listUnhighlightAll :: Traversable t => GenericList n t (e,Highlight) -> GenericList n t (e,Highlight)
+listUnhighlightAll = fmap (second $ const False)
 
 saveListToPl :: MPD.MonadMPD m => SongList -> Text -> m ()
 saveListToPl ls name =
