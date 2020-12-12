@@ -1,6 +1,11 @@
 
 # Revision history for hum
 
+## 0.1.0.1 - unreleased
+
+-   Add to playlist prompt now updates for new playlists
+-   Playlists now sorted alphabetically
+
 ## 0.1.0.0 - 2020-12-12
 
 -   First version. Released on an unsuspecting world.
