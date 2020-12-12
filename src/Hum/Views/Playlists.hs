@@ -162,12 +162,15 @@ handleEventPlaylists s e = case e of
       continue $ s & playlistsL . plSongsL %~ (listMoveDown . listToggleHighlight)
       else
       continue =<< playlistsMove listMoveDown =<< playlistsAddtoQ False s
-    EvKey (KChar 'd') [] -> do
-      continue $ deleteHighlighted s (playlistsL . plSongsL)
-    EvKey (KChar 'y') [] -> do
-      continue $ s & clipboardL .~ (s ^. playlistsL . plSongsL & getHighlighted)
-    EvKey (KChar 'p') [] -> do
-      continue $ s & playlistsL . plSongsL %~ listPaste (s^. clipboardL)
+    EvKey (KChar 'd') [] -> if s ^. editableL then
+        continue $ deleteHighlighted s (playlistsL . plSongsL)
+       else continue s
+    EvKey (KChar 'y') [] -> if s ^. editableL then
+       continue $ s & clipboardL .~ (s ^. playlistsL . plSongsL & getHighlighted)
+       else continue s
+    EvKey (KChar 'p') [] -> if s ^. editableL then
+       continue $ s & playlistsL . plSongsL %~ listPaste (s^. clipboardL)
+       else continue s
     EvKey (KChar 'G') [] ->
       continue =<< playlistsMove (\ls -> listMoveBy (length ls) ls) s
     EvKey (KChar 'g') [] -> continue =<< playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
