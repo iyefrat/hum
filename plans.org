@@ -1,9 +1,9 @@
 #+TITLE: Plans
 
 * PROJ Uploading to hackage
-** TODO playlist editing
+** DONE playlist editing
 *** DONE add song to playlist
-*** TODO copy and delete individual playlists
+*** DONE copy and delete individual playlists
 *** DONE edit playlist my copying and pasting stuff, then saving
 ** TODO implement scroll in help screen
 ** TODO implement search in help screen
@@ -11,6 +11,8 @@
 ** TODO upload to hackage
 
 * PROJ Near future
+** TODO on Queue implement 'D' with MPD.clear
+** TODO paste back deleted playlists
 ** TODO implement completion in cmds
 ** TODO generalize prompt
 ** TODO impliment search history

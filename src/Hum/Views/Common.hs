@@ -95,34 +95,6 @@ column maxWidth left right w = case maxWidth of
   Just (Col m) -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
 
-songBulkAddtoQ :: Bool -> V.Vector MPD.Song -> HState -> EventM n HState
-songBulkAddtoQ play songs s = do
-  let songPaths = MPD.sgFilePath <$> songs
-  traverse_
-    (\sel -> liftIO
-      (withMPD $ MPD.addId sel Nothing >>= if play
-        then MPD.playId
-        else const pass
-      )
-    )
-    (V.take 1 songPaths)
-  traverse_ (\sel -> liftIO (withMPD $ MPD.addId sel Nothing))
-            (V.drop 1 songPaths)
-  song <- liftIO (withMPD MPD.currentSong)
-  pure s { currentSong = fromRight Nothing song, queue = queue s }
-
-songBulkAddtoPl :: String -> V.Vector MPD.Song -> HState -> EventM n HState
-songBulkAddtoPl pl songs s = do
-  let songPaths = MPD.sgFilePath <$> songs
-  traverse_
-    (\sel -> liftIO
-      (withMPD $ MPD.playlistAdd (fromString pl) sel
-      )
-    )
-    songPaths
-  rebuildPl s
-
-
 songSearch :: Text -> [MPD.Metadata] -> MPD.Song -> Bool
 songSearch text metadata song =
   let mtags = (T.toLower <$>) . (`mmeta` song) <$> metadata

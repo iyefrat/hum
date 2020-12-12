@@ -164,19 +164,25 @@ handleEventPlaylists s e = case e of
       continue =<< playlistsMove listMoveDown =<< playlistsAddtoQ False s
     EvKey (KChar 'd') []
        | s ^. editableL
-        -> continue $ deleteHighlighted s (playlistsL . plSongsL)
+         -> continue $ deleteHighlighted s (playlistsL . plSongsL)
        | s ^. focusL . focPlayL == FocPlaylists
-        -> continue $ s & modeL .~ PromptMode
-                        & promptsL . currentPromptL .~ YNPrompt
-                        & promptsL . promptTitleL .~ ("DELETE " <> selectedPl <> "?")
-                        & promptsL . exitPromptL .~ deleteSelectedPl
+         -> continue $ s & modeL .~ PromptMode
+                         & promptsL . currentPromptL .~ YNPrompt
+                         & promptsL . promptTitleL .~ ("DELETE " <> selectedPl <> "?\nYou can't paste it back yet")
+                         & promptsL . exitPromptL .~ deleteSelectedPl
        | otherwise ->  continue s
-    EvKey (KChar 'y') [] -> if s ^. editableL then
-       continue $ s & clipboardL . clSongsL .~ (s ^. playlistsL . plSongsL & getHighlighted)
-       else continue s
-    EvKey (KChar 'p') [] -> if s ^. editableL then
-       continue $ s & playlistsL . plSongsL %~ listPaste (s^. clipboardL. clSongsL)
-       else continue s
+    EvKey (KChar 'y') []
+       | s ^. editableL
+         -> continue $ s & clipboardL . clSongsL .~ (s ^. playlistsL . plSongsL & getHighlighted)
+       | s ^. focusL . focPlayL == FocPlaylists
+         -> continue $ s & clipboardL . clPlNameL .~ (s ^. playlistsL . plListL & listSelectedElement <&> snd)
+       | otherwise -> continue s
+    EvKey (KChar 'p') []
+       | s ^. editableL
+         -> continue $ s & playlistsL . plSongsL %~ listPaste (s^. clipboardL. clSongsL)
+       | s ^. focusL . focPlayL == FocPlaylists
+         -> continue =<< pastePlaylist s
+       | otherwise -> continue s
     EvKey (KChar 'G') [] ->
       continue =<< playlistsMove (\ls -> listMoveBy (length ls) ls) s
     EvKey (KChar 'g') [] -> continue =<< playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow

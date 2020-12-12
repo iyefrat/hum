@@ -6,8 +6,8 @@ import           Hum.Rebuild
 import           Brick.Types
 import           Brick.Main
 import           Brick.Widgets.List
-import           Data.Vector                   as V
-import           Data.Text                     as T
+import qualified Data.Vector                   as V
+import qualified Data.Text                     as T
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
@@ -141,3 +141,43 @@ deleteSelectedPl st = do
   let plName = st ^. playlistsL . plListL & listSelectedElement <&> snd
   _ <- liftIO . withMPD $ traverse MPD.rm plName
   rebuildPl st
+
+duplicatePlaylist :: MPD.PlaylistName -> HState -> EventM n HState
+duplicatePlaylist pl st = do
+  songs <- V.fromList . fromRight [] <$> (liftIO . withMPD $ MPD.listPlaylistInfo pl)
+  plNames <- (MPD.toText <$>) . fromRight [] <$> (liftIO . withMPD $ MPD.listPlaylists)
+  let newPlName = viaNonEmpty head $ filter (`notElem` plNames) (map ((\tx num -> tx <> "-copy" <> show num) (MPD.toText pl)) [1::Int ..])
+  traverse_ (\pln -> songBulkAddtoPl pln songs st) (T.unpack <$> newPlName)
+  rebuildPl st
+
+pastePlaylist :: HState -> EventM n HState
+pastePlaylist st = do
+  let plName = fromMaybe "<error>" (st ^. clipboardL . clPlNameL)
+  duplicatePlaylist plName st
+
+songBulkAddtoQ :: Bool -> V.Vector MPD.Song -> HState -> EventM n HState
+songBulkAddtoQ play songs s = do
+  let songPaths = MPD.sgFilePath <$> songs
+  traverse_
+    (\sel -> liftIO
+      (withMPD $ MPD.addId sel Nothing >>= if play
+        then MPD.playId
+        else const pass
+      )
+    )
+    (V.take 1 songPaths)
+  traverse_ (\sel -> liftIO (withMPD $ MPD.addId sel Nothing))
+            (V.drop 1 songPaths)
+  song <- liftIO (withMPD MPD.currentSong)
+  pure s { currentSong = fromRight Nothing song, queue = queue s }
+
+songBulkAddtoPl :: String -> V.Vector MPD.Song -> HState -> EventM n HState
+songBulkAddtoPl pl songs s = do
+  let songPaths = MPD.sgFilePath <$> songs
+  traverse_
+    (\sel -> liftIO
+      (withMPD $ MPD.playlistAdd (fromString pl) sel
+      )
+    )
+    songPaths
+  rebuildPl s

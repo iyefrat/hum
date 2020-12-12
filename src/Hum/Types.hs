@@ -60,7 +60,7 @@ data PromptType = PlSelectPrompt | YNPrompt | TextPrompt
   deriving (Show,Eq)
 
 data Clipboard = Clipboard { clSongs  :: !SongList
-                           , clPlName :: !PlaylistName}
+                           , clPlName :: !(Maybe PlaylistName)}
 
 data Mode = NormalMode | ExMode | PromptMode
   deriving (Show,Eq)
