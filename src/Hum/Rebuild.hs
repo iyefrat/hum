@@ -4,7 +4,7 @@ module Hum.Rebuild where
 
 import           Hum.Types
 import           Hum.Utils
-import           Lens.Micro
+import           Control.Lens
 import           Brick.Widgets.List
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD

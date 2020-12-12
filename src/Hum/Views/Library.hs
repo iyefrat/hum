@@ -10,7 +10,7 @@ import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Brick.Widgets.Border
-import           Lens.Micro
+import           Control.Lens
 import           Brick.Widgets.List
 import           Hum.Attributes
 import           Hum.Views.Common

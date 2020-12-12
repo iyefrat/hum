@@ -11,6 +11,7 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import           Text.Printf                    ( printf )
+import           Control.Lens
 
 -- | Get comma seperated metedata from tag
 meta :: Text -> MPD.Metadata -> MPD.Song -> Text

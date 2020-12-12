@@ -10,7 +10,7 @@ import           Brick.Widgets.List
 
 data HState = HState
     { chan        :: !(BC.BChan HumEvent)
-    , view        :: !View
+    , hview        :: !View
     , status      :: !(Maybe MPD.Status)
     , mode        :: !Mode
     , ex          :: !ExState

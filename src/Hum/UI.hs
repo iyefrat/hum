@@ -19,7 +19,7 @@ import           Hum.Views
 import           Hum.Modes
 import           Hum.Utils
 import qualified Data.Map.Strict               as Map
-import           Lens.Micro
+import           Control.Lens
 app :: App HState HumEvent Name
 
 app = App { appDraw         = drawUI
@@ -33,7 +33,7 @@ drawUI :: HState -> [Widget Name]
 drawUI st =
   [if st ^. modeL == PromptMode then drawPrompt st else emptyWidget,
    drawNowPlaying st
-    <=> (case view st of
+    <=> (case hview st of
           QueueView     -> drawViewQueue st
           LibraryView   -> drawViewLibrary st
           PlaylistsView -> drawViewPlaylists st
@@ -66,7 +66,7 @@ buildInitialState chan = do
                    }
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
-  let view      = QueueView
+  let hview      = QueueView
   let extentMap = Map.empty
   let focus = Focus { focQueue = FocQueue
                     , focLib   = FocArtists
@@ -101,7 +101,7 @@ buildInitialState chan = do
         , exitPrompt     = \s -> pure $ s & modeL .~ NormalMode
         }
   pure HState { chan
-              , view
+              , hview
               , mode
               , ex
               , status
@@ -210,19 +210,19 @@ handleEvent s e = case e of
       EvKey (KChar '1') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
         continue $ s & editableL .~ False
-                     & viewL .~ QueueView
+                     & hviewL .~ QueueView
       EvKey (KChar '2') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
         continue $ s & editableL .~ False
-                     & viewL .~ LibraryView
+                     & hviewL .~ LibraryView
       EvKey (KChar '3') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
         continue $ s & editableL .~ False
-                     & viewL .~ PlaylistsView
+                     & hviewL .~ PlaylistsView
       EvResize _ _ -> do
         extentMap <- updateExtentMap
         continue s { extentMap }
-      _ -> case view s of
+      _ -> case hview s of
         QueueView     -> handleEventQueue s e
         LibraryView   -> handleEventLibrary s e
         PlaylistsView -> handleEventPlaylists s e

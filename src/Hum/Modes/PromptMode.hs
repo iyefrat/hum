@@ -11,7 +11,7 @@ import           Hum.Utils
 import           Graphics.Vty.Input.Events
 import qualified Data.Text.Zipper              as Z
                                          hiding ( textZipper )
-import           Lens.Micro
+import           Control.Lens
 import qualified Network.MPD                   as MPD
 import qualified Data.Vector                   as V
 import Brick.Widgets.List

@@ -15,7 +15,7 @@ import           Hum.Views.Common
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
-import           Lens.Micro
+import           Control.Lens
 
 drawViewQueue :: HState -> Widget Name
 drawViewQueue st =

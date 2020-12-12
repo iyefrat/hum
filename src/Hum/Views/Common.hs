@@ -17,7 +17,7 @@ import qualified Data.Map.Strict               as Map
 import qualified Data.Vector                   as V
 import qualified Data.Text                     as T
 import           Brick.Widgets.List
-import           Lens.Micro
+import           Control.Lens
 
 drawNowPlaying :: HState -> Widget Name
 drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe

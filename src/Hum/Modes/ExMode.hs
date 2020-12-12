@@ -12,7 +12,7 @@ import           Hum.Rebuild
 import           Graphics.Vty.Input.Events
 import qualified Data.Text.Zipper              as Z
                                          hiding ( textZipper )
-import           Lens.Micro
+import           Control.Lens hiding (uncons)
 import qualified Network.MPD                   as MPD
 
 exEnd :: HState -> EventM Name (Next HState)
@@ -24,7 +24,7 @@ exEnd s =
     in
           case s ^. exL . exPrefixL of
             Cmd -> exCmdExecute (words searched) (s' & exL . cmdHistoryL %~ (searched :) )
-            srch -> case view s' of
+            srch -> case hview s' of
                 QueueView     -> continue =<< queueSearch (srch == FSearch) s''
                 LibraryView   -> continue =<< librarySearch (srch == FSearch) s''
                 PlaylistsView -> continue =<< playlistsSearch (srch == FSearch) s''
@@ -44,7 +44,7 @@ exPrefixTxt FSearch= "/"
 exPrefixTxt BSearch = "?"
 
 exCmdExecute :: [Text] -> HState -> EventM Name (Next HState)
-exCmdExecute ("help":_) s = continue s { view = HelpView }
+exCmdExecute ("help":_) s = continue s { hview = HelpView }
 exCmdExecute ("q":_) s = halt s
 exCmdExecute ("save":name) s = do
   let songs = queue s
