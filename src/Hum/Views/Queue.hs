@@ -153,9 +153,11 @@ handleEventQueue s e = case e of
       continue s { queue = listMoveUp $ queue s, extentMap }
     EvKey (KChar 'n') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL) s
     EvKey (KChar 'N') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL & not) s
-    EvKey (KChar 'a') [] -> continue $ s & modeL .~ PromptMode
-                                         & promptsL . currentPromptL .~ PlSelectPrompt
-                                         & promptsL . promptTitleL .~ "Add selected Item(s) to:"
+    EvKey (KChar 'a') [] ->
+      continue $ s & modeL .~ PromptMode
+                   & promptsL . plSelectPromptL .~ listInsert 0 Nothing (Just <$> (s ^. playlistsL . plListL))
+                   & promptsL . currentPromptL .~ PlSelectPrompt
+                   & promptsL . promptTitleL .~ "Add selected Item(s) to:"
     EvKey KEnter      [] -> do
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)
