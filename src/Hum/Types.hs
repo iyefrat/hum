@@ -6,6 +6,7 @@ import qualified Brick.BChan                   as BC
 import           Brick.Types
 import           Brick.Widgets.Edit
 import           Brick.Widgets.List
+import           Hum.Orphans()
 
 
 data HState = HState

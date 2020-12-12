@@ -53,9 +53,6 @@ rebuildLibAlbums s = do
     let songs'  = list SongsList songsVec 1
     pure $ s & libraryL . albumsL .~ albums' & libraryL . songsL .~ songs'
 
-instance Ord MPD.PlaylistName where
-  compare (MPD.PlaylistName x) (MPD.PlaylistName y) = compare x y
-
 rebuildPl :: MonadIO m => HState -> m HState
 rebuildPl s = do
   plListVec  <- liftIO $  V.fromList . sort . fromRight [] <$> withMPD MPD.listPlaylists

@@ -129,8 +129,9 @@ library
              , Hum.Modes.ExMode
              , Hum.Modes.PromptMode
              , Hum.Rebuild
+             , Hum.Orphans
   -- Modules included in this library but not exported.
-  other-modules: Brick.Widgets.List
+ -- other-modules:
 
   -- Other library packages from which modules are imported.
  -- Directories containing source files.
