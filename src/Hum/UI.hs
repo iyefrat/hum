@@ -40,7 +40,7 @@ drawUI st =
           QueueView     -> drawViewQueue st
           LibraryView   -> drawViewLibrary st
           PlaylistsView -> drawViewPlaylists st
-          HelpView      -> drawViewHelp
+          HelpView      -> drawViewHelp st
         )
     <=> if st ^. focusL . focExL
           then txt (st ^. exL . exPrefixL & exPrefixTxt) <+> renderEditor
@@ -106,6 +106,7 @@ buildInitialState chan = do
         , plSelectPrompt = listInsert 0 Nothing (Just <$> plList)
         , exitPrompt     = \s -> pure $ s & modeL .~ NormalMode
         }
+  let helpScreen = 0
   pure HState { chan
               , hview
               , mode
@@ -120,6 +121,7 @@ buildInitialState chan = do
               , focus
               , editable
               , prompts
+              , helpScreen
               }
 
 humStartEvent :: HState -> EventM Name HState

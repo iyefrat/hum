@@ -22,7 +22,8 @@ data HState = HState
     , clipboard   :: !Clipboard
     , focus       :: !Focus
     , editable    :: !Bool
-    , prompts      :: !Prompts
+    , prompts     :: !Prompts
+    , helpScreen  :: !Int --HACK
     }
 --  deriving (Show) --, Eq)
 
