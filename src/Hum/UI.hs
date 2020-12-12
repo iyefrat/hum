@@ -73,7 +73,8 @@ buildInitialState chan = do
                     , focPlay  = FocPlaylists
                     , focEx    = False
                     }
-  let clipboard = list Clipboard V.empty 1
+  let clipboard = Clipboard { clSongs = list ClSongs V.empty 1
+                            , clPlName = MPD.PlaylistName "unnamed"}
   queueVec <- V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue = (, False) <$> list QueueList queueVec 1
   artistsVec <- V.fromList . fromRight [] <$> withMPD

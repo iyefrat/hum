@@ -166,10 +166,10 @@ handleEventPlaylists s e = case e of
         continue $ deleteHighlighted s (playlistsL . plSongsL)
        else continue s
     EvKey (KChar 'y') [] -> if s ^. editableL then
-       continue $ s & clipboardL .~ (s ^. playlistsL . plSongsL & getHighlighted)
+       continue $ s & clipboardL . clSongsL .~ (s ^. playlistsL . plSongsL & getHighlighted)
        else continue s
     EvKey (KChar 'p') [] -> if s ^. editableL then
-       continue $ s & playlistsL . plSongsL %~ listPaste (s^. clipboardL)
+       continue $ s & playlistsL . plSongsL %~ listPaste (s^. clipboardL. clSongsL)
        else continue s
     EvKey (KChar 'G') [] ->
       continue =<< playlistsMove (\ls -> listMoveBy (length ls) ls) s

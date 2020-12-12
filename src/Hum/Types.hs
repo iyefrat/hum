@@ -19,7 +19,7 @@ data HState = HState
     , library     :: !LibraryState
     , playlists   :: !PlaylistsState
     , extentMap   :: !(Map Name (Maybe (Extent Name)))
-    , clipboard   :: !SongList
+    , clipboard   :: !Clipboard
     , focus       :: !Focus
     , editable    :: !Bool
     , prompts      :: !Prompts
@@ -48,16 +48,19 @@ data ExState = ExState
     , cmdHistory      :: ![Text]
     }
 
-data Prompts = Prompts { currentPrompt  :: !PromptType
-                        ,promptTitle :: Text
-                        ,plSelectPrompt :: !(List Name (Maybe PlaylistName))
-                        ,textPrompt :: !(Editor Text Name)
-                        ,exitPrompt :: HState -> EventM Name HState
-                       }
+data Prompts = Prompts
+    { currentPrompt  :: !PromptType
+    , promptTitle    :: Text
+    , plSelectPrompt :: !(List Name (Maybe PlaylistName))
+    , textPrompt     :: !(Editor Text Name)
+    , exitPrompt     :: HState -> EventM Name HState
+    }
 
 data PromptType = PlSelectPrompt | YNPrompt | TextPrompt
   deriving (Show,Eq)
 
+data Clipboard = Clipboard { clSongs  :: !SongList
+                           , clPlName :: !PlaylistName}
 
 data Mode = NormalMode | ExMode | PromptMode
   deriving (Show,Eq)
@@ -66,7 +69,7 @@ type SongList = List Name (Song, Highlight)
 
 type HumEvent = Either Tick (Response [Subsystem])
 
-data Name = NowPlaying | Clipboard
+data Name = NowPlaying | ClSongs
   | Queue | QueueList
   | Library | ArtistsList | LibraryLeft | AlbumsList | LibraryMid | SongsList | LibraryRight
   | PlaylistList | PlaylistLeft | PlaylistSongs | PlaylistRight
@@ -101,3 +104,4 @@ suffixLenses ''LibraryState
 suffixLenses ''PlaylistsState
 suffixLenses ''ExState
 suffixLenses ''Prompts
+suffixLenses ''Clipboard

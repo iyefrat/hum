@@ -97,17 +97,17 @@ queueRow st (song, hl) =
       $ MPD.sgLength song
 
 pasteDeleteCleanup :: HState -> SongList -> EventM Name HState
-pasteDeleteCleanup s clip = do
+pasteDeleteCleanup s clSongs' = do
   let mi = listSelected (queue s)
   extentMap   <- updateExtentMap
   currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
   status      <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
   s'          <- rebuildQueue s
-  pure (s' & queueL %~ maybe id listMoveTo mi) { currentSong
-                                               , status
-                                               , clipboard   = clip
-                                               , extentMap
-                                               }
+  pure (s' & queueL %~ maybe id listMoveTo mi
+           & clipboardL . clSongsL .~ clSongs') { currentSong
+                                                , status
+                                                , extentMap
+                                                }
 
 queueSearch :: Bool -> HState -> EventM Name HState
 queueSearch direction s =
@@ -164,17 +164,17 @@ handleEventQueue s e = case e of
       continue s { currentSong = fromRight Nothing song, queue = queue s }
     EvKey (KChar ' ') [] -> continue $ s & queueL %~ (listMoveDown . listToggleHighlight)
     EvKey (KChar 'd') [] -> do
-      let clip = getHighlighted (queue s)
+      let clSongs' = getHighlighted (queue s)
       _ <- liftIO (withMPD $ deleteHighlightedfromQ (queue s))
-      continue =<< pasteDeleteCleanup s clip
+      continue =<< pasteDeleteCleanup s clSongs'
     EvKey (KChar 'D') [] -> do
       let clip = queue s
       _ <- liftIO (withMPD $ deleteAll (queue s))
       continue =<< pasteDeleteCleanup s clip
-    EvKey (KChar 'y') [] -> continue s { clipboard = getHighlighted (queue s) }
+    EvKey (KChar 'y') [] -> continue $ s & clipboardL . clSongsL .~  (s ^. queueL & getHighlighted)
     EvKey (KChar 'p') [] -> do
-      let clip = clipboard s
-      _ <- liftIO (withMPD $ pasteClipboardtoQ clip (queue s))
+      let clip = s ^. clipboardL . clSongsL
+      _ <- liftIO (withMPD $ pasteSongstoQ clip (queue s))
       continue =<< pasteDeleteCleanup s clip
     EvKey (KChar 'G') [] -> do
       extentMap <- updateExtentMap

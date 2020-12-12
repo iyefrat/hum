@@ -4,7 +4,7 @@
 ** TODO playlist editing
 *** DONE add song to playlist
 *** TODO copy and delete individual playlists
-*** TODO edit playlist my copying and pasting stuff, then saving
+*** DONE edit playlist my copying and pasting stuff, then saving
 ** TODO implement scroll in help screen
 ** TODO implement search in help screen
 ** TODO improve docs

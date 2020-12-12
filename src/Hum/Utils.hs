@@ -83,8 +83,8 @@ deleteHighlightedfromQ ls =
 deleteAll :: MPD.MonadMPD m => SongList -> m ()
 deleteAll ls = for_ ls (\s -> whenJust (MPD.sgId . fst $ s) MPD.deleteId)
 
-pasteClipboardtoQ :: MPD.MonadMPD m => SongList -> SongList -> m ()
-pasteClipboardtoQ clip ls =
+pasteSongstoQ :: MPD.MonadMPD m => SongList -> SongList -> m ()
+pasteSongstoQ clip ls =
   let pos         = listSelected ls
       indexedClip = V.indexed $ MPD.sgFilePath . fst <$> listElements clip
   in  for_ indexedClip (\(n, song) -> MPD.addId song $ (+ (n + 1)) <$> pos)
@@ -112,7 +112,7 @@ listPaste paste ls =
 deleteHighlighted ::  HState
     -> Lens' HState SongList
     -> HState
-deleteHighlighted st lns = st & clipboardL .~ (st ^. lns & listHighlight ? W.filter snd ? listUnhighlightAll)
+deleteHighlighted st lns = st & clipboardL . clSongsL .~ (st ^. lns & listHighlight ? W.filter snd ? listUnhighlightAll)
                               & lns %~ listHighlight ? W.filter (not . snd)
 
 -- | toggle selected items highlight status
