@@ -83,3 +83,10 @@ rebuildQueue s = do
   queueVec  <- liftIO $ V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue' = (, False) <$> list QueueList queueVec 1
   pure $ s & queueL .~ queue'
+
+rebuildStatus :: MonadIO m => HState -> m HState
+rebuildStatus s = do
+  currentSong' <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
+  status'      <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
+  pure $ s & currentSongL .~ currentSong'
+           & statusL .~ status'
