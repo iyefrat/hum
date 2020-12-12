@@ -12,6 +12,7 @@ import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import           Text.Printf                    ( printf )
 import           Control.Lens
+import qualified Data.Witherable.Class         as W
 
 -- | Get comma seperated metedata from tag
 meta :: Text -> MPD.Metadata -> MPD.Song -> Text
@@ -65,7 +66,7 @@ updateExtentMap = do
 
 deleteHighlightedfromQ :: MPD.MonadMPD m => SongList -> m ()
 deleteHighlightedfromQ ls =
-  let (hls :: SongList) = listFilter snd ls
+  let (hls :: SongList) = W.filter snd ls
   in  for_ hls (\s -> whenJust (MPD.sgId . fst $ s) MPD.deleteId)
         >> whenJust
              ((MPD.sgId . fst . snd) =<< listSelectedElement ls)
@@ -80,12 +81,13 @@ pasteClipboardtoQ clip ls =
       indexedClip = V.indexed $ MPD.sgFilePath . fst <$> listElements clip
   in  for_ indexedClip (\(n, song) -> MPD.addId song $ (+ (n + 1)) <$> pos)
 
-getHighlighted :: SongList -> SongList
+getHighlighted
+  :: (Eq e, W.Filterable t, Foldable t, Splittable t)
+  => GenericList n t (e, Highlight)
+  -> GenericList n t (e, Highlight)
 getHighlighted ls = hls where
-  hls = listFilter
-    (\(song,hl) ->
-      hl || Just (song,hl) == (snd <$> listSelectedElement ls)
-    )
+  hls = W.filter
+    (\(el, hl) -> hl || Just (el, hl) == (snd <$> listSelectedElement ls))
     ls
 
 listPaste

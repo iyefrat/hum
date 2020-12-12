@@ -70,6 +70,7 @@ common deps
      ,vty                  >= 5.32 && < 5.33
      ,libmpd               >= 0.9.2 && < 0.10
      ,relude               >= 0.7.0 && < 0.8
+     ,witherable-class
 
   mixins:
       base hiding (Prelude)
