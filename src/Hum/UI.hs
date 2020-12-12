@@ -89,7 +89,7 @@ buildInitialState chan = do
   let albums    = list AlbumsList albumsVec 1
   songsVec <- songsOfAlbum (snd <$> listSelectedElement albums)
   let songs = list SongsList songsVec 1
-  plListVec <- V.fromList . fromRight [] <$> withMPD MPD.listPlaylists
+  plListVec <- V.fromList . sort . fromRight [] <$> withMPD MPD.listPlaylists
   let plList = list PlaylistList plListVec 1
   plSongsVec <- V.fromList . fromRight [] <$> withMPD
     ( MPD.listPlaylistInfo
