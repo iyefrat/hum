@@ -174,6 +174,13 @@ handleEventPlaylists s e = case e of
     EvKey (KChar 'G') [] ->
       continue =<< playlistsMove (\ls -> listMoveBy (length ls) ls) s
     EvKey (KChar 'g') [] -> continue =<< playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
-    EvKey (KChar 'e') [] -> continue $ s & editableL %~ not
+    EvKey (KChar 'e') [] -> if s ^. editableL then
+      continue $ s & editableL %~ not
+                   & modeL .~ PromptMode
+                   & promptsL . currentPromptL .~ YNPrompt
+                   & promptsL . promptTitleL .~ ("Save changes to " <> selectedPl <> "?")
+                   & promptsL . exitPromptL .~ saveEditedPl
+      else continue =<< rebuildPlList (s & editableL %~ not)
+        where selectedPl = s ^. playlistsL . plListL & listSelectedElement ? maybe "<error>" snd ? MPD.toText
     _                    -> continue s
   _ -> continue s

@@ -133,3 +133,16 @@ saveListToPl ls name =
       name'     = fromString . T.unpack $ name
   in  for_ songpaths (MPD.playlistAdd name')
 
+overwriteListToPl :: MPD.MonadMPD m => SongList -> Text -> m ()
+overwriteListToPl ls name =
+  let songpaths = MPD.sgFilePath . fst <$> listElements ls
+      name'     = fromString . T.unpack $ name
+  in MPD.playlistClear name' >>
+     for_ songpaths (MPD.playlistAdd name')
+
+saveEditedPl :: HState -> EventM n HState
+saveEditedPl st = do
+  let plSongs = st ^. playlistsL . plSongsL
+  let plName = st ^. playlistsL . plListL & listSelectedElement ? maybe "unnamed" snd ? MPD.toText
+  _ <- liftIO . withMPD $ overwriteListToPl plSongs plName
+  pure st
