@@ -166,7 +166,7 @@ handleEventQueue s e = case e of
       continue $ s & queueL %~ (listMoveDown . listToggleHighlight)
     EvKey (KChar 'd') [] -> do
       let clip = getHighlighted (queue s)
-      _ <- liftIO (withMPD $ deleteHighlighted (queue s))
+      _ <- liftIO (withMPD $ deleteHighlightedfromQ (queue s))
       continue =<< pasteDeleteCleanup s clip
     EvKey (KChar 'D') [] -> do
       let clip = queue s
@@ -176,7 +176,7 @@ handleEventQueue s e = case e of
       continue s { clipboard = getHighlighted (queue s) }
     EvKey (KChar 'p') [] -> do
       let clip = clipboard s
-      _ <- liftIO (withMPD $ pasteClipboard clip (queue s))
+      _ <- liftIO (withMPD $ pasteClipboardtoQ clip (queue s))
       continue =<< pasteDeleteCleanup s clip
     EvKey (KChar 'G') [] -> do
       extentMap <- updateExtentMap

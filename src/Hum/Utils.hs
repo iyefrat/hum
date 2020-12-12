@@ -62,8 +62,8 @@ updateExtentMap = do
         ]
   pure extentMap
 
-deleteHighlighted :: MPD.MonadMPD m => SongList -> m ()
-deleteHighlighted ls =
+deleteHighlightedfromQ :: MPD.MonadMPD m => SongList -> m ()
+deleteHighlightedfromQ ls =
   let (hls :: SongList) = listFilter snd ls
   in  for_ hls (\s -> whenJust (MPD.sgId . fst $ s) MPD.deleteId)
         >> whenJust
@@ -73,8 +73,8 @@ deleteHighlighted ls =
 deleteAll :: MPD.MonadMPD m => SongList -> m ()
 deleteAll ls = for_ ls (\s -> whenJust (MPD.sgId . fst $ s) MPD.deleteId)
 
-pasteClipboard :: MPD.MonadMPD m => SongList -> SongList -> m ()
-pasteClipboard clip ls =
+pasteClipboardtoQ :: MPD.MonadMPD m => SongList -> SongList -> m ()
+pasteClipboardtoQ clip ls =
   let pos         = listSelected ls
       indexedClip = V.indexed $ MPD.sgFilePath . fst <$> listElements clip
   in  for_ indexedClip (\(n, song) -> MPD.addId song $ (+ (n + 1)) <$> pos)
