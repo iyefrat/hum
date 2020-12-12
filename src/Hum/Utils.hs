@@ -14,6 +14,14 @@ import           Text.Printf                    ( printf )
 import           Control.Lens
 import qualified Data.Witherable.Class         as W
 
+-- | A backwards function composition operator
+infixl 8  ?
+{-# INLINE (?) #-}
+-- Make sure it has TWO args only on the left, so that it inlines
+-- when applied to two functions, even if there is no final argument
+(?)    :: (a -> b) -> (b -> c) -> a -> c
+(?) f g = \x -> g (f x)
+
 -- | Get comma seperated metedata from tag
 meta :: Text -> MPD.Metadata -> MPD.Song -> Text
 meta notFound tag song = maybe
