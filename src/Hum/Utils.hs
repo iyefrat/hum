@@ -135,3 +135,9 @@ saveEditedPl st = do
   let plName = st ^. playlistsL . plListL & listSelectedElement ? maybe "unnamed" snd ? MPD.toText
   _ <- liftIO . withMPD $ overwriteListToPl plSongs plName
   pure st
+
+deleteSelectedPl :: HState -> EventM n HState
+deleteSelectedPl st = do
+  let plName = st ^. playlistsL . plListL & listSelectedElement <&> snd
+  _ <- liftIO . withMPD $ traverse MPD.rm plName
+  rebuildPl st

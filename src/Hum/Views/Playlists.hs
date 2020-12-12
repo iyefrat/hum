@@ -162,9 +162,15 @@ handleEventPlaylists s e = case e of
       continue $ s & playlistsL . plSongsL %~ (listMoveDown . listToggleHighlight)
       else
       continue =<< playlistsMove listMoveDown =<< playlistsAddtoQ False s
-    EvKey (KChar 'd') [] -> if s ^. editableL then
-        continue $ deleteHighlighted s (playlistsL . plSongsL)
-       else continue s
+    EvKey (KChar 'd') []
+       | s ^. editableL
+        -> continue $ deleteHighlighted s (playlistsL . plSongsL)
+       | s ^. focusL . focPlayL == FocPlaylists
+        -> continue $ s & modeL .~ PromptMode
+                        & promptsL . currentPromptL .~ YNPrompt
+                        & promptsL . promptTitleL .~ ("DELETE " <> selectedPl <> "?")
+                        & promptsL . exitPromptL .~ deleteSelectedPl
+       | otherwise ->  continue s
     EvKey (KChar 'y') [] -> if s ^. editableL then
        continue $ s & clipboardL . clSongsL .~ (s ^. playlistsL . plSongsL & getHighlighted)
        else continue s
@@ -181,6 +187,6 @@ handleEventPlaylists s e = case e of
                    & promptsL . promptTitleL .~ ("Save changes to " <> selectedPl <> "?")
                    & promptsL . exitPromptL .~ saveEditedPl
       else continue =<< rebuildPlList (s & editableL %~ not)
-        where selectedPl = s ^. playlistsL . plListL & listSelectedElement ? maybe "<error>" snd ? MPD.toText
     _                    -> continue s
   _ -> continue s
+  where selectedPl = s ^. playlistsL . plListL & listSelectedElement ? maybe "<error>" snd ? MPD.toText
