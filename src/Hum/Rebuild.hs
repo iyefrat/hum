@@ -3,13 +3,23 @@
 module Hum.Rebuild where
 
 import           Hum.Types
-import           Hum.Utils
 import           Control.Lens
 import           Brick.Widgets.List
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Vector                   as V
 -- in which we have funcitons to rebuild the state when it changes.
+
+songsOfArtist :: Maybe MPD.Value -> IO (V.Vector MPD.Song)
+songsOfArtist martist = V.fromList . fromRight [] <$> withMPD
+  (MPD.find (MPD.AlbumArtist MPD.=? fromMaybe "" martist))
+
+songsOfAlbum :: Maybe MPD.Value -> IO (V.Vector MPD.Song)
+songsOfAlbum malbum = V.fromList . fromRight [] <$> withMPD
+  (MPD.find (MPD.Album MPD.=? fromMaybe "" malbum))
+albumsOfArtist :: Maybe MPD.Value -> IO (V.Vector MPD.Value)
+albumsOfArtist martist =
+  V.fromList . fromRight [] <$> withMPD (MPD.list MPD.Album martist)
 
 
 rebuildLib :: MonadIO m => HState -> m HState

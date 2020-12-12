@@ -18,6 +18,7 @@ import           Hum.Attributes
 import           Hum.Views
 import           Hum.Modes
 import           Hum.Utils
+import           Hum.Rebuild
 import qualified Data.Map.Strict               as Map
 import           Control.Lens
 import           System.Directory
