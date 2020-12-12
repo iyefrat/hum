@@ -20,6 +20,8 @@ import           Hum.Modes
 import           Hum.Utils
 import qualified Data.Map.Strict               as Map
 import           Control.Lens
+import           System.Directory
+
 app :: App HState HumEvent Name
 
 app = App { appDraw         = drawUI
@@ -57,6 +59,8 @@ chooseCursor st ls
 
 buildInitialState :: BC.BChan HumEvent -> IO HState
 buildInitialState chan = do
+  configDir <- getXdgDirectory XdgConfig "hum"
+  _ <- createDirectoryIfMissing True configDir
   let mode = NormalMode
   let ex = ExState { exPrefix        = Cmd
                    , exEditor        = editorText ExEditor (Just 1) ""
