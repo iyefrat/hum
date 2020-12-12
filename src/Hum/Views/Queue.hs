@@ -162,8 +162,7 @@ handleEventQueue s e = case e of
       traverse_ (\sel -> liftIO (withMPD $ MPD.playId sel)) maybeSelectedId
       song <- liftIO (withMPD MPD.currentSong)
       continue s { currentSong = fromRight Nothing song, queue = queue s }
-    EvKey (KChar ' ') [] -> do
-      continue $ s & queueL %~ (listMoveDown . listToggleHighlight)
+    EvKey (KChar ' ') [] -> continue $ s & queueL %~ (listMoveDown . listToggleHighlight)
     EvKey (KChar 'd') [] -> do
       let clip = getHighlighted (queue s)
       _ <- liftIO (withMPD $ deleteHighlightedfromQ (queue s))
@@ -172,8 +171,7 @@ handleEventQueue s e = case e of
       let clip = queue s
       _ <- liftIO (withMPD $ deleteAll (queue s))
       continue =<< pasteDeleteCleanup s clip
-    EvKey (KChar 'y') [] -> do
-      continue s { clipboard = getHighlighted (queue s) }
+    EvKey (KChar 'y') [] -> continue s { clipboard = getHighlighted (queue s) }
     EvKey (KChar 'p') [] -> do
       let clip = clipboard s
       _ <- liftIO (withMPD $ pasteClipboardtoQ clip (queue s))
