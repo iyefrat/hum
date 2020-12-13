@@ -20,7 +20,7 @@ drawViewQueue :: HState -> Widget Name
 drawViewQueue st =
   Widget Greedy Fixed $ do
     ctx <- getContext
-    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ hCenter
         (   viewport Queue Vertical
         .   vLimit vsize

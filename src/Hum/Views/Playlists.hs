@@ -27,7 +27,7 @@ drawPlaylistLeft :: HState -> Widget Name
 drawPlaylistLeft st =
   Widget Greedy Fixed $ do
     ctx <- getContext
-    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ reportExtent PlaylistLeft $ hCenter
         (   viewport PlaylistLeft Vertical
         .   visible
@@ -44,7 +44,7 @@ drawPlaylistRight :: HState -> Widget Name
 drawPlaylistRight st =
   Widget Greedy Fixed $ do
     ctx <- getContext
-    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $  reportExtent PlaylistRight $ hCenter
         (   viewport PlaylistRight Vertical
         .   visible

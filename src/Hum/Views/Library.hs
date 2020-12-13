@@ -25,7 +25,7 @@ drawLibraryLeft :: HState -> Widget Name
 drawLibraryLeft st =
   Widget Greedy Fixed $ do
     ctx <- getContext
-    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ reportExtent LibraryLeft $ hCenter
         (   viewport LibraryLeft Vertical
         .   visible
@@ -42,7 +42,7 @@ drawLibraryMid :: HState -> Widget Name
 drawLibraryMid st =
   Widget Greedy Fixed $ do
     ctx <- getContext
-    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ reportExtent LibraryMid $ hCenter
         (   viewport LibraryMid Vertical
         .   visible
@@ -61,7 +61,7 @@ drawLibraryRight :: HState -> Widget Name
 drawLibraryRight st =
   Widget Greedy Fixed $ do
     ctx <- getContext
-    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ reportExtent LibraryRight $ hCenter
         (   viewport LibraryRight Vertical
         .   visible
