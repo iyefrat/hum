@@ -79,8 +79,8 @@ libraryRow :: HState -> Name -> T.Text -> Widget n
 libraryRow _ name val =
   withAttr
       (case name of
-        LibraryLeft -> queueArtistAttr
-        LibraryMid  -> queueAlbumAttr
+        LibraryLeft -> artistAttr
+        LibraryMid  -> albumAttr
         _           -> listAttr
       )
     $ column Nothing (Pad 1) Max
@@ -92,8 +92,8 @@ librarySongRow st song =
         (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
   in  withAttr
           (if MPD.sgFilePath song `elem` pathsInQueue
-            then queueTitleBoldAttr
-            else queueTitleAttr
+            then titleBoldAttr
+            else titleAttr
           )
         $ column Nothing (Pad 1) Max
         $ txt (meta (MPD.toText . MPD.sgFilePath $ song) MPD.Title song)

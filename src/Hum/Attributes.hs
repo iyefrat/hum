@@ -22,31 +22,31 @@ humAttrMap = attrMap
   , (listSelectedFocusedAttr, Vty.withStyle defAttr Vty.reverseVideo)
   , (listHighlightedAttr    , BU.fg Vty.yellow)
   , (headerAttr             , Vty.withStyle defAttr Vty.underline)
-  , (queueAlbumAttr         , BU.fg Vty.red)
-  , (queueTrackAttr         , BU.fg Vty.magenta)
-  , (queueTitleAttr         , BU.fg Vty.cyan)
-  , (queueArtistAttr        , BU.fg Vty.green)
-  , (queueTimeAttr          , BU.fg Vty.blue)
-  , (queueDateAttr          , BU.fg Vty.yellow)
+  , (albumAttr         , BU.fg Vty.red)
+  , (trackAttr         , BU.fg Vty.magenta)
+  , (titleAttr         , BU.fg Vty.cyan)
+  , (artistAttr        , BU.fg Vty.green)
+  , (timeAttr          , BU.fg Vty.blue)
+  , (dateAttr          , BU.fg Vty.yellow)
   , ( queueNowPlayingAttr
     , Vty.withStyle (Vty.withStyle defAttr Vty.bold) Vty.underline
     )
-  , (queueTitleBoldAttr, Vty.withStyle defAttr Vty.bold)
+  , (titleBoldAttr, Vty.withStyle defAttr Vty.bold)
   , (editorAttr          , BU.bg Vty.black)
   ]
 
 wobAttr :: Vty.Attr
 wobAttr = BU.fg Vty.white
 
-queueAttr, queueAlbumAttr, queueTitleAttr, queueTrackAttr, queueArtistAttr, queueTimeAttr, queueDateAttr
+queueAttr, albumAttr, titleAttr, trackAttr, artistAttr, timeAttr, dateAttr
   :: AttrName
 queueAttr = "queue"
-queueAlbumAttr = queueAttr <> "album"
-queueTitleAttr = queueAttr <> "title"
-queueTrackAttr = queueAttr <> "track"
-queueArtistAttr = queueAttr <> "artist"
-queueTimeAttr = queueAttr <> "time"
-queueDateAttr = queueAttr <> "date"
+albumAttr = queueAttr <> "album"
+titleAttr = queueAttr <> "title"
+trackAttr = queueAttr <> "track"
+artistAttr = queueAttr <> "artist"
+timeAttr = queueAttr <> "time"
+dateAttr = queueAttr <> "date"
 
 headerAttr :: AttrName
 headerAttr = "header"
@@ -56,22 +56,22 @@ listHighlightedAttr = listAttr <> "highlighted"
 queueNowPlayingAttr :: AttrName
 queueNowPlayingAttr = queueAttr <> "now playing"
 
-queueTitleBoldAttr :: AttrName
-queueTitleBoldAttr = queueTitleAttr <> "bold"
+titleBoldAttr :: AttrName
+titleBoldAttr = titleAttr <> "bold"
 
 
 editorAttr :: AttrName
 editorAttr = "editor"
 
-highlightOverQueueAttrs :: Widget n -> Widget n
-highlightOverQueueAttrs = updateAttrMap
+highlightOverAttrs :: Widget n -> Widget n -- HACK?
+highlightOverAttrs = updateAttrMap
   (mapAttrNames
     (   (listHighlightedAttr, )
-    <$> [ queueAlbumAttr
-        , queueTrackAttr
-        , queueTitleAttr
-        , queueArtistAttr
-        , queueTimeAttr
+    <$> [ albumAttr
+        , trackAttr
+        , titleAttr
+        , artistAttr
+        , timeAttr
         ]
     )
   )

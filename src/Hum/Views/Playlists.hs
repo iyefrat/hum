@@ -67,16 +67,16 @@ drawPlaylistRight st =
 
 playlistRow :: HState -> T.Text -> Widget n
 playlistRow _ val =
-  withAttr queueAlbumAttr $ column Nothing (Pad 1) Max $ txt val
+  withAttr albumAttr $ column Nothing (Pad 1) Max $ txt val
 
 playlistSongRow :: HState -> (MPD.Song,Highlight) -> Widget n
 playlistSongRow st (song,hl) =
   let pathsInQueue =
         (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
-  in (if hl then highlightOverQueueAttrs else id) . withAttr
+  in (if hl then highlightOverAttrs else id) . withAttr
           (if MPD.sgFilePath song `elem` pathsInQueue
-            then queueTitleBoldAttr
-            else queueTitleAttr
+            then titleBoldAttr
+            else titleAttr
           )
         $ column Nothing (Pad 1) Max
         $ txt (meta (MPD.toText . MPD.sgFilePath $ song) MPD.Title song)

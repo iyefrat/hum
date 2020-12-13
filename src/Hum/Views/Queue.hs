@@ -37,20 +37,20 @@ drawViewQueue st =
   {-songIdx = column (Just (Col 4)) Max (Pad 1) $ txt "Inx"
   songId  = column (Just (Col 3)) Max (Pad 1) $ txt "ID"-}
   album =
-    withAttr queueAlbumAttr $ column (Just (Per 25)) (Pad 1) Max $ txt "Album"
-  track = withAttr queueTrackAttr $ column (Just (Col 3)) Max (Pad 1) $ txt "#"
-  title = withAttr queueTitleAttr $ column Nothing Max Max $ txt "Title"
+    withAttr albumAttr $ column (Just (Per 25)) (Pad 1) Max $ txt "Album"
+  track = withAttr trackAttr $ column (Just (Col 3)) Max (Pad 1) $ txt "#"
+  title = withAttr titleAttr $ column Nothing Max Max $ txt "Title"
   artist =
-    withAttr queueArtistAttr $ column (Just (Per 25)) Max (Pad 1) $ txt "Artist"
+    withAttr artistAttr $ column (Just (Per 25)) Max (Pad 1) $ txt "Artist"
   time =
-    withAttr queueTimeAttr $ column (Just (Col 5)) Max (Pad 1) $ txt "Time"
+    withAttr timeAttr $ column (Just (Col 5)) Max (Pad 1) $ txt "Time"
   header = withDefAttr headerAttr
                        ({-songIdx <+> songId <+>-}
                         album <+> track <+> title <+> artist <+> time)
 
 queueRow :: HState -> (MPD.Song, Highlight) -> Widget n
 queueRow st (song, hl) =
-  (if hl then highlightOverQueueAttrs else id)
+  (if hl then highlightOverAttrs else id)
     . (if Just (MPD.sgIndex song) == (MPD.sgIndex <$> nowPlaying)
         then withDefAttr queueNowPlayingAttr
         else id
@@ -69,26 +69,26 @@ queueRow st (song, hl) =
       $ maybe "?" (\(MPD.Id x) -> show x)
       $ MPD.sgId song-}
   album =
-    withAttr queueAlbumAttr $ column (Just (Per 25)) (Pad 1) Max $ txt $ meta
+    withAttr albumAttr $ column (Just (Per 25)) (Pad 1) Max $ txt $ meta
       "<no album>"
       MPD.Album
       song
   track =
-    withAttr queueTrackAttr $ column (Just (Col 3)) Max (Pad 1) $ txt $ meta
+    withAttr trackAttr $ column (Just (Col 3)) Max (Pad 1) $ txt $ meta
       "?"
       MPD.Track
       song
-  title = withAttr queueTitleAttr $ column Nothing Max Max $ txt $ meta
+  title = withAttr titleAttr $ column Nothing Max Max $ txt $ meta
     "<no title>"
     MPD.Title
     song
   artist =
-    withAttr queueArtistAttr $ column (Just (Per 25)) Max (Pad 1) $ txt $ meta
+    withAttr artistAttr $ column (Just (Per 25)) Max (Pad 1) $ txt $ meta
       "<no artist>"
       MPD.Artist
       song
   time =
-    withAttr queueTimeAttr
+    withAttr timeAttr
       $ column (Just (Col 5)) Max (Pad 1)
       $ txt
       $ secondsToTime
