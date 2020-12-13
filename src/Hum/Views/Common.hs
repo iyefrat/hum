@@ -59,26 +59,26 @@ drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
       txt $ "[" <> repeatmpd <> random <> single <> consume <> crossfade <> "]"
 
 drawProgressBar :: HState -> Widget Name
-drawProgressBar st = case width of
-  0 -> txt $ Prelude.toText timeText
-  _ -> bar
+drawProgressBar st =
+  Widget Fixed Fixed  $ do
+    ctx <- getContext
+    let width = ctx ^. windowWidthL
+    render $ bar width
  where
-  width =
-    maybe 0 (fst . extentSize) (join (Map.lookup NowPlaying $ extentMap st))
   songTime = fromMaybe (0, 1) (MPD.stTime =<< status st)
   timeText =
     toString
       . (\(i, j) -> secondsToTime (round i) <> "/" <> secondsToTime (round j))
       $ songTime
-  completed = (\w (i, j) -> round ((i / j) * fromIntegral w)) width songTime
-  bar       = str
+  completed width = (\w (i, j) -> round ((i / j) * fromIntegral w)) width songTime
+  bar width     = str
     (zipWith
       (\a b -> if a `elem` ("1234567890/:" :: String) then a else b)
       (replicate (-5 + div width 2) ' ' ++ timeText ++ replicate
         (-3 + div width 2)
         ' '
       )
-      (replicate completed '=' ++ replicate (width - completed) ' ')
+      (replicate (completed width) '=' ++ replicate (width - (completed width)) ' ')
     )
 
 --drawEx :: HState -> Widget Name
