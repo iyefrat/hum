@@ -25,7 +25,7 @@ import           Hum.Utils
 
 drawPlaylistLeft :: HState -> Widget Name
 drawPlaylistLeft st =
-  Widget Greedy Fixed $ do
+  Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ reportExtent PlaylistLeft $ hCenter
@@ -42,7 +42,7 @@ drawPlaylistLeft st =
         )
 drawPlaylistRight :: HState -> Widget Name
 drawPlaylistRight st =
-  Widget Greedy Fixed $ do
+  Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $  reportExtent PlaylistRight $ hCenter

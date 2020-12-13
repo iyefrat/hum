@@ -22,7 +22,7 @@ import           Hum.Utils
 
 drawLibraryLeft :: HState -> Widget Name
 drawLibraryLeft st =
-  Widget Greedy Fixed $ do
+  Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ reportExtent LibraryLeft $ hCenter
@@ -39,7 +39,7 @@ drawLibraryLeft st =
         )
 drawLibraryMid :: HState -> Widget Name
 drawLibraryMid st =
-  Widget Greedy Fixed $ do
+  Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ reportExtent LibraryMid $ hCenter
@@ -58,7 +58,7 @@ drawLibraryMid st =
 
 drawLibraryRight :: HState -> Widget Name
 drawLibraryRight st =
-  Widget Greedy Fixed $ do
+  Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ reportExtent LibraryRight $ hCenter

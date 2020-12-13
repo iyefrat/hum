@@ -18,7 +18,7 @@ import           Control.Lens
 
 drawViewQueue :: HState -> Widget Name
 drawViewQueue st =
-  Widget Greedy Fixed $ do
+  Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ hCenter
