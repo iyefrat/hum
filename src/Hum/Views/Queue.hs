@@ -99,13 +99,8 @@ queueRow st (song, hl) =
 pasteDeleteCleanup :: HState -> SongList -> EventM Name HState
 pasteDeleteCleanup s clSongs' = do
   extentMap   <- updateExtentMap
-  currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
-  status      <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-  s'          <- rebuildQueue s
-  pure (s' & clipboardL . clSongsL .~ clSongs') { currentSong
-                                                , status
-                                                , extentMap
-                                                }
+  s'          <- rebuildQueue s >>= rebuildStatus
+  pure (s' & clipboardL . clSongsL .~ clSongs') {extentMap}
 
 queueSearch :: Bool -> HState -> EventM Name HState
 queueSearch direction s =

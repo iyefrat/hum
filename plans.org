@@ -1,5 +1,6 @@
 #+TITLE: Plans
-
+* PROJ Bugs
+** TODO queue highlight gets erased when song changes
 * PROJ Near future
 ** TODO improve docs
 ** TODO implement scroll in help screen
