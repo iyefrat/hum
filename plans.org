@@ -3,9 +3,9 @@
 ** TODO queue highlight gets erased when song changes
 * PROJ Near future
 ** TODO improve docs
+** TODO rethink the extentmap
 ** TODO implement scroll in help screen
 ** TODO implement search in help screen
-** TODO on Queue implement 'D' with MPD.clear
 ** TODO paste back deleted playlists
 ** TODO implement completion in cmds
 ** TODO impliment search history
@@ -18,7 +18,6 @@
 
 * PROJ Medium Future
 ** TODO display random song order
-** TODO rethink the extentmap
 ** TODO more vim motions
 ** TODO tags
 ** TODO undo
@@ -26,3 +25,16 @@
 * PROJ Far future
 ** TODO write generic Response handler to print the MPDError instead of doing the thing.
 ** TODO (oneday) album art stuff, look into hip and jucypixels on hackage
+
+* PROJ Upstream
+** TODO libmpd-haskell
+*** TODO filter combinators
+*** TODO past mpd version tests?
+*** TODO Ord on PlaylistName
+** TODO brick
+*** TODO witherable
+*** TODO seperated list, maybe?
+*** TODO cycle search
+** TODO mpd
+*** TODO toggle random, single, etc
+*** TODO duplicate playlist

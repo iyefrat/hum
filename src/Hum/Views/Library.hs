@@ -17,7 +17,6 @@ import           Hum.Views.Common
 import           Hum.Rebuild
 import qualified Data.Text                     as T
 import qualified Data.Vector                   as V
-import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import           Hum.Utils
@@ -200,6 +199,3 @@ handleEventLibrary s e = case e of
     EvKey (KChar 'g') [] -> continue =<< libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     _                    -> continue s
   _ -> continue s
-
-addToPl :: EventM Name HState
-addToPl = error "not implemented"
