@@ -127,13 +127,6 @@ hBoxPad _ []       = emptyWidget
 hBoxPad _ [w     ] = w
 hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
 
-seekCurEventM :: MPD.FractionalSeconds -> HState -> EventM Name HState
-seekCurEventM i s = do
-  _      <- liftIO (withMPD $ MPD.seekCur False i)
-  status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-  song   <- liftIO (withMPD MPD.currentSong)
-  pure s { currentSong = fromRight Nothing song, status }
-
 handleEvent :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleEvent s e = case e of
   VtyEvent vtye -> case s ^. modeL of
@@ -199,10 +192,18 @@ handleEvent s e = case e of
       EvKey (KChar ',') [] -> do
         _    <- liftIO (withMPD MPD.previous)
         continue =<< rebuildStatus s
-      EvKey (KChar ']') [] -> continue =<< seekCurEventM 5 s
-      EvKey (KChar '[') [] -> continue =<< seekCurEventM (-5) s
-      EvKey (KChar '}') [] -> continue =<< seekCurEventM 30 s
-      EvKey (KChar '{') [] -> continue =<< seekCurEventM (-30) s
+      EvKey (KChar ']') [] -> do
+        _ <- liftIO (withMPD $ MPD.seekCur False 5)
+        continue =<< rebuildStatus s
+      EvKey (KChar '[') [] -> do
+        _ <- liftIO (withMPD $ MPD.seekCur False (-5))
+        continue =<< rebuildStatus s
+      EvKey (KChar '}') [] -> do
+        _ <- liftIO (withMPD $ MPD.seekCur False 30)
+        continue =<< rebuildStatus s
+      EvKey (KChar '{') [] -> do
+        _ <- liftIO (withMPD $ MPD.seekCur False (-30))
+        continue =<< rebuildStatus s
       EvKey (KChar '1') [] -> do
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
         continue $ s & editableL .~ False
