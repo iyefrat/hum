@@ -15,7 +15,6 @@
 - the editing operations should be kept in memory, and saved explicitly
 ** TODO Various Artists
 ** TODO various modes for the library
-** TODO make refactor pasteDeleteCleanup
 
 * PROJ Medium Future
 ** TODO display random song order
