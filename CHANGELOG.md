@@ -5,6 +5,7 @@
 
 -   Add to playlist prompt now updates for new playlists
 -   Playlists now sorted alphabetically
+-   List of Playlists keeps cursor position after edit
 
 ## 0.1.0.0 - 2020-12-12
 

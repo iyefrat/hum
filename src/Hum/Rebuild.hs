@@ -56,8 +56,9 @@ rebuildLibAlbums s = do
 
 rebuildPl :: MonadIO m => HState -> m HState
 rebuildPl s = do
+  let mi = s ^. playlistsL . plListL & listSelected
   plListVec  <- liftIO $  V.fromList . sort . fromRight [] <$> withMPD MPD.listPlaylists
-  let plList' = list PlaylistList plListVec 1
+  let plList' = maybe id listMoveTo mi $ list PlaylistList plListVec 1
   plSongsVec <- liftIO $ V.fromList . fromRight [] <$> withMPD
            (MPD.listPlaylistInfo
                (maybe "<no playlists>" snd (listSelectedElement plList'))
@@ -81,7 +82,7 @@ rebuildPlList s = do
 
 rebuildQueue :: MonadIO m => HState -> m HState
 rebuildQueue s = do
-  let mi = listSelected (queue s)
+  let mi = s ^. queueL & listSelected
   queueVec  <- liftIO $ V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue' = (, False) <$> list QueueList queueVec 1
   pure $ s & queueL .~ maybe id listMoveTo mi queue'

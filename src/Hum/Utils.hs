@@ -142,7 +142,7 @@ deleteSelectedPl st = do
   _ <- liftIO . withMPD $ traverse MPD.rm plName
   rebuildPl st
 
-duplicatePlaylist :: MPD.PlaylistName -> HState -> EventM n HState
+duplicatePlaylist :: MPD.PlaylistName -> HState -> EventM n HState -- HACK
 duplicatePlaylist pl st = do
   songs <- V.fromList . fromRight [] <$> (liftIO . withMPD $ MPD.listPlaylistInfo pl)
   plNames <- (MPD.toText <$>) . fromRight [] <$> (liftIO . withMPD $ MPD.listPlaylists)
