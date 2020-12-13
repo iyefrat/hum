@@ -153,16 +153,14 @@ handleEvent s e = case e of
       EvKey (KChar 's') [] -> do
         _ <- liftIO
           (withMPD $ MPD.single (maybe False (not . MPD.stSingle) (status s)))
-        status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-        continue s { status }
+        continue =<< rebuildStatus s
       EvKey (KChar 'c') [] -> do
         _ <-
           liftIO
             ( withMPD
             $ MPD.consume (maybe False (not . MPD.stConsume) (status s))
             )
-        status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-        continue s { status }
+        continue =<< rebuildStatus s
       EvKey (KChar 'x') [] -> do
         _ <- liftIO
           (withMPD $ MPD.crossfade
@@ -173,18 +171,15 @@ handleEvent s e = case e of
             $ maybe 0 MPD.stXFadeWidth (status s)
             )
           ) -- TODO
-        status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-        continue s { status }
+        continue =<< rebuildStatus s
       EvKey (KChar 'r') [] -> do
         _ <- liftIO
           (withMPD $ MPD.repeat (maybe False (not . MPD.stRepeat) (status s)))
-        status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-        continue s { status }
+        continue =<< rebuildStatus s
       EvKey (KChar 'z') [] -> do
         _ <- liftIO
           (withMPD $ MPD.random (maybe False (not . MPD.stRandom) (status s)))
-        status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-        continue s { status }
+        continue =<< rebuildStatus s
       EvKey (KChar '/') [] ->
         continue $ s &  modeL .~ ExMode
                      &  exL . exPrefixL .~ FSearch
@@ -201,12 +196,10 @@ handleEvent s e = case e of
                      &  focusL .  focExL .~ True
       EvKey (KChar '.') [] -> do
         _    <- liftIO (withMPD MPD.next)
-        song <- liftIO (withMPD MPD.currentSong)
-        continue s { currentSong = fromRight Nothing song }
+        continue =<< rebuildStatus s
       EvKey (KChar ',') [] -> do
         _    <- liftIO (withMPD MPD.previous)
-        song <- liftIO (withMPD MPD.currentSong)
-        continue s { currentSong = fromRight Nothing song }
+        continue =<< rebuildStatus s
       EvKey (KChar ']') [] -> continue =<< seekCurEventM 5 s
       EvKey (KChar '[') [] -> continue =<< seekCurEventM (-5) s
       EvKey (KChar '}') [] -> continue =<< seekCurEventM 30 s
@@ -231,16 +224,7 @@ handleEvent s e = case e of
         PlaylistsView -> handleEventPlaylists s e
         HelpView -> handleEventHelp s e
   (AppEvent (Left Tick)) -> do
-    status    <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-    continue s { status }
+    continue =<< rebuildStatus s
   (AppEvent (Right (Right _))) -> do
-    currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
-    status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-    queueVec <- liftIO
-      (V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing))
-    let queueUnmoved = (, False) <$> list QueueList queueVec 1
-    let queueNew = case listSelected (queue s) of
-          Nothing -> queueUnmoved
-          Just i  -> listMoveTo i queueUnmoved
-    continue s { currentSong, status, queue = queueNew }
+    continue =<< rebuildStatus =<< rebuildQueue s
   _ -> continue s
