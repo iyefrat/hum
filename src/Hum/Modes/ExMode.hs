@@ -33,6 +33,10 @@ exEnd s =
 handleExEvent
     :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
 handleExEvent s e = case e of
+    VtyEvent (EvKey KEsc []) ->
+        continue $ s & exL . exEditorL .~ editorText ExEditor (Just 1) ""
+                     & modeL .~ NormalMode
+                     & focusL . focExL .~ False
     VtyEvent (EvKey KEnter []) -> exEnd s
     VtyEvent vtye ->
         continue =<< handleEventLensed s (exL . exEditorL) handleEditorEvent vtye
