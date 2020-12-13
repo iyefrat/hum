@@ -1,4 +1,3 @@
-{-#LANGUAGE RankNTypes#-}
 -- |
 
 module Hum.Views.Library where

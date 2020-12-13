@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 -- |
 
 module Hum.Views.Common where
