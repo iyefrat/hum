@@ -162,7 +162,7 @@ handleEventQueue s e = case e of
     EvKey (KChar 'D') [] -> do
       let clSongs' = s^. queueL
       let s' = s & clipboardL . clSongsL .~ clSongs'
-      _ <- liftIO (withMPD $ deleteAll (queue s))
+      _ <- liftIO (withMPD MPD.clear)
       rebuildQueue s' >>= rebuildStatus >>= continue
     EvKey (KChar 'y') [] -> continue $ s & clipboardL . clSongsL .~  (s ^. queueL & getHighlighted)
     EvKey (KChar 'p') [] -> do

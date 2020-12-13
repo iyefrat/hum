@@ -69,8 +69,8 @@ deleteHighlightedfromQ ls =
              ((MPD.sgId . fst . snd) =<< listSelectedElement ls)
              MPD.deleteId
 
-deleteAll :: MPD.MonadMPD m => SongList -> m ()
-deleteAll ls = for_ ls (\s -> whenJust (MPD.sgId . fst $ s) MPD.deleteId)
+deleteBulkfromQ :: MPD.MonadMPD m => SongList -> m ()
+deleteBulkfromQ ls = for_ ls (\s -> whenJust (MPD.sgId . fst $ s) MPD.deleteId)
 
 pasteSongstoQ :: MPD.MonadMPD m => SongList -> SongList -> m ()
 pasteSongstoQ clip ls =
