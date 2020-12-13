@@ -196,8 +196,7 @@ handleEventLibrary s e = case e of
       continue =<< libraryMove listMoveDown =<< libraryAddtoQ True s
     EvKey (KChar ' ') [] ->
       continue =<< libraryMove listMoveDown =<< libraryAddtoQ False s
-    EvKey (KChar 'G') [] ->
-      continue =<< libraryMove (\ls -> listMoveBy (length ls) ls) s
+    EvKey (KChar 'G') [] -> continue =<< libraryMove (listMoveTo (-1)) s
     EvKey (KChar 'g') [] -> continue =<< libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     _                    -> continue s
   _ -> continue s

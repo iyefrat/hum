@@ -183,8 +183,7 @@ handleEventPlaylists s e = case e of
        | s ^. focusL . focPlayL == FocPlaylists
          -> continue =<< pastePlaylist s
        | otherwise -> continue s
-    EvKey (KChar 'G') [] ->
-      continue =<< playlistsMove (\ls -> listMoveBy (length ls) ls) s
+    EvKey (KChar 'G') [] -> continue =<< playlistsMove (listMoveTo (-1)) s
     EvKey (KChar 'g') [] -> continue =<< playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
     EvKey (KChar 'e') [] -> if s ^. editableL then
       continue $ s & editableL %~ not
