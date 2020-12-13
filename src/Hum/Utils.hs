@@ -79,13 +79,10 @@ pasteSongstoQ clip ls =
   in  for_ indexedClip (\(n, song) -> MPD.addId song $ (+ (n + 1)) <$> pos)
 
 getHighlighted
-  :: (Eq e, W.Filterable t, Foldable t, Splittable t)
+  :: (W.Filterable t, Traversable t)
   => GenericList n t (e, Highlight)
   -> GenericList n t (e, Highlight)
-getHighlighted ls = hls where
-  hls = W.filter
-    (\(el, hl) -> hl || Just (el, hl) == (snd <$> listSelectedElement ls))
-    ls
+getHighlighted ls = ls & listHighlightSelected ? W.filter snd ? listUnhighlightAll
 
 listPaste
   :: (Splittable t, Semigroup (t e))
@@ -98,11 +95,14 @@ listPaste paste ls =
       (es1, es2) = Brick.Widgets.List.splitAt (pos + 1) es
   in  ls { listElements = es1 <> listElements paste <> es2 }
 
-deleteHighlighted ::  HState
-    -> Lens' HState SongList
-    -> HState
-deleteHighlighted st lns = st & clipboardL . clSongsL .~ (st ^. lns & listHighlight ? W.filter snd ? listUnhighlightAll)
-                              & lns %~ listHighlight ? W.filter (not . snd)
+deleteHighlighted :: HState -> Lens' HState SongList -> HState
+deleteHighlighted st lns =
+  st & clipboardL . clSongsL .~ (st ^. lns & getHighlighted)
+     & lns %~ listHighlightSelected ? W.filter (not . snd)
+
+yankHighlighted :: HState -> Lens' HState SongList -> HState
+yankHighlighted st lns =
+  st & clipboardL . clSongsL .~ (st ^. lns & getHighlighted)
 
 -- | toggle selected items highlight status
 listToggleHighlight :: Traversable t => GenericList n t (e,Highlight) -> GenericList n t (e,Highlight)
@@ -110,8 +110,8 @@ listToggleHighlight = listModify (second not)
 
 
 -- | Highlight selcted item status
-listHighlight :: Traversable t => GenericList n t (e,Highlight) -> GenericList n t (e,Highlight)
-listHighlight = listModify (second (const True))
+listHighlightSelected :: Traversable t => GenericList n t (e,Highlight) -> GenericList n t (e,Highlight)
+listHighlightSelected = listModify (second (const True))
 
 listUnhighlightAll :: Traversable t => GenericList n t (e,Highlight) -> GenericList n t (e,Highlight)
 listUnhighlightAll = fmap (second $ const False)
