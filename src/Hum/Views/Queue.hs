@@ -104,9 +104,8 @@ queueSearch direction s =
     if searchkey == ""
       then pure s
       else do
-        extentMap <- updateExtentMap
         pure
-          $  s { extentMap }
+          $  s
           &  queueL
           %~ ( dir
              . listFindBy
@@ -132,11 +131,9 @@ handleEventQueue
 handleEventQueue s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> do
-      extentMap <- updateExtentMap
-      continue $ (s & queueL %~ listMoveDown) { extentMap }
+      continue $ s & queueL %~ listMoveDown
     EvKey (KChar 'k') [] -> do
-      extentMap <- updateExtentMap
-      continue $ (s & queueL %~ listMoveUp) { extentMap }
+      continue $ s & queueL %~ listMoveUp
     EvKey (KChar 'n') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL) s
     EvKey (KChar 'N') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL & not) s
     EvKey (KChar 'a') [] ->
@@ -153,8 +150,7 @@ handleEventQueue s e = case e of
     EvKey (KChar 'd') [] -> do
       let clSongs' = s ^. queueL & getHighlighted
       _ <- liftIO (withMPD $ deleteHighlightedfromQ (s ^. queueL))
-      extentMap   <- updateExtentMap
-      let s' = (s & clipboardL . clSongsL .~ clSongs') {extentMap}
+      let s' = s & clipboardL . clSongsL .~ clSongs'
       rebuildQueue s' >>= rebuildStatus >>= continue
     EvKey (KChar 'D') [] -> do
       let clSongs' = s^. queueL
@@ -167,10 +163,8 @@ handleEventQueue s e = case e of
       _ <- liftIO (withMPD $ pasteSongstoQ clSongs' (s ^. queueL))
       rebuildQueue s >>= rebuildStatus >>= continue
     EvKey (KChar 'G') [] -> do
-      extentMap <- updateExtentMap
-      continue (s & queueL %~ listMoveTo (-1)) { extentMap }
+      continue $ s & queueL %~ listMoveTo (-1)
     EvKey (KChar 'g') [] -> do -- TODO change this to  'gg', somehow
-      extentMap <- updateExtentMap
-      continue (s & queueL %~ listMoveTo 0) { extentMap }
+      continue $ s & queueL %~ listMoveTo 0
     _ -> continue s
   _ -> continue s

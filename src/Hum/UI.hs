@@ -17,9 +17,7 @@ import qualified Data.Text                     as T
 import           Hum.Attributes
 import           Hum.Views
 import           Hum.Modes
-import           Hum.Utils
 import           Hum.Rebuild
-import qualified Data.Map.Strict               as Map
 import           Control.Lens
 import           System.Directory
 
@@ -72,7 +70,6 @@ buildInitialState chan = do
   currentSong <- fromRight Nothing <$> withMPD MPD.currentSong
   status <- fromRight Nothing <$> (Just <<$>> withMPD MPD.status)
   let hview      = QueueView
-  let extentMap = Map.empty
   let focus = Focus { focQueue = FocQueue
                     , focLib   = FocArtists
                     , focPlay  = FocPlaylists
@@ -114,7 +111,6 @@ buildInitialState chan = do
               , status
               , currentSong
               , queue
-              , extentMap
               , clipboard
               , library
               , playlists
@@ -228,17 +224,15 @@ handleEvent s e = case e of
         continue $ s & editableL .~ False
                      & hviewL .~ PlaylistsView
       EvResize _ _ -> do
-        extentMap <- updateExtentMap
-        continue s { extentMap }
+        continue s
       _ -> case hview s of
         QueueView     -> handleEventQueue s e
         LibraryView   -> handleEventLibrary s e
         PlaylistsView -> handleEventPlaylists s e
         HelpView -> handleEventHelp s e
   (AppEvent (Left Tick)) -> do
-    extentMap <- updateExtentMap
     status    <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))
-    continue s { status, extentMap }
+    continue s { status }
   (AppEvent (Right (Right _))) -> do
     currentSong <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
     status <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))

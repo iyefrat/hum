@@ -128,16 +128,14 @@ playlistsSearch direction s =
         then pure s
         else case playfoc of
           FocPlaylists -> do
-            extentMap <- updateExtentMap
             rebuildPlList
-              $  (s { extentMap })
+              $  s
               &  playlistsL
               .  plListL
               %~ (dir . listFindBy (stringySearch searchkey) . dir)
           FocPSongs -> do
-            extentMap <- updateExtentMap
             pure
-              $  s { extentMap }
+              $  s
               &  playlistsL
               .  plSongsL
               %~ (dir . listFindBy (songSearch searchkey [MPD.Title] . fst) . dir)

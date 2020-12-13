@@ -155,23 +155,20 @@ librarySearch direction s =
         then pure s
         else case libfoc of
           FocArtists -> do
-            extentMap <- updateExtentMap
             rebuildLibArtists
-              $  (s { extentMap })
+              $  s
               &  libraryL
               .  artistsL
               %~ (dir . listFindBy (stringySearch searchkey) . dir)
           FocAlbums -> do
-            extentMap <- updateExtentMap
             rebuildLibAlbums
-              $  (s { extentMap })
+              $  s
               &  libraryL
               .  albumsL
               %~ (dir . listFindBy (stringySearch searchkey) . dir)
           FocSongs -> do
-            extentMap <- updateExtentMap
             pure
-              $  s { extentMap }
+              $  s
               &  libraryL
               .  songsL
               %~ (dir . listFindBy (songSearch searchkey [MPD.Title]) . dir)

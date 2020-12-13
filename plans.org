@@ -3,7 +3,6 @@
 ** TODO queue highlight gets erased when song changes
 * PROJ Near future
 ** TODO improve docs
-** TODO rethink the extentmap
 ** TODO implement scroll in help screen
 ** TODO implement search in help screen
 ** TODO paste back deleted playlists

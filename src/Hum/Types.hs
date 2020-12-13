@@ -19,7 +19,6 @@ data HState = HState
     , queue       :: !SongList
     , library     :: !LibraryState
     , playlists   :: !PlaylistsState
-    , extentMap   :: !(Map Name (Maybe (Extent Name)))
     , clipboard   :: !Clipboard
     , focus       :: !Focus
     , editable    :: !Bool

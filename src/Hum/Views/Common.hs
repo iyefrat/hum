@@ -11,7 +11,6 @@ import           Brick.Widgets.Border
 import           Hum.Attributes
 import           Hum.Utils
 import qualified Network.MPD                   as MPD
-import qualified Data.Map.Strict               as Map
 import qualified Data.Text                     as T
 import           Brick.Widgets.List
 import           Control.Lens

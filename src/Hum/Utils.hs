@@ -4,7 +4,6 @@ module Hum.Utils where
 import           Hum.Types
 import           Hum.Rebuild
 import           Brick.Types
-import           Brick.Main
 import           Brick.Widgets.List
 import qualified Data.Vector                   as V
 import qualified Data.Text                     as T
@@ -40,26 +39,6 @@ secondsToTime :: Integer -> Text
 secondsToTime sec =
   let (minutes, seconds) = divMod sec 60
   in  toText (printf "%d:%02d" minutes seconds :: String)
-
-updateExtentMap :: EventM Name (Map Name (Maybe (Extent Name)))
-updateExtentMap = do
-  queueE      <- lookupExtent Queue
-  nowPlayingE <- lookupExtent NowPlaying
-  libLeftE    <- lookupExtent LibraryLeft
-  libMidE     <- lookupExtent LibraryMid
-  libRightE   <- lookupExtent LibraryRight
-  playLeftE   <- lookupExtent PlaylistLeft
-  playRightE  <- lookupExtent PlaylistRight
-  let extentMap = Map.fromList
-        [ (Queue        , queueE)
-        , (NowPlaying   , nowPlayingE)
-        , (LibraryLeft  , libLeftE)
-        , (LibraryMid   , libMidE)
-        , (LibraryRight , libRightE)
-        , (PlaylistLeft , playLeftE)
-        , (PlaylistRight, playRightE)
-        ]
-  pure extentMap
 
 deleteHighlightedfromQ :: MPD.MonadMPD m => SongList -> m ()
 deleteHighlightedfromQ ls =
