@@ -16,6 +16,7 @@ import           Hum.Attributes
 import           Hum.Views.Common
 import           Hum.Rebuild
 import qualified Data.Text                     as T
+import qualified Data.Vector                   as V
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
@@ -144,18 +145,9 @@ libraryAddtoQ play s =
             )
         songBulkAddtoQ play songs s
       FocSongs -> do
-        let maybeFilePath = MPD.sgFilePath . snd <$> listSelectedElement
+        let songs = maybe V.empty V.singleton $ snd <$> listSelectedElement
               (s ^. libraryL . songsL)
-        traverse_
-          (\sel -> liftIO
-            (withMPD $ MPD.addId sel Nothing >>= if play
-              then MPD.playId
-              else const pass
-            )
-          )
-          maybeFilePath
-        song <- liftIO (withMPD MPD.currentSong)
-        pure s { currentSong = fromRight Nothing song, queue = queue s }
+        songBulkAddtoQ play songs s
 
 librarySearch :: Bool -> HState -> EventM Name HState
 librarySearch direction s =

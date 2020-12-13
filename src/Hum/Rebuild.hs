@@ -17,6 +17,7 @@ songsOfArtist martist = V.fromList . fromRight [] <$> withMPD
 songsOfAlbum :: Maybe MPD.Value -> IO (V.Vector MPD.Song)
 songsOfAlbum malbum = V.fromList . fromRight [] <$> withMPD
   (MPD.find (MPD.Album MPD.=? fromMaybe "" malbum))
+
 albumsOfArtist :: Maybe MPD.Value -> IO (V.Vector MPD.Value)
 albumsOfArtist martist =
   V.fromList . fromRight [] <$> withMPD (MPD.list MPD.Album martist)
