@@ -80,9 +80,10 @@ rebuildPlList s = do
 
 rebuildQueue :: MonadIO m => HState -> m HState
 rebuildQueue s = do
+  let mi = listSelected (queue s)
   queueVec  <- liftIO $ V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue' = (, False) <$> list QueueList queueVec 1
-  pure $ s & queueL .~ queue'
+  pure $ s & queueL .~ maybe id listMoveTo mi queue'
 
 rebuildStatus :: MonadIO m => HState -> m HState
 rebuildStatus s = do
