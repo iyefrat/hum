@@ -135,10 +135,10 @@ handleEventQueue s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> do
       extentMap <- updateExtentMap
-      continue s { queue = listMoveDown $ queue s, extentMap }
+      continue $ (s & queueL %~ listMoveDown) { extentMap }
     EvKey (KChar 'k') [] -> do
       extentMap <- updateExtentMap
-      continue s { queue = listMoveUp $ queue s, extentMap }
+      continue $ (s & queueL %~ listMoveUp) { extentMap }
     EvKey (KChar 'n') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL) s
     EvKey (KChar 'N') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL & not) s
     EvKey (KChar 'a') [] ->
@@ -150,8 +150,7 @@ handleEventQueue s e = case e of
       let maybeSelectedId =
             MPD.sgId . fst . snd =<< listSelectedElement (queue s)
       traverse_ (\sel -> liftIO (withMPD $ MPD.playId sel)) maybeSelectedId
-      song <- liftIO (withMPD MPD.currentSong)
-      continue s { currentSong = fromRight Nothing song, queue = queue s }
+      rebuildStatus s >>= continue
     EvKey (KChar ' ') [] -> continue $ s & queueL %~ (listMoveDown . listToggleHighlight)
     EvKey (KChar 'd') [] -> do
       let clSongs' = s ^. queueL & getHighlighted
@@ -171,11 +170,9 @@ handleEventQueue s e = case e of
       rebuildQueue s >>= rebuildStatus >>= continue
     EvKey (KChar 'G') [] -> do
       extentMap <- updateExtentMap
-      continue s { queue     = listMoveTo (length . queue $ s) $ queue s
-                 , extentMap
-                 }
+      continue (s & queueL %~ listMoveTo (-1)) { extentMap }
     EvKey (KChar 'g') [] -> do -- TODO change this to  'gg', somehow
       extentMap <- updateExtentMap
-      continue s { queue = listMoveTo 0 $ queue s, extentMap }
+      continue (s & queueL %~ listMoveTo 0) { extentMap }
     _ -> continue s
   _ -> continue s
