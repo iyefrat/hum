@@ -17,17 +17,16 @@ import           Hum.Rebuild
 import qualified Data.Text                     as T
 import qualified Data.Vector                   as V
 import qualified Network.MPD                   as MPD
-import qualified Data.Map.Strict               as Map
 import           Hum.Utils
 
 
 
 drawLibraryLeft :: HState -> Widget Name
 drawLibraryLeft st =
-  let vsize = case join $ Map.lookup LibraryLeft $ extentMap st of
-        Just e  -> snd . extentSize $ e
-        Nothing -> 20
-  in  reportExtent LibraryLeft $ hCenter
+  Widget Greedy Fixed $ do
+    ctx <- getContext
+    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    render $ reportExtent LibraryLeft $ hCenter
         (   viewport LibraryLeft Vertical
         .   visible
         .   vLimit vsize
@@ -41,10 +40,10 @@ drawLibraryLeft st =
         )
 drawLibraryMid :: HState -> Widget Name
 drawLibraryMid st =
-  let vsize = case join $ Map.lookup LibraryMid $ extentMap st of
-        Just e  -> snd . extentSize $ e
-        Nothing -> 20
-  in  reportExtent LibraryMid $ hCenter
+  Widget Greedy Fixed $ do
+    ctx <- getContext
+    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    render $ reportExtent LibraryMid $ hCenter
         (   viewport LibraryMid Vertical
         .   visible
         .   vLimit vsize
@@ -60,10 +59,10 @@ drawLibraryMid st =
 
 drawLibraryRight :: HState -> Widget Name
 drawLibraryRight st =
-  let vsize = case join $ Map.lookup LibraryRight $ extentMap st of
-        Just e  -> snd . extentSize $ e
-        Nothing -> 20
-  in  reportExtent LibraryRight $ hCenter
+  Widget Greedy Fixed $ do
+    ctx <- getContext
+    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    render $ reportExtent LibraryRight $ hCenter
         (   viewport LibraryRight Vertical
         .   visible
         .   vLimit vsize

@@ -14,17 +14,15 @@ import           Hum.Rebuild
 import           Hum.Views.Common
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
-import qualified Data.Map.Strict               as Map
 import           Control.Lens
 
 drawViewQueue :: HState -> Widget Name
 drawViewQueue st =
-  let vsize = case join $ Map.lookup Queue $ extentMap st of
-        Just e  -> snd . extentSize $ e
-        Nothing -> 60
-  in  reportExtent Queue $ hCenter
+  Widget Greedy Fixed $ do
+    ctx <- getContext
+    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    render $ hCenter
         (   viewport Queue Vertical
---        .   visible
         .   vLimit vsize
         .   center
         $   hCenter header

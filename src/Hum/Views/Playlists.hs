@@ -19,17 +19,16 @@ import           Hum.Rebuild
 import qualified Data.Text                     as T
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
-import qualified Data.Map.Strict               as Map
 import           Hum.Utils
 
 
 
 drawPlaylistLeft :: HState -> Widget Name
 drawPlaylistLeft st =
-  let vsize = case join $ Map.lookup PlaylistLeft $ extentMap st of
-        Just e  -> snd . extentSize $ e
-        Nothing -> 20
-  in  reportExtent PlaylistLeft $ hCenter
+  Widget Greedy Fixed $ do
+    ctx <- getContext
+    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    render $ reportExtent PlaylistLeft $ hCenter
         (   viewport PlaylistLeft Vertical
         .   visible
         .   vLimit vsize
@@ -43,10 +42,10 @@ drawPlaylistLeft st =
         )
 drawPlaylistRight :: HState -> Widget Name
 drawPlaylistRight st =
-  let vsize = case join $ Map.lookup PlaylistRight $ extentMap st of
-        Just e  -> snd . extentSize $ e
-        Nothing -> 20
-  in  reportExtent PlaylistRight $ hCenter
+  Widget Greedy Fixed $ do
+    ctx <- getContext
+    let vsize = ctx ^. windowHeightL - 5 -- HACK Don't hardcode nowplaying size?
+    render $  reportExtent PlaylistRight $ hCenter
         (   viewport PlaylistRight Vertical
         .   visible
         .   vLimit vsize
