@@ -2,7 +2,6 @@
 -- |
 
 module Hum.Views.Library where
-import           Prelude                 hiding ( Down )
 import           Hum.Types
 import           Brick.Types
 import           Graphics.Vty.Input.Events
