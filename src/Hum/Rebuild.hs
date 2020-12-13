@@ -11,12 +11,22 @@ import qualified Data.Vector                   as V
 -- in which we have funcitons to rebuild the state when it changes.
 
 songsOfArtist :: Maybe MPD.Value -> IO (V.Vector MPD.Song)
-songsOfArtist martist = V.fromList . fromRight [] <$> withMPD
-  (MPD.find (MPD.AlbumArtist MPD.=? fromMaybe "" martist))
+songsOfArtist martist = maybe
+  (pure empty)
+  ( (V.fromList . fromRight [] <$>)
+  . withMPD
+  . (MPD.find . (MPD.AlbumArtist MPD.=?))
+  )
+  martist
 
 songsOfAlbum :: Maybe MPD.Value -> IO (V.Vector MPD.Song)
-songsOfAlbum malbum = V.fromList . fromRight [] <$> withMPD
-  (MPD.find (MPD.Album MPD.=? fromMaybe "" malbum))
+songsOfAlbum malbum = maybe
+  (pure empty)
+  ( (V.fromList . fromRight [] <$>)
+  . withMPD
+  . (MPD.find . (MPD.Album MPD.=?))
+  )
+  malbum
 
 albumsOfArtist :: Maybe MPD.Value -> IO (V.Vector MPD.Value)
 albumsOfArtist martist =
