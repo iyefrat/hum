@@ -4,6 +4,7 @@
 * PROJ Near future
 ** TODO improve docs
 ** TODO try and do initialBuild with reBuilds
+** TODO consider if viewports do anything
 ** TODO implement scroll in help screen
 ** TODO implement search in help screen
 ** TODO paste back deleted playlists
