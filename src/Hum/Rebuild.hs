@@ -53,8 +53,7 @@ rebuildLibArtists s = do
     let albums'  = list AlbumsList albumsVec 1
     songsVec    <- liftIO $ songsOfAlbum (snd <$> listSelectedElement albums')
     let songs'   = list SongsList songsVec 1
-    pure $ s &  libraryL . artistsL .~ artists'
-             &  libraryL . albumsL .~ albums'
+    pure $ s &  libraryL . albumsL .~ albums'
              &  libraryL . songsL .~ songs'
 
 rebuildLibAlbums :: MonadIO m => HState -> m HState
@@ -62,7 +61,7 @@ rebuildLibAlbums s = do
     let albums' = s ^. libraryL . albumsL
     songsVec   <- liftIO $ songsOfAlbum (snd <$> listSelectedElement albums')
     let songs'  = list SongsList songsVec 1
-    pure $ s & libraryL . albumsL .~ albums' & libraryL . songsL .~ songs'
+    pure $ s & libraryL . songsL .~ songs'
 
 rebuildPl :: MonadIO m => HState -> m HState
 rebuildPl s = do
@@ -87,15 +86,14 @@ rebuildPlList s = do
             )
         )
     let plSongs' = (, False) <$> list PlaylistSongs plSongsVec 1
-    pure $ s & playlistsL . plListL  .~ plList'
-             & playlistsL . plSongsL .~ plSongs'
+    pure $ s & playlistsL . plSongsL .~ plSongs'
 
 rebuildQueue :: MonadIO m => HState -> m HState
 rebuildQueue s = do
   let mi = s ^. queueL & listSelected
   queueVec  <- liftIO $ V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
-  let queue' = (, False) <$> list QueueList queueVec 1
-  pure $ s & queueL .~ maybe id listMoveTo mi queue'
+  let queue' = maybe id listMoveTo mi $ (, False) <$> list QueueList queueVec 1
+  pure $ s & queueL .~ queue'
 
 rebuildStatus :: MonadIO m => HState -> m HState
 rebuildStatus s = do

@@ -8,6 +8,7 @@
 ** TODO implement scroll in help screen
 ** TODO implement search in help screen
 ** TODO paste back deleted playlists
+** TODO can the xOfY's not take Maybes?
 ** TODO implement completion in cmds
 ** TODO impliment search history
 *** TODO implement =:save= with the protocol
