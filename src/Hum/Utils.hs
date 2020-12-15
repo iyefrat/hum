@@ -147,8 +147,7 @@ songBulkAddtoQ play songs s = do
     (V.take 1 songPaths)
   traverse_ (\sel -> liftIO (withMPD $ MPD.addId sel Nothing))
             (V.drop 1 songPaths)
-  song <- liftIO (withMPD MPD.currentSong)
-  pure s { currentSong = fromRight Nothing song}
+  pure s
 
 songBulkAddtoPl :: String -> V.Vector MPD.Song -> HState -> EventM n HState
 songBulkAddtoPl pl songs s = do
