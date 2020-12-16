@@ -86,17 +86,34 @@ libraryRow _ name val =
     $ column Nothing (Pad 1) Max
     $ txt val
 
+libraryAlbumRow :: HState -> MPD.Song -> Widget n
+libraryAlbumRow st song =
+  let pathsInQueue =
+        (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
+      title  = meta (MPD.toText . MPD.sgFilePath $ song) MPD.Title song
+      titleW =  withAttr titleAttr $ column Nothing Max Max $ txt title
+      track = meta "-" MPD.Track song
+      trackW = withAttr trackAttr $ column (Just (Col 3)) Max (Pad 1) $ txt track
+  in     (if MPD.sgFilePath song `elem` pathsInQueue
+            then withAttr titleBoldAttr
+            else id
+          )
+        $ trackW <+> titleW 
+
+
 librarySongRow :: HState -> MPD.Song -> Widget n
 librarySongRow st song =
   let pathsInQueue =
         (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
-  in  withAttr
-          (if MPD.sgFilePath song `elem` pathsInQueue
-            then titleBoldAttr
-            else titleAttr
+      title  = meta (MPD.toText . MPD.sgFilePath $ song) MPD.Title song
+      titleW =  withAttr titleAttr $ column Nothing Max Max $ txt title
+      track = meta "-" MPD.Track song
+      trackW = withAttr trackAttr $ column (Just (Col 3)) Max (Pad 1) $ txt track
+  in     (if MPD.sgFilePath song `elem` pathsInQueue
+            then withAttr titleBoldAttr
+            else id
           )
-        $ column Nothing (Pad 1) Max
-        $ txt (meta (MPD.toText . MPD.sgFilePath $ song) MPD.Title song)
+        $ trackW <+> titleW
 
 libraryMoveRight :: FocLib -> FocLib
 libraryMoveRight FocArtists = FocAlbums
