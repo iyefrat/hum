@@ -81,7 +81,9 @@ buildInitialState chan = do
   artistsVec <- V.fromList . fromRight [] <$> withMPD (MPD.list MPD.AlbumArtist mempty)
   let artists = list ArtistsList artistsVec 1
   albumsVec <- maybe (pure empty) albumsOfArtist (snd <$> listSelectedElement artists)
-  let albums    = list AlbumsList albumsVec 1
+  yalbumsVec <- maybe (pure empty) yalbumsOfArtist (snd <$> listSelectedElement artists)
+  let albums  = list AlbumsList albumsVec 1
+  let yalbums = list YalbumsList yalbumsVec 1
   songsVec <- maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums)
   let songs = list SongsList songsVec 1
   plListVec <- V.fromList . sort . fromRight [] <$> withMPD MPD.listPlaylists
@@ -91,7 +93,7 @@ buildInitialState chan = do
     $ maybe "<no playlists>" snd (listSelectedElement plList)
     )
   let plSongs = (, False) <$> list PlaylistSongs plSongsVec 1
-  let library = LibraryState { artists, albums, songs }
+  let library = LibraryState { artists, albums, yalbums, songs }
   let playlists = PlaylistsState { plList, plSongs }
   let editable  = False
   let prompts = Prompts

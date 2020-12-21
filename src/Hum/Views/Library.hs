@@ -49,9 +49,9 @@ drawLibraryMid st =
         .   center
         $   hBorder
         <=> hCenter
-              (renderList (const $ libraryRow st LibraryMid)
+              (renderList (const $ libraryAlbumRow)
                           ((focLib . focus $ st) == FocAlbums)
-                          (MPD.toText <$> st ^. libraryL . albumsL)
+                          (st ^. libraryL . yalbumsL)
               )
         )
 
@@ -86,19 +86,16 @@ libraryRow _ name val =
     $ column Nothing (Pad 1) Max
     $ txt val
 
-libraryAlbumRow :: HState -> MPD.Song -> Widget n
-libraryAlbumRow st song =
-  let pathsInQueue =
-        (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
-      title  = meta (MPD.toText . MPD.sgFilePath $ song) MPD.Title song
-      titleW =  withAttr titleAttr $ column Nothing Max Max $ txt title
-      track = meta "-" MPD.Track song
-      trackW = withAttr trackAttr $ column (Just (Col 3)) Max (Pad 1) $ txt track
-  in     (if MPD.sgFilePath song `elem` pathsInQueue
-            then withAttr titleBoldAttr
-            else id
-          )
-        $ trackW <+> titleW 
+libraryAlbumRow :: (MPD.Value,MPD.Value) -> Widget n
+libraryAlbumRow (yr,al) =
+  let year = MPD.toText yr
+      album = MPD.toText al
+      yearW = withAttr dateAttr $ column (Just (Col 7)) Max Max $
+        if T.null year
+          then txt ""
+         else  txt "(" <+>  txt year <+> txt ")"
+      albumW = withAttr albumAttr $ column Nothing Max Max $ txt album
+  in yearW <+> albumW
 
 
 librarySongRow :: HState -> MPD.Song -> Widget n
@@ -133,7 +130,7 @@ libraryMove moveFunc s =
   let libfoc = s ^. focusL . focLibL
   in  case libfoc of
         FocArtists -> rebuildLibArtists $ s & libraryL . artistsL %~ moveFunc
-        FocAlbums  -> rebuildLibAlbums $ s & libraryL . albumsL %~ moveFunc
+        FocAlbums  -> rebuildLibAlbums $ s & libraryL . yalbumsL %~ moveFunc
         FocSongs   -> do
           pure $ s & libraryL . songsL %~ moveFunc
 

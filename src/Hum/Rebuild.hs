@@ -29,6 +29,12 @@ albumsOfArtist :: MPD.Value -> IO (V.Vector MPD.Value)
 albumsOfArtist artist' =
   V.fromList . fromRight [] <$> withMPD (MPD.list MPD.Album (MPD.AlbumArtist MPD.=? artist'))
 
+yalbumsOfArtist :: MPD.Value -> IO (V.Vector (MPD.Value,MPD.Value))
+yalbumsOfArtist artist' = do
+  albums' <- fromRight [] <$> withMPD (MPD.list MPD.Album (MPD.AlbumArtist MPD.=? artist'))
+  yalbums' <- liftIO . sequence $ (\x -> (,x) <$> yearOfAlbum x) <$> albums'
+  pure $ V.fromList (sortBy (\x y -> compare (fst x) (fst y)) yalbums')
+
 yearOfAlbum :: MPD.Value -> IO MPD.Value
 yearOfAlbum album' = fromRight "????" <$> (minYear <<$>> withMPD (MPD.list MPD.Date (MPD.Album MPD.=? album')))
   where minYear :: [MPD.Value] -> MPD.Value
@@ -42,27 +48,32 @@ rebuildLib s = do
     let artists' = list ArtistsList artistsVec 1
     albumsVec   <- liftIO $ maybe (pure empty) albumsOfArtist (snd <$> listSelectedElement artists')
     let albums'  = list AlbumsList albumsVec 1
-    songsVec    <- liftIO $ maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums')
+    yalbumsVec   <- liftIO $ maybe (pure empty) yalbumsOfArtist (snd <$> listSelectedElement artists')
+    let yalbums'    = list YalbumsList yalbumsVec 1
+    songsVec     <- liftIO $ maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums')
     let songs'   = list SongsList songsVec 1
     pure $ s &  libraryL . artistsL .~ artists'
              &  libraryL . albumsL .~ albums'
+             &  libraryL . yalbumsL .~ yalbums'
              &  libraryL . songsL .~ songs'
 
 rebuildLibArtists :: MonadIO m => HState -> m HState
 rebuildLibArtists s = do
     let artists' = s ^. libraryL . artistsL
     albumsVec   <- liftIO $ maybe (pure empty) albumsOfArtist (snd <$> listSelectedElement artists')
-    yalbumsVec   <- liftIO . sequence $ (\x -> (,x) <$> yearOfAlbum x) <$> albumsVec
     let albums'  = list AlbumsList albumsVec 1
-    songsVec    <- liftIO $ maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums')
+    yalbumsVec   <- liftIO $ maybe (pure empty) yalbumsOfArtist (snd <$> listSelectedElement artists')
+    let yalbums'    = list YalbumsList yalbumsVec 1
+    songsVec    <- liftIO $ maybe (pure empty) songsOfAlbum (snd . snd <$> listSelectedElement yalbums')
     let songs'   = list SongsList songsVec 1
     pure $ s &  libraryL . albumsL .~ albums'
+             &  libraryL . yalbumsL .~ yalbums'
              &  libraryL . songsL .~ songs'
 
 rebuildLibAlbums :: MonadIO m => HState -> m HState
 rebuildLibAlbums s = do
-    let albums' = s ^. libraryL . albumsL
-    songsVec   <- liftIO $ maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums')
+    let yalbums' = s ^. libraryL . yalbumsL
+    songsVec   <- liftIO $ maybe (pure empty) songsOfAlbum (snd . snd <$> listSelectedElement yalbums')
     let songs'  = list SongsList songsVec 1
     pure $ s & libraryL . songsL .~ songs'
 

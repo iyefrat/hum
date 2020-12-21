@@ -29,7 +29,7 @@ data HState = HState
 
 data LibraryState = LibraryState
     { artists     :: !(List Name MPD.Value)
---    , albumYears  :: !(List Name MPD.Value)
+    , yalbums  :: !(List Name (MPD.Value,MPD.Value))
     , albums      :: !(List Name MPD.Value)
     , songs       :: !(List Name Song)
     }
@@ -73,7 +73,7 @@ type HumEvent = Either Tick (Response [Subsystem])
 
 data Name = NowPlaying | ClSongs
   | Queue | QueueList
-  | Library | ArtistsList | LibraryLeft | AlbumsList | LibraryMid | SongsList | LibraryRight
+  | Library | ArtistsList | LibraryLeft | AlbumsList | YalbumsList | LibraryMid | SongsList | LibraryRight
   | PlaylistList | PlaylistLeft | PlaylistSongs | PlaylistRight
   | ExEditor
   | TextPromptEditor
