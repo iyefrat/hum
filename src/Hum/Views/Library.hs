@@ -145,11 +145,11 @@ libraryAddtoQ play s =
     case libfoc of
       FocArtists -> do
         let martist = snd <$> listSelectedElement (s ^. libraryL . artistsL)
-        songs <-liftIO $ songsOfArtist martist
+        songs <-liftIO $ maybe (pure empty) songsOfArtist martist
         songBulkAddtoQ play songs s
       FocAlbums -> do
         let malbum = snd <$> listSelectedElement (s ^. libraryL . albumsL)
-        songs <- liftIO $ songsOfAlbum malbum
+        songs <- liftIO $ maybe (pure empty) songsOfAlbum malbum
         songBulkAddtoQ play songs s
       FocSongs -> do
         let songs = maybe V.empty V.singleton $ snd <$> listSelectedElement

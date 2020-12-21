@@ -10,37 +10,33 @@ import qualified Network.MPD                   as MPD
 import qualified Data.Vector                   as V
 -- in which we have funcitons to rebuild the state when it changes.
 
-songsOfArtist :: Maybe MPD.Value -> IO (V.Vector MPD.Song)
-songsOfArtist martist = maybe
-  (pure empty)
-  ( (V.fromList . fromRight [] <$>)
+songsOfArtist :: MPD.Value -> IO (V.Vector MPD.Song)
+songsOfArtist artist' =
+  (V.fromList . fromRight [] <$>)
   . withMPD
-  . (MPD.find . (MPD.AlbumArtist MPD.=?))
-  )
-  martist
+  . MPD.find $ (MPD.AlbumArtist MPD.=? artist')
 
-songsOfAlbum :: Maybe MPD.Value -> IO (V.Vector MPD.Song)
-songsOfAlbum malbum = maybe
-  (pure empty)
-  ( (V.fromList . fromRight [] <$>)
+
+songsOfAlbum ::MPD.Value -> IO (V.Vector MPD.Song)
+songsOfAlbum album' =
+   (V.fromList . fromRight [] <$>)
   . withMPD
-  . (MPD.find . (MPD.Album MPD.=?))
-  )
-  malbum
+  . MPD.find $ (MPD.Album MPD.=? album')
 
-albumsOfArtist :: Maybe MPD.Value -> IO (V.Vector MPD.Value)
-albumsOfArtist martist =
-  V.fromList . fromRight [] <$> withMPD (MPD.list MPD.Album martist)
+
+albumsOfArtist :: MPD.Value -> IO (V.Vector MPD.Value)
+albumsOfArtist artist' =
+  V.fromList . fromRight [] <$> withMPD (MPD.list MPD.Album (MPD.Artist MPD.=? artist'))
 
 
 rebuildLib :: MonadIO m => HState -> m HState
 rebuildLib s = do
     artistsVec <- liftIO (V.fromList . fromRight [] <$> withMPD
-      (MPD.list MPD.AlbumArtist Nothing))
+      (MPD.list MPD.AlbumArtist mempty))
     let artists' = list ArtistsList artistsVec 1
-    albumsVec   <- liftIO $ albumsOfArtist (snd <$> listSelectedElement artists')
+    albumsVec   <- liftIO $ maybe (pure empty) albumsOfArtist (snd <$> listSelectedElement artists')
     let albums'  = list AlbumsList albumsVec 1
-    songsVec    <- liftIO $ songsOfAlbum (snd <$> listSelectedElement albums')
+    songsVec    <- liftIO $ maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums')
     let songs'   = list SongsList songsVec 1
     pure $ s &  libraryL . artistsL .~ artists'
              &  libraryL . albumsL .~ albums'
@@ -49,9 +45,9 @@ rebuildLib s = do
 rebuildLibArtists :: MonadIO m => HState -> m HState
 rebuildLibArtists s = do
     let artists' = s ^. libraryL . artistsL
-    albumsVec   <- liftIO $ albumsOfArtist (snd <$> listSelectedElement artists')
+    albumsVec   <- liftIO $ maybe (pure empty) albumsOfArtist (snd <$> listSelectedElement artists')
     let albums'  = list AlbumsList albumsVec 1
-    songsVec    <- liftIO $ songsOfAlbum (snd <$> listSelectedElement albums')
+    songsVec    <- liftIO $ maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums')
     let songs'   = list SongsList songsVec 1
     pure $ s &  libraryL . albumsL .~ albums'
              &  libraryL . songsL .~ songs'
@@ -59,7 +55,7 @@ rebuildLibArtists s = do
 rebuildLibAlbums :: MonadIO m => HState -> m HState
 rebuildLibAlbums s = do
     let albums' = s ^. libraryL . albumsL
-    songsVec   <- liftIO $ songsOfAlbum (snd <$> listSelectedElement albums')
+    songsVec   <- liftIO $ maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums')
     let songs'  = list SongsList songsVec 1
     pure $ s & libraryL . songsL .~ songs'
 

@@ -78,12 +78,11 @@ buildInitialState chan = do
                             , clPlName = Nothing}
   queueVec <- V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue = (, False) <$> list QueueList queueVec 1
-  artistsVec <- V.fromList . fromRight [] <$> withMPD
-    (MPD.list MPD.AlbumArtist Nothing)
+  artistsVec <- V.fromList . fromRight [] <$> withMPD (MPD.list MPD.AlbumArtist mempty)
   let artists = list ArtistsList artistsVec 1
-  albumsVec <- albumsOfArtist (snd <$> listSelectedElement artists)
+  albumsVec <- maybe (pure empty) albumsOfArtist (snd <$> listSelectedElement artists)
   let albums    = list AlbumsList albumsVec 1
-  songsVec <- songsOfAlbum (snd <$> listSelectedElement albums)
+  songsVec <- maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums)
   let songs = list SongsList songsVec 1
   plListVec <- V.fromList . sort . fromRight [] <$> withMPD MPD.listPlaylists
   let plList = list PlaylistList plListVec 1
