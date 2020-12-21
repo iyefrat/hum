@@ -28,9 +28,10 @@ data HState = HState
 --  deriving (Show) --, Eq)
 
 data LibraryState = LibraryState
-    { artists :: !(List Name MPD.Value)
-    , albums  :: !(List Name MPD.Value)
-    , songs   :: !(List Name Song)
+    { artists     :: !(List Name MPD.Value)
+--    , albumYears  :: !(List Name MPD.Value)
+    , albums      :: !(List Name MPD.Value)
+    , songs       :: !(List Name Song)
     }
 
 data PlaylistsState = PlaylistsState

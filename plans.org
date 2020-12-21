@@ -2,11 +2,12 @@
 * PROJ Bugs
 ** TODO queue highlight gets erased when song changes
 * PROJ Near future
-** TODO want list to actually be good
-*** TODO need to upstream tests for different versions of MPD
-*** TODO need to finish filter combinators
-*** TODO need to change type of list (breaking)
+** STRT want list to actually be good
+*** WAIT need to upstream tests for different versions of MPD
+*** WAIT need to finish filter combinators
+*** DONE need to change type of list (breaking)
 *** TODO need to think about other breaking changes that should be made
+*** TODO upstream breaking changes
 ** TODO improve docs
 ** TODO try and do initialBuild with reBuilds
 ** TODO consider if viewports do anything

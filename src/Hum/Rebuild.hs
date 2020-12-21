@@ -4,6 +4,7 @@ module Hum.Rebuild where
 
 import           Hum.Types
 import           Control.Lens
+import           Data.Foldable
 import           Brick.Widgets.List
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
@@ -28,6 +29,11 @@ albumsOfArtist :: MPD.Value -> IO (V.Vector MPD.Value)
 albumsOfArtist artist' =
   V.fromList . fromRight [] <$> withMPD (MPD.list MPD.Album (MPD.AlbumArtist MPD.=? artist'))
 
+yearOfAlbum :: MPD.Value -> IO MPD.Value
+yearOfAlbum album' = fromRight "????" <$> (minYear <<$>> withMPD (MPD.list MPD.Date (MPD.Album MPD.=? album')))
+  where minYear :: [MPD.Value] -> MPD.Value
+        minYear [] = "????"
+        minYear vals = minimum vals
 
 rebuildLib :: MonadIO m => HState -> m HState
 rebuildLib s = do
@@ -46,6 +52,7 @@ rebuildLibArtists :: MonadIO m => HState -> m HState
 rebuildLibArtists s = do
     let artists' = s ^. libraryL . artistsL
     albumsVec   <- liftIO $ maybe (pure empty) albumsOfArtist (snd <$> listSelectedElement artists')
+    yalbumsVec   <- liftIO . sequence $ (\x -> (,x) <$> yearOfAlbum x) <$> albumsVec
     let albums'  = list AlbumsList albumsVec 1
     songsVec    <- liftIO $ maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums')
     let songs'   = list SongsList songsVec 1
