@@ -145,7 +145,7 @@ libraryAddtoQ play s =
         songs <-liftIO $ maybe (pure empty) songsOfArtist martist
         songBulkAddtoQ play songs s
       FocAlbums -> do
-        let malbum = snd <$> listSelectedElement (s ^. libraryL . albumsL)
+        let malbum = snd . snd <$> listSelectedElement (s ^. libraryL . yalbumsL)
         songs <- liftIO $ maybe (pure empty) songsOfAlbum malbum
         songBulkAddtoQ play songs s
       FocSongs -> do
@@ -171,8 +171,8 @@ librarySearch direction s =
             rebuildLibAlbums
               $  s
               &  libraryL
-              .  albumsL
-              %~ (dir . listFindBy (stringySearch searchkey) . dir)
+              .  yalbumsL
+              %~ (dir . listFindBy (stringySearch searchkey . snd) . dir)
           FocSongs -> do
             pure
               $  s
