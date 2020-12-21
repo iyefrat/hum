@@ -26,7 +26,7 @@ songsOfAlbum album' =
 
 albumsOfArtist :: MPD.Value -> IO (V.Vector MPD.Value)
 albumsOfArtist artist' =
-  V.fromList . fromRight [] <$> withMPD (MPD.list MPD.Album (MPD.Artist MPD.=? artist'))
+  V.fromList . fromRight [] <$> withMPD (MPD.list MPD.Album (MPD.AlbumArtist MPD.=? artist'))
 
 
 rebuildLib :: MonadIO m => HState -> m HState
