@@ -53,21 +53,17 @@ rebuildLib s = do
     songsVec     <- liftIO $ maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums')
     let songs'   = list SongsList songsVec 1
     pure $ s &  libraryL . artistsL .~ artists'
-             &  libraryL . albumsL .~ albums'
              &  libraryL . yalbumsL .~ yalbums'
              &  libraryL . songsL .~ songs'
 
 rebuildLibArtists :: MonadIO m => HState -> m HState
 rebuildLibArtists s = do
     let artists' = s ^. libraryL . artistsL
-    albumsVec   <- liftIO $ maybe (pure empty) albumsOfArtist (snd <$> listSelectedElement artists')
-    let albums'  = list AlbumsList albumsVec 1
     yalbumsVec   <- liftIO $ maybe (pure empty) yalbumsOfArtist (snd <$> listSelectedElement artists')
     let yalbums'    = list YalbumsList yalbumsVec 1
     songsVec    <- liftIO $ maybe (pure empty) songsOfAlbum (snd . snd <$> listSelectedElement yalbums')
     let songs'   = list SongsList songsVec 1
-    pure $ s &  libraryL . albumsL .~ albums'
-             &  libraryL . yalbumsL .~ yalbums'
+    pure $ s &  libraryL . yalbumsL .~ yalbums'
              &  libraryL . songsL .~ songs'
 
 rebuildLibAlbums :: MonadIO m => HState -> m HState
