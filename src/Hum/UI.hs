@@ -161,7 +161,7 @@ handleEvent s e = case e of
               )
             $ maybe 0 MPD.stXFadeWidth (status s)
             )
-          ) -- TODO
+          )
         continue =<< rebuildStatus s
       EvKey (KChar 'r') [] -> do
         _ <- liftIO

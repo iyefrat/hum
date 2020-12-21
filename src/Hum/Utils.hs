@@ -77,7 +77,7 @@ listPaste paste ls =
 deleteHighlighted :: HState -> Lens' HState SongList -> HState
 deleteHighlighted st lns =
   st & clipboardL . clSongsL .~ (st ^. lns & getHighlighted)
-     & lns %~ listHighlightSelected ? ( W.filter (not . snd))
+     & lns %~ listHighlightSelected ?  W.filter (not . snd)
 
 yankHighlighted :: HState -> Lens' HState SongList -> HState
 yankHighlighted st lns =
