@@ -30,6 +30,7 @@ data HState = HState
 data LibraryState = LibraryState
     { artists     :: !(List Name MPD.Value)
     , yalbums     :: !(List Name (MPD.Value,MPD.Value))
+    , yalbumSort  :: !Bool
     , songs       :: !(List Name Song)
     }
 

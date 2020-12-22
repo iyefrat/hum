@@ -48,6 +48,7 @@ helpText st = unlines $ case st^.helpScreenL of
         , "Library and Playlists keybindigns:"
         , "  SPC - add song/song collection to queue"
         , "  RET - add song/song collection to queue, and start playing the first one"
+        , "  `   - toggle sort of the album column between release order and alphabetical order"
         , ""
         , "Playlists keybindigns:"
         , " on playlist conents:"

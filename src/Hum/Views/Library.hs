@@ -199,5 +199,6 @@ handleEventLibrary s e = case e of
       continue =<< libraryMove listMoveDown =<< libraryAddtoQ False s
     EvKey (KChar 'G') [] -> continue =<< libraryMove (listMoveTo (-1)) s
     EvKey (KChar 'g') [] -> continue =<< libraryMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
+    EvKey (KChar '`') [] -> continue =<< rebuildLibArtists (s & libraryL . yalbumSortL %~ not)
     _                    -> continue s
   _ -> continue s

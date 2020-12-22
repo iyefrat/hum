@@ -6,6 +6,7 @@
 -   Add to playlist prompt now updates for new playlists
 -   Playlists now sorted alphabetically
 -   List of playlists keeps cursor position after edit
+-   `\`` toggles album sort order in library
 
 ## 0.1.0.0 - 2020-12-12
 

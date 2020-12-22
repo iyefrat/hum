@@ -29,11 +29,12 @@ albumsOfArtist :: MPD.Value -> IO (V.Vector MPD.Value)
 albumsOfArtist artist' =
   V.fromList . fromRight [] <$> withMPD (MPD.list MPD.Album (MPD.AlbumArtist MPD.=? artist'))
 
-yalbumsOfArtist :: MPD.Value -> IO (V.Vector (MPD.Value,MPD.Value))
-yalbumsOfArtist artist' = do
+yalbumsOfArtist ::  Bool -> MPD.Value -> IO (V.Vector (MPD.Value,MPD.Value))
+yalbumsOfArtist bl artist' = let srt = (if bl then fst else snd)
+  in do
   albums' <- fromRight [] <$> withMPD (MPD.list MPD.Album (MPD.AlbumArtist MPD.=? artist'))
   yalbums' <- liftIO . sequence $ (\x -> (,x) <$> yearOfAlbum x) <$> albums'
-  pure $ V.fromList (sortBy (\x y -> compare (fst x) (fst y)) yalbums')
+  pure $ V.fromList (sortBy (\x y -> compare (srt x) (srt y)) yalbums')
 
 yearOfAlbum :: MPD.Value -> IO MPD.Value
 yearOfAlbum album' = fromRight "????" <$> (minYear <<$>> withMPD (MPD.list MPD.Date (MPD.Album MPD.=? album')))
@@ -48,7 +49,7 @@ rebuildLib s = do
     let artists' = list ArtistsList artistsVec 1
     albumsVec   <- liftIO $ maybe (pure empty) albumsOfArtist (snd <$> listSelectedElement artists')
     let albums'  = list AlbumsList albumsVec 1
-    yalbumsVec   <- liftIO $ maybe (pure empty) yalbumsOfArtist (snd <$> listSelectedElement artists')
+    yalbumsVec   <- liftIO $ maybe (pure empty) (yalbumsOfArtist (s ^. libraryL . yalbumSortL)) (snd <$> listSelectedElement artists')
     let yalbums'    = list YalbumsList yalbumsVec 1
     songsVec     <- liftIO $ maybe (pure empty) songsOfAlbum (snd <$> listSelectedElement albums')
     let songs'   = list SongsList songsVec 1
@@ -59,7 +60,7 @@ rebuildLib s = do
 rebuildLibArtists :: MonadIO m => HState -> m HState
 rebuildLibArtists s = do
     let artists' = s ^. libraryL . artistsL
-    yalbumsVec   <- liftIO $ maybe (pure empty) yalbumsOfArtist (snd <$> listSelectedElement artists')
+    yalbumsVec   <- liftIO $ maybe (pure empty) (yalbumsOfArtist (s ^. libraryL . yalbumSortL)) (snd <$> listSelectedElement artists')
     let yalbums'    = list YalbumsList yalbumsVec 1
     songsVec    <- liftIO $ maybe (pure empty) songsOfAlbum (snd . snd <$> listSelectedElement yalbums')
     let songs'   = list SongsList songsVec 1
