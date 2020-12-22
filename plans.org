@@ -35,13 +35,13 @@
 
 * PROJ Upstream
 ** TODO libmpd-haskell
-*** TODO filter combinators
+*** WAIT filter combinators
 *** TODO past mpd version tests?
-*** TODO Ord on PlaylistName
+*** WAIT Ord on PlaylistName
 ** TODO brick
 *** TODO witherable
 *** TODO seperated list, maybe?
-*** TODO cycle search
+*** WAIT cycle search
 ** TODO mpd
 *** TODO toggle random, single, etc
 *** TODO duplicate playlist
