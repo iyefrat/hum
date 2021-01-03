@@ -216,15 +216,13 @@ handleEvent s e = case e of
         _ <- liftIO (BC.writeBChan (chan s) (Left Tick))
         continue $ s & editableL .~ False
                      & hviewL .~ PlaylistsView
-      EvResize _ _ -> do
-        continue s
+      EvResize _ _ -> continue s
       _ -> case hview s of
         QueueView     -> handleEventQueue s e
         LibraryView   -> handleEventLibrary s e
         PlaylistsView -> handleEventPlaylists s e
         HelpView -> handleEventHelp s e
-  (AppEvent (Left Tick)) -> do
-    continue =<< rebuildStatus s
+  (AppEvent (Left Tick)) -> continue =<< rebuildStatus s
   (AppEvent (Right (Right _))) -> do
     continue =<< rebuildStatus =<< rebuildQueue s
   _ -> continue s

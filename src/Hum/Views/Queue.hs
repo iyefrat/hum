@@ -130,10 +130,8 @@ handleEventQueue
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventQueue s e = case e of
   VtyEvent vtye -> case vtye of
-    EvKey (KChar 'j') [] -> do
-      continue $ s & queueL %~ listMoveDown
-    EvKey (KChar 'k') [] -> do
-      continue $ s & queueL %~ listMoveUp
+    EvKey (KChar 'j') [] -> continue $ s & queueL %~ listMoveDown
+    EvKey (KChar 'k') [] -> continue $ s & queueL %~ listMoveUp
     EvKey (KChar 'n') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL) s
     EvKey (KChar 'N') [] -> continue =<< queueSearch (s ^. exL . searchDirectionL & not) s
     EvKey (KChar 'a') [] ->
@@ -162,9 +160,7 @@ handleEventQueue s e = case e of
       let clSongs' = s ^. clipboardL . clSongsL
       _ <- liftIO (withMPD $ pasteSongstoQ clSongs' (s ^. queueL))
       rebuildQueue s >>= rebuildStatus >>= continue
-    EvKey (KChar 'G') [] -> do
-      continue $ s & queueL %~ listMoveTo (-1)
-    EvKey (KChar 'g') [] -> do -- TODO change this to  'gg', somehow
-      continue $ s & queueL %~ listMoveTo 0
+    EvKey (KChar 'G') [] -> continue $ s & queueL %~ listMoveTo (-1)
+    EvKey (KChar 'g') [] -> continue $ s & queueL %~ listMoveTo 0  -- TODO change this to  'gg', somehow
     _ -> continue s
   _ -> continue s
