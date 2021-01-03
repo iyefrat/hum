@@ -7,11 +7,10 @@ import           Brick.Types
 import           Brick.Main
 import           Hum.Types
 import           Hum.Views
-import           Hum.Utils
 import           Hum.Rebuild
 import           Graphics.Vty.Input.Events
 import qualified Data.Text.Zipper              as Z
-                                         hiding ( textZipper )
+import qualified Data.Text                     as T
 import           Control.Lens hiding (uncons)
 import qualified Network.MPD                   as MPD
 
@@ -50,9 +49,9 @@ exPrefixTxt BSearch = "?"
 exCmdExecute :: [Text] -> HState -> EventM Name (Next HState)
 exCmdExecute ("help":_) s = continue s { hview = HelpView }
 exCmdExecute ("q":_) s = halt s
-exCmdExecute ("save":name) s = do
-  let songs = queue s
-  let name' = maybe "unnamed" fst (uncons name)
-  _ <- liftIO $ MPD.withMPD $ saveListToPl songs name'
+exCmdExecute ("save":name) s =
+  let name' = if null name then "unnamed" else unwords name in
+  do
+  _ <- liftIO $ MPD.withMPD $ MPD.save (fromString . T.unpack $ name')
   continue =<< rebuildPl s
 exCmdExecute _ s = continue s

@@ -4,8 +4,8 @@
 ** TODO document everything
 ** TODO implement scroll in help screen (remove hack)
 ** TODO implement search in help screen
-** TODO implement =:save= with the protocol
-- also don't override unnamed.m3u
+** TODO write =unusedPlName=, take prefix
+** TODO have =:save= not unnamed.m3u
 ** TODO check if vendors work
 - TODO if so, move everything to new list
 
