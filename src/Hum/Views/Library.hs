@@ -92,8 +92,8 @@ libraryAlbumRow (yr,al) =
       album = MPD.toText al
       yearW = withAttr dateAttr $ column (Just (Col 7)) Max Max $
         if T.null year
-          then txt ""
-         else  txt "(" <+>  txt year <+> txt ")"
+          then txt "      "
+         else  txt "(" <+> txt (T.take 4 year) <+> txt ")"
       albumW = withAttr albumAttr $ column Nothing Max Max $ txt album
   in yearW <+> albumW
 
