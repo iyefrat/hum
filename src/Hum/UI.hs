@@ -1,3 +1,12 @@
+
+-- | Module    : Hum.UI
+-- Copyright   : (c) Itai Y. Efrat 2020-2021
+-- License     : GPLv2-or-later (see LICENSE)
+-- Maintainer  : Itai Y. Efrat <itai3397@gmail.com>
+--
+-- The starting point of Hum's logic. Contains things like building the initial
+-- state, shared keypresses, and the UI drawing function.
+
 module Hum.UI where
 
 
@@ -20,8 +29,8 @@ import           Hum.Rebuild
 import           Control.Lens
 import           System.Directory
 
+-- | The brick app record for Hum.
 app :: App HumState HumEvent Name
-
 app = App { appDraw         = drawUI
           , appChooseCursor = chooseCursor
           , appHandleEvent  = handleEvent
@@ -29,6 +38,7 @@ app = App { appDraw         = drawUI
           , appAttrMap      = const humAttrMap
           }
 
+-- | Draws shared UI elements and dispatches for view specific ones.
 drawUI :: HumState -> [Widget Name]
 drawUI st =
   [if st ^. modeL == PromptMode then drawPrompt st else emptyWidget,
@@ -47,6 +57,7 @@ drawUI st =
           else txt " "
   ]
 
+-- | Make sure cursor is displayed when editing text.
 chooseCursor :: HumState -> [CursorLocation Name] -> Maybe (CursorLocation Name)
 chooseCursor st ls
   | st ^. focusL . focExL = find (isCurrent ExEditor) ls
@@ -55,6 +66,8 @@ chooseCursor st ls
   where
       isCurrent n cl = cl ^. cursorLocationNameL == Just n
 
+-- | builds ''HumState' for the first time. A lot of overlap with functions from
+-- | "Hum.Rebuild", but they are hard to reuse because 'HumState' is strict.
 buildInitialState :: BC.BChan HumEvent -> IO HumState
 buildInitialState chan = do
   configDir <- getXdgDirectory XdgConfig "hum"
@@ -100,7 +113,7 @@ buildInitialState chan = do
         , promptTitle    = ""
         , textPrompt     = editorText TextPromptEditor (Just 1) ""
         , plSelectPrompt = listInsert 0 Nothing (Just <$> plList)
-        , exitPrompt     = \s -> pure $ s & modeL .~ NormalMode
+        , exitPromptFunc     = \s -> pure $ s & modeL .~ NormalMode
         }
   let helpScreen = 0
   pure HumState { chan
@@ -119,14 +132,13 @@ buildInitialState chan = do
               , helpScreen
               }
 
+-- | Initial event.
 humStartEvent :: HumState -> EventM Name HumState
 humStartEvent = pure
 
-hBoxPad :: Padding -> [Widget n] -> Widget n
-hBoxPad _ []       = emptyWidget
-hBoxPad _ [w     ] = w
-hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
-
+-- | handles keypresses shared between views, and nonkeypress events from the
+-- channels (ticks every 0.1 seconds and mpd events). Dispatches for view
+-- specific keypresses.
 handleEvent :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEvent s e = case e of
   VtyEvent vtye -> case s ^. modeL of

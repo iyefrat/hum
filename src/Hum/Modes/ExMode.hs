@@ -1,4 +1,10 @@
--- |
+
+-- | Module    : Hum.Modes.ExMode
+-- Copyright   : (c) Itai Y. Efrat 2020-2021
+-- License     : GPLv2-or-later (see LICENSE)
+-- Maintainer  : Itai Y. Efrat <itai3397@gmail.com>
+--
+-- Functions for the ex mode style prompt.
 
 module Hum.Modes.ExMode where
 
@@ -13,8 +19,10 @@ import qualified Data.Text.Zipper              as Z
 import qualified Data.Text                     as T
 import           Control.Lens hiding (uncons)
 import qualified Network.MPD                   as MPD
-import Hum.Utils
+import           Hum.Utils
 
+-- | Executed after pressing enter in the ex mode prompt.
+-- Either executes the command, or updates the search state for n/N to work.
 exEnd :: HumState -> EventM Name (Next HumState)
 exEnd s =
     let searched = (s ^. exL . exEditorL . editContentsL & Z.currentLine)
@@ -30,6 +38,8 @@ exEnd s =
                 PlaylistsView -> continue =<< playlistsSearch (srch == FSearch) s''
                 HelpView      -> continue s'
                 where s''= s' & exL . searchHistoryL %~ (searched :)
+
+-- | Handle key inputs for ex mode.
 handleExEvent
     :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleExEvent s e = case e of
@@ -42,11 +52,13 @@ handleExEvent s e = case e of
         continue =<< handleEventLensed s (exL . exEditorL) handleEditorEvent vtye
     _ -> continue s
 
+-- | Prefix of ex mode prompt.
 exPrefixTxt :: ExSubMode -> Text
 exPrefixTxt Cmd = ":"
 exPrefixTxt FSearch= "/"
 exPrefixTxt BSearch = "?"
 
+-- | Executes ex mode command.
 exCmdExecute :: [Text] -> HumState -> EventM Name (Next HumState)
 exCmdExecute ("help":_) s = continue s { hview = HelpView }
 exCmdExecute ("q":_) s = halt s

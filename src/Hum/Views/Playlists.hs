@@ -1,5 +1,10 @@
-{-#LANGUAGE RankNTypes#-}
--- |
+
+-- | Module    : Hum.Views.Library
+-- Copyright   : (c) Itai Y. Efrat 2020-2021
+-- License     : GPLv2-or-later (see LICENSE)
+-- Maintainer  : Itai Y. Efrat <itai3397@gmail.com>
+--
+-- Functions for the Playlist view.
 
 module Hum.Views.Playlists where
 
@@ -21,8 +26,7 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Hum.Utils
 
-
-
+-- | Draw left column in Playlist view.
 drawPlaylistLeft :: HumState -> Widget Name
 drawPlaylistLeft st =
   Widget Greedy Greedy $ do
@@ -40,6 +44,8 @@ drawPlaylistLeft st =
                           (MPD.toText <$> st ^. playlistsL . plListL)
               )
         )
+
+-- | Draw right column in Playlist view.
 drawPlaylistRight :: HumState -> Widget Name
 drawPlaylistRight st =
   Widget Greedy Greedy $ do
@@ -65,10 +71,12 @@ drawPlaylistRight st =
               )
         )
 
-playlistRow :: HumState -> T.Text -> Widget n
+-- | Draw row in playlist column in Playlist view.
+playlistRow :: HumState -> T.Text -> Widget n -- TODO rename?
 playlistRow _ val =
   withAttr albumAttr $ column Nothing (Pad 1) Max $ txt val
 
+-- | Draw row in song column in Playlist view.
 playlistSongRow :: HumState -> (MPD.Song,Highlight) -> Widget n
 playlistSongRow st (song,hl) =
   let pathsInQueue =
@@ -81,17 +89,16 @@ playlistSongRow st (song,hl) =
         $ column Nothing (Pad 1) Max
         $ txt (meta (MPD.toText . MPD.sgFilePath $ song) MPD.Title song)
 
-
-
-
-
-
+-- | Draw Playlist view.
 drawViewPlaylists :: HumState -> Widget Name
 drawViewPlaylists st =
   hLimitPercent 25 (drawPlaylistLeft st) <+> drawPlaylistRight st
 
+-- | Move focused playlist column by given function
 playlistsMove
-  :: (forall e . List Name e -> List Name e) -> HumState -> EventM Name HumState
+  :: (forall e . List Name e -> List Name e) -- ^ Function to move the focused column with
+  -> HumState
+  -> EventM Name HumState
 playlistsMove moveFunc s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
@@ -99,7 +106,12 @@ playlistsMove moveFunc s =
         FocPSongs    -> do
           pure $ s & playlistsL . plSongsL %~ moveFunc
 
-playlistsAddtoQ :: Bool -> HumState -> EventM Name HumState
+-- | Add selected element in Playlist view to queue.
+-- If the element is a playlist adds entire playlist.
+playlistsAddtoQ
+  :: Bool -- ^ Play first item added to queue
+  -> HumState
+  -> EventM Name HumState
 playlistsAddtoQ play s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
@@ -119,7 +131,11 @@ playlistsAddtoQ play s =
           song <- liftIO (withMPD MPD.currentSong)
           pure s { currentSong = fromRight Nothing song, queue = queue s }
 
-playlistsSearch :: Bool -> HumState -> EventM Name HumState
+-- | Search focused playlist column for next instance of last search.
+playlistsSearch
+  :: Bool -- ^ Search direction, True for forward.
+  -> HumState
+  -> EventM Name HumState
 playlistsSearch direction s =
   let playfoc   = s ^. focusL . focPlayL
       dir       = if direction then id else listReverse
@@ -140,7 +156,7 @@ playlistsSearch direction s =
               .  plSongsL
               %~ (dir . listFindBy (songSearch searchkey [MPD.Title] . fst) . dir)
 
-
+-- | handle key inputs for Playlist view.
 handleEventPlaylists
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventPlaylists s e = case e of
@@ -166,7 +182,7 @@ handleEventPlaylists s e = case e of
          -> continue $ s & modeL .~ PromptMode
                          & promptsL . currentPromptL .~ YNPrompt
                          & promptsL . promptTitleL .~ ("DELETE " <> selectedPl <> "?\nYou can't paste it back yet")
-                         & promptsL . exitPromptL .~ deleteSelectedPl
+                         & promptsL . exitPromptFuncL .~ deleteSelectedPl
        | otherwise ->  continue s
     EvKey (KChar 'y') []
        | s ^. editableL
@@ -187,7 +203,7 @@ handleEventPlaylists s e = case e of
                    & modeL .~ PromptMode
                    & promptsL . currentPromptL .~ YNPrompt
                    & promptsL . promptTitleL .~ ("Save changes to " <> selectedPl <> "?")
-                   & promptsL . exitPromptL .~ saveEditedPl
+                   & promptsL . exitPromptFuncL .~ saveEditedPl
       else continue =<< rebuildPlList (s & editableL %~ not)
     _                    -> continue s
   _ -> continue s

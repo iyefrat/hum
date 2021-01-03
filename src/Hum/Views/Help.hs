@@ -1,4 +1,10 @@
--- |
+-- | Module    : Hum.Views.Help
+-- Copyright   : (c) Itai Y. Efrat 2020-2021
+-- License     : GPLv2-or-later (see LICENSE)
+-- Maintainer  : Itai Y. Efrat <itai3397@gmail.com>
+--
+-- Shared functions for views.
+
 
 module Hum.Views.Help where
 import           Prelude                 hiding ( Down )
@@ -10,7 +16,7 @@ import           Brick.Widgets.Core
 import           Brick.Widgets.Center
 import           Control.Lens
 
-
+-- | Draws help.
 drawViewHelp :: HumState -> Widget Name
 drawViewHelp st = center ((hCenter . txt $ "j/k cycle between help screens.") <=> txt (helpText st))
 
@@ -65,7 +71,7 @@ helpText st = unlines $ case st^.helpScreenL of
         ]
   _ -> ["something went wrong."]
 
-
+-- | handle key events in help view.
 handleEventHelp
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventHelp s e = case e of

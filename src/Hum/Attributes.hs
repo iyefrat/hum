@@ -1,4 +1,10 @@
--- |
+
+-- | Module    : Hum.Attributes
+-- Copyright   : (c) Itai Y. Efrat 2020-2021
+-- License     : GPLv2-or-later (see LICENSE)
+-- Maintainer  : Itai Y. Efrat <itai3397@gmail.com>
+--
+-- Brick/Vty color attributes.
 
 module Hum.Attributes where
 
@@ -13,7 +19,6 @@ import qualified Brick.Util                    as BU
 import           Graphics.Vty                   ( defAttr )
 import qualified Graphics.Vty                  as Vty
 
-
 humAttrMap :: AttrMap
 humAttrMap = attrMap
   defAttr
@@ -22,17 +27,16 @@ humAttrMap = attrMap
   , (listSelectedFocusedAttr, Vty.withStyle defAttr Vty.reverseVideo)
   , (listHighlightedAttr    , BU.fg Vty.yellow)
   , (headerAttr             , Vty.withStyle defAttr Vty.underline)
-  , (albumAttr         , BU.fg Vty.red)
-  , (trackAttr         , BU.fg Vty.magenta)
-  , (titleAttr         , BU.fg Vty.cyan)
-  , (artistAttr        , BU.fg Vty.green)
-  , (timeAttr          , BU.fg Vty.blue)
-  , (dateAttr          , BU.fg Vty.yellow)
-  , ( queueNowPlayingAttr
-    , Vty.withStyle (Vty.withStyle defAttr Vty.bold) Vty.underline
-    )
-  , (titleBoldAttr, Vty.withStyle defAttr Vty.bold)
-  , (editorAttr          , BU.bg Vty.black)
+  , (albumAttr              , BU.fg Vty.red)
+  , (trackAttr              , BU.fg Vty.magenta)
+  , (titleAttr              , BU.fg Vty.cyan)
+  , (artistAttr             , BU.fg Vty.green)
+  , (timeAttr               , BU.fg Vty.blue)
+  , (dateAttr               , BU.fg Vty.yellow)
+  , ( queueNowPlayingAttr   , Vty.withStyle
+                                (Vty.withStyle defAttr Vty.bold) Vty.underline)
+  , (titleBoldAttr          , Vty.withStyle defAttr Vty.bold)
+  , (editorAttr             , BU.bg Vty.black)
   ]
 
 wobAttr :: Vty.Attr
@@ -59,10 +63,10 @@ queueNowPlayingAttr = queueAttr <> "now playing"
 titleBoldAttr :: AttrName
 titleBoldAttr = titleAttr <> "bold"
 
-
 editorAttr :: AttrName
 editorAttr = "editor"
 
+-- | Overwrites attributes for item to be highlighted.
 highlightOverAttrs :: Widget n -> Widget n -- HACK?
 highlightOverAttrs = updateAttrMap
   (mapAttrNames

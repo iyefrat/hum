@@ -1,4 +1,10 @@
--- |
+
+-- | Module    : Hum.Views.Library
+-- Copyright   : (c) Itai Y. Efrat 2020-2021
+-- License     : GPLv2-or-later (see LICENSE)
+-- Maintainer  : Itai Y. Efrat <itai3397@gmail.com>
+--
+-- Functions for the Help view.
 
 module Hum.Views.Common where
 import           Hum.Types
@@ -14,6 +20,7 @@ import qualified Data.Text                     as T
 import           Brick.Widgets.List
 import           Control.Lens
 
+-- | Draw Now Playing box.
 drawNowPlaying :: HumState -> Widget Name
 drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
   (txt "nothing.")
@@ -56,6 +63,7 @@ drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
     mode =
       txt $ "[" <> repeatmpd <> random <> single <> consume <> crossfade <> "]"
 
+-- | Draw progress bar for song time.
 drawProgressBar :: HumState -> Widget Name
 drawProgressBar st =
   Widget Fixed Fixed  $ do
@@ -79,27 +87,36 @@ drawProgressBar st =
       (replicate (completed width) '=' ++ replicate (width - (completed width)) ' ')
     )
 
---drawEx :: HumState -> Widget Name
---drawEx st =
+-- | Either a number or a percent. To be used for widget horizontal size.
+data PerCol =
+    Per Int -- ^ percent size
+  | Col Int -- ^ column number size
 
-data PerCol = Per Int | Col Int
-column :: Maybe PerCol -> Padding -> Padding -> Widget n -> Widget n
+-- | Helper function for drawing column rows.
+column
+  :: Maybe PerCol -- ^ Maximum width, greedy if Nothing.
+  -> Padding -- ^ Left padding
+  -> Padding -- ^ Right padding
+  -> Widget n
+  -> Widget n
 column maxWidth left right w = case maxWidth of
   Nothing      -> wpad
   Just (Per m) -> hLimitPercent m wpad
   Just (Col m) -> hLimit m wpad
   where wpad = padLeft left . padRight right $ w
 
+-- | Returns True if text is substring of one of the given tags of the given song.
 songSearch :: Text -> [MPD.Metadata] -> MPD.Song -> Bool
 songSearch text metadata song =
   let mtags = (T.toLower <$>) . (`mmeta` song) <$> metadata
   in  or $ fromMaybe False <$> (T.isInfixOf (T.toLower text) <<$>> mtags)
 
-
+-- | Returns True if text is substring of the given strings.
 stringySearch :: MPD.ToString a => Text -> a -> Bool
 stringySearch text value =
   T.isInfixOf (T.toLower text) (T.toLower . MPD.toText $ value)
 
+-- | Draws a prompt.
 drawPrompt :: HumState -> Widget Name
 drawPrompt st = case st ^. promptsL . currentPromptL of
   PlSelectPrompt ->
@@ -109,7 +126,7 @@ drawPrompt st = case st ^. promptsL . currentPromptL of
       .   center
       $   (hCenter . txt $ st ^. promptsL . promptTitleL)
       <=> hBorder
-      <=> renderListWithIndex choosePlRow
+      <=> renderListWithIndex drawPlSelectRow
                               True
                               (st ^. promptsL . plSelectPromptL)
   TextPrompt ->
@@ -128,8 +145,8 @@ drawPrompt st = case st ^. promptsL . currentPromptL of
       $   (hCenter . txt $ st ^. promptsL . promptTitleL)
       <=> (hCenter . txt $ "[y/n]")
 
-
-choosePlRow :: Int -> Bool -> Maybe MPD.PlaylistName -> Widget n
-choosePlRow i _ pl = if i==0 then
+-- | Draw row in playlist select prompt.
+drawPlSelectRow :: Int -> Bool -> Maybe MPD.PlaylistName -> Widget n
+drawPlSelectRow i _ pl = if i==0 then
   str "New Playlist" <=> modifyDefAttr (const wobAttr) hBorder
   else str (MPD.toString $ fromMaybe "<error getting playlist name>" pl)

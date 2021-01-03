@@ -1,6 +1,5 @@
 #+TITLE: Plans
 * PROJ 0.2.0.0
-** TODO document everything
 ** TODO implement scroll in help screen (remove hack)
 ** TODO implement search in help screen
 ** TODO rename playlists

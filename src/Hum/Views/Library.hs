@@ -1,4 +1,10 @@
--- |
+
+-- | Module    : Hum.Views.Library
+-- Copyright   : (c) Itai Y. Efrat 2020-2021
+-- License     : GPLv2-or-later (see LICENSE)
+-- Maintainer  : Itai Y. Efrat <itai3397@gmail.com>
+--
+-- Functions for the Library view.
 
 module Hum.Views.Library where
 import           Hum.Types
@@ -18,8 +24,7 @@ import qualified Data.Vector                   as V
 import qualified Network.MPD                   as MPD
 import           Hum.Utils
 
-
-
+-- | Draw left column in Library view.
 drawLibraryLeft :: HumState -> Widget Name
 drawLibraryLeft st =
   Widget Greedy Greedy $ do
@@ -37,6 +42,8 @@ drawLibraryLeft st =
                           (MPD.toText <$> st ^. libraryL . artistsL)
               )
         )
+
+-- | Draw middle column in Library view.
 drawLibraryMid :: HumState -> Widget Name
 drawLibraryMid st =
   Widget Greedy Greedy $ do
@@ -55,7 +62,7 @@ drawLibraryMid st =
               )
         )
 
-
+-- | Draw right column in Library view.
 drawLibraryRight :: HumState -> Widget Name
 drawLibraryRight st =
   Widget Greedy Greedy $ do
@@ -74,8 +81,8 @@ drawLibraryRight st =
               )
         )
 
-
-libraryRow :: HumState -> Name -> T.Text -> Widget n
+-- | Draw generic column row in Library view.
+libraryRow :: HumState -> Name -> T.Text -> Widget n -- TODO refactor?
 libraryRow _ name val =
   withAttr
       (case name of
@@ -86,6 +93,7 @@ libraryRow _ name val =
     $ column Nothing (Pad 1) Max
     $ txt val
 
+-- | Draw row in album column in Library view.
 libraryAlbumRow :: (MPD.Value,MPD.Value) -> Widget n
 libraryAlbumRow (yr,al) =
   let year = MPD.toText yr
@@ -97,7 +105,7 @@ libraryAlbumRow (yr,al) =
       albumW = withAttr albumAttr $ column Nothing Max Max $ txt album
   in yearW <+> albumW
 
-
+-- | Draw row in song column in Library view.
 librarySongRow :: HumState -> MPD.Song -> Widget n
 librarySongRow st song =
   let pathsInQueue =
@@ -112,20 +120,26 @@ librarySongRow st song =
           )
         $ trackW <+> titleW
 
+-- | Move focus right in Library view.
 libraryMoveRight :: FocLib -> FocLib
 libraryMoveRight FocArtists = FocAlbums
 libraryMoveRight _          = FocSongs
 
+-- | Move focus left in Library view.
 libraryMoveLeft :: FocLib -> FocLib
 libraryMoveLeft FocSongs = FocAlbums
 libraryMoveLeft _        = FocArtists
 
+-- | Draw Library view.
 drawViewLibrary :: HumState -> Widget Name
 drawViewLibrary st =
   drawLibraryLeft st <+> drawLibraryMid st <+> drawLibraryRight st
 
+-- | Move focused library column by given function
 libraryMove
-  :: (forall e . List Name e -> List Name e) -> HumState -> EventM Name HumState
+  :: (forall e . List Name e -> List Name e) -- ^ Function to move the focused column with
+  -> HumState
+  -> EventM Name HumState
 libraryMove moveFunc s =
   let libfoc = s ^. focusL . focLibL
   in  case libfoc of
@@ -134,8 +148,12 @@ libraryMove moveFunc s =
         FocSongs   -> do
           pure $ s & libraryL . songsL %~ moveFunc
 
-
-libraryAddtoQ :: Bool -> HumState -> EventM Name HumState
+-- | Add selected element in Library view to queue.
+-- If the element is an album or artist add all songs under it.
+libraryAddtoQ
+  :: Bool -- ^ Play first item added to queue
+  -> HumState
+  -> EventM Name HumState
 libraryAddtoQ play s =
   let libfoc = s ^. focusL . focLibL
   in
@@ -153,7 +171,11 @@ libraryAddtoQ play s =
               (s ^. libraryL . songsL)
         songBulkAddtoQ play songs s
 
-librarySearch :: Bool -> HumState -> EventM Name HumState
+-- | Search focused library column for next instance of last search.
+librarySearch
+  :: Bool -- ^ Search direction, True for forward.
+  -> HumState
+  -> EventM Name HumState
 librarySearch direction s =
   let libfoc    = s ^. focusL . focLibL
       dir       = if direction then id else listReverse
@@ -180,7 +202,7 @@ librarySearch direction s =
               .  songsL
               %~ (dir . listFindBy (songSearch searchkey [MPD.Title]) . dir)
 
-
+-- | handle key inputs for Library view.
 handleEventLibrary
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventLibrary s e = case e of

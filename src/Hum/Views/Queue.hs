@@ -1,4 +1,11 @@
--- |
+
+-- | Module    : Hum.Views.Queue
+-- Copyright   : (c) Itai Y. Efrat 2020-2021
+-- License     : GPLv2-or-later (see LICENSE)
+-- Maintainer  : Itai Y. Efrat <itai3397@gmail.com>
+--
+-- Functions for the Queue view.
+
 
 module Hum.Views.Queue where
 import           Hum.Types
@@ -16,6 +23,7 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Control.Lens
 
+-- | Draw the queue.
 drawViewQueue :: HumState -> Widget Name
 drawViewQueue st =
   Widget Greedy Greedy $ do
@@ -48,6 +56,7 @@ drawViewQueue st =
                        ({-songIdx <+> songId <+>-}
                         album <+> track <+> title <+> artist <+> time)
 
+-- | Draw individual row in queue.
 queueRow :: HumState -> (MPD.Song, Highlight) -> Widget n
 queueRow st (song, hl) =
   (if hl then highlightOverAttrs else id)
@@ -94,8 +103,11 @@ queueRow st (song, hl) =
       $ secondsToTime
       $ MPD.sgLength song
 
-
-queueSearch :: Bool -> HumState -> EventM Name HumState
+-- | Search queue for next instance of last search.
+queueSearch
+  :: Bool -- ^ Search direction, True for forward.
+  -> HumState
+  -> EventM Name HumState
 queueSearch direction s =
   let
     dir       = if direction then id else listReverse
@@ -115,7 +127,11 @@ queueSearch direction s =
              . dir
              )
 
-queueAddToPl :: HumState -> String -> EventM Name HumState
+-- | Add highlighted songs to given playlist.
+queueAddToPl
+  :: HumState
+  -> String -- ^ Playlist name
+  -> EventM Name HumState
 queueAddToPl s plName =
   let songs =
         (s ^.  queueL)
@@ -124,8 +140,7 @@ queueAddToPl s plName =
           <&> fst
   in  songBulkAddtoPl plName songs s
 
-
-
+-- | handle key inputs for Queue view.
 handleEventQueue
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventQueue s e = case e of
