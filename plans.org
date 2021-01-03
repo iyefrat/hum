@@ -3,8 +3,8 @@
 ** TODO queue highlight gets erased when song changes
 * PROJ Near future
 ** STRT want list to actually be good
-*** WAIT need to upstream tests for different versions of MPD
-*** WAIT need to finish filter combinators
+*** DONE need to upstream tests for different versions of MPD
+*** DONE need to finish filter combinators
 *** DONE need to change type of list (breaking)
 *** TODO need to think about other breaking changes that should be made
 *** TODO upstream breaking changes
@@ -16,12 +16,12 @@
 ** TODO paste back deleted playlists
 ** TODO implement completion in cmds
 ** TODO impliment search history
-*** TODO implement =:save= with the protocol
+** TODO implement =:save= with the protocol
 - also don't override unnamed.m3u
-*** TODO playlist contents editing
+** DONE playlist contents editing
 - the editing operations should be kept in memory, and saved explicitly
-** TODO Various Artists
-** TODO various modes for the library
+** DONE Various Artists
+** STRT various modes for the library
 
 * PROJ Medium Future
 ** TODO display random song order
@@ -35,13 +35,13 @@
 
 * PROJ Upstream
 ** TODO libmpd-haskell
-*** WAIT filter combinators
+*** DONE filter combinators
 *** TODO past mpd version tests?
-*** WAIT Ord on PlaylistName
+*** DONE Ord on PlaylistName
 ** TODO brick
-*** TODO witherable
+*** DONE witherable
 *** TODO seperated list, maybe?
-*** WAIT cycle search
+*** DONE cycle search
 ** TODO mpd
 *** TODO toggle random, single, etc
 *** TODO duplicate playlist
