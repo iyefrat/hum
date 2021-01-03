@@ -223,6 +223,7 @@ handleEvent s e = case e of
         PlaylistsView -> handleEventPlaylists s e
         HelpView -> handleEventHelp s e
   (AppEvent (Left Tick)) -> continue =<< rebuildStatus s
-  (AppEvent (Right (Right _))) -> do
-    continue =<< rebuildStatus =<< rebuildQueue s
+  (AppEvent (Right (Right subs)))
+    | MPD.PlaylistS `elem` subs -> continue =<< rebuildStatus =<< rebuildQueue s
+    | otherwise -> continue =<< rebuildStatus s
   _ -> continue s
