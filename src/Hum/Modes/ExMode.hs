@@ -13,6 +13,7 @@ import qualified Data.Text.Zipper              as Z
 import qualified Data.Text                     as T
 import           Control.Lens hiding (uncons)
 import qualified Network.MPD                   as MPD
+import Hum.Utils
 
 exEnd :: HumState -> EventM Name (Next HumState)
 exEnd s =
@@ -50,10 +51,9 @@ exCmdExecute :: [Text] -> HumState -> EventM Name (Next HumState)
 exCmdExecute ("help":_) s = continue s { hview = HelpView }
 exCmdExecute ("q":_) s = halt s
 exCmdExecute ("save":name) s =
-  let name' = if null name then "unnamed" else unwords name
-
-  in
-  do
-  _ <- liftIO $ MPD.withMPD $ MPD.save (fromString . T.unpack $ name')
-  continue =<< rebuildPl s
+  let name'  = if null name then "unnamed" else unwords name in
+    do
+    name'' <- liftIO $ unusedPlName (fromString . T.unpack $ name')
+    _ <- liftIO $ MPD.withMPD $ MPD.save name''
+    continue =<< rebuildPl s
 exCmdExecute _ s = continue s

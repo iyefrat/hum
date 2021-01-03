@@ -4,8 +4,7 @@
 ** TODO document everything
 ** TODO implement scroll in help screen (remove hack)
 ** TODO implement search in help screen
-** TODO write =unusedPlName=, take prefix
-** TODO have =:save= not unnamed.m3u
+** TODO rename playlists
 ** TODO check if vendors work
 - TODO if so, move everything to new list
 

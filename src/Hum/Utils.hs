@@ -125,7 +125,7 @@ deleteSelectedPl st = do
 unusedPlName :: MPD.PlaylistName -> IO MPD.PlaylistName
 unusedPlName prefix = do
   plNames <- fromRight [] <$> (liftIO . withMPD $ MPD.listPlaylists)
-  let newPlName = viaNonEmpty head $ filter (`notElem` plNames) (append' prefix . show <$> [2::Int ..])
+  let newPlName = viaNonEmpty head $ filter (`notElem` plNames) (prefix:(append' prefix . show <$> [2::Int ..]))
   pure (fromMaybe "unnamed" newPlName) -- HACK
   where
     append' (MPD.PlaylistName x) (MPD.PlaylistName y) = MPD.PlaylistName (BS.append x y)
