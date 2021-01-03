@@ -1,27 +1,21 @@
 #+TITLE: Plans
-* PROJ Bugs
+* PROJ 0.2.0.0
 ** TODO queue highlight gets erased when song changes
-* PROJ Near future
-** STRT want list to actually be good
-*** DONE need to upstream tests for different versions of MPD
-*** DONE need to finish filter combinators
-*** DONE need to change type of list (breaking)
-*** TODO need to think about other breaking changes that should be made
-*** TODO upstream breaking changes
-** TODO improve docs
-** TODO try and do initialBuild with reBuilds
-** TODO consider if viewports do anything
-** TODO implement scroll in help screen
+** TODO document everything
+** TODO implement scroll in help screen (remove hack)
 ** TODO implement search in help screen
-** TODO paste back deleted playlists
-** TODO implement completion in cmds
-** TODO impliment search history
 ** TODO implement =:save= with the protocol
 - also don't override unnamed.m3u
-** DONE playlist contents editing
-- the editing operations should be kept in memory, and saved explicitly
-** DONE Various Artists
-** STRT various modes for the library
+** TODO check if vendors work
+- TODO if so, move everything to new list
+
+* PROJ Near future
+** TODO try and do initialBuild with reBuilds
+** TODO consider if viewports do anything
+** TODO paste back deleted playlists
+** TODO implement completion in cmds
+** TODO more commands
+** TODO impliment search history
 
 * PROJ Medium Future
 ** TODO display random song order
@@ -38,6 +32,10 @@
 *** DONE filter combinators
 *** TODO past mpd version tests?
 *** DONE Ord on PlaylistName
+*** TODO need to upstream tests for different versions of MPD
+** STRT want list to actually be good
+*** TODO need to think about other breaking changes that should be made
+*** TODO upstream breaking changes
 ** TODO brick
 *** DONE witherable
 *** TODO seperated list, maybe?

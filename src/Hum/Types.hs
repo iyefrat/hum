@@ -23,7 +23,7 @@ data HState = HState
     , focus       :: !Focus
     , editable    :: !Bool
     , prompts     :: !Prompts
-    , helpScreen  :: !Int --HACK
+    , helpScreen  :: !Int -- HACK
     }
 
 data LibraryState = LibraryState
