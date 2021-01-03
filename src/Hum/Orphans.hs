@@ -6,9 +6,6 @@ import qualified Data.Witherable.Class as W
 import Brick.Widgets.List
 import Control.Lens
 
---instance Ord MPD.PlaylistName where
---  compare (MPD.PlaylistName x) (MPD.PlaylistName y) = compare x y
-
 instance W.Filterable t => W.Filterable (GenericList n t) where
   catMaybes l = l & listElementsL %~ W.catMaybes
 
