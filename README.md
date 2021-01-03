@@ -35,7 +35,7 @@ You can install `hum` either by running `cabal install hum` to install directly 
 
 -   better documentation
 -   tag info and editing
--   mpdish file browser browser and more advanced search
+-   mpdish file browser and more advanced search
 -   visualizer because why not
 -   having a random mode when you can see what the next song is
 -   making the UI nicer

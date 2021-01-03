@@ -1,21 +1,21 @@
 -- |
 
 module Hum.Types where
-import           Network.MPD                   as MPD
-import qualified Brick.BChan                   as BC
+import           Network.MPD
+import           Brick.BChan
 import           Brick.Types
 import           Brick.Widgets.Edit
 import           Brick.Widgets.List
-import           Hum.Orphans()
+import           Hum.Orphans ( )
 
 
 data HState = HState
-    { chan        :: !(BC.BChan HumEvent)
-    , hview        :: !View
-    , status      :: !(Maybe MPD.Status)
+    { chan        :: !(BChan HumEvent)
+    , hview       :: !View
+    , status      :: !(Maybe Status)
     , mode        :: !Mode
     , ex          :: !ExState
-    , currentSong :: !(Maybe MPD.Song)
+    , currentSong :: !(Maybe Song)
     , queue       :: !SongList
     , library     :: !LibraryState
     , playlists   :: !PlaylistsState
@@ -27,8 +27,8 @@ data HState = HState
     }
 
 data LibraryState = LibraryState
-    { artists     :: !(List Name MPD.Value)
-    , yalbums     :: !(List Name (MPD.Value,MPD.Value))
+    { artists     :: !(List Name Value)
+    , yalbums     :: !(List Name (Value,Value))
     , yalbumSort  :: !Bool
     , songs       :: !(List Name Song)
     }
