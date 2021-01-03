@@ -17,14 +17,14 @@ import Brick.Widgets.List
 
 
 handlePromptEvent
-    :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+    :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handlePromptEvent s e = case s ^. promptsL . currentPromptL of
   PlSelectPrompt -> handlePlSelectPromptEvent s e
   TextPrompt -> handleTextPromptEvent s e
   YNPrompt -> handleYNPromptEvent s e
 
 handlePlSelectPromptEvent
-    :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+    :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handlePlSelectPromptEvent s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey KEsc [] -> continue $ s & modeL .~ NormalMode
@@ -48,14 +48,14 @@ handlePlSelectPromptEvent s e = case e of
     _ -> continue s
   _ -> continue s
 
-songBulkAddtoNewPl :: V.Vector MPD.Song -> HState -> EventM n HState
+songBulkAddtoNewPl :: V.Vector MPD.Song -> HumState -> EventM n HumState
 songBulkAddtoNewPl songs st = songBulkAddtoPl
   (toString $ st ^. promptsL . textPromptL . editContentsL & Z.currentLine)
   songs
   st
 
 handleTextPromptEvent
-  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+  :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleTextPromptEvent s e = case e of
   VtyEvent (EvKey KEsc []) -> continue (s & modeL .~ NormalMode)
   VtyEvent (EvKey KEnter []) ->
@@ -66,7 +66,7 @@ handleTextPromptEvent s e = case e of
   _ -> continue s
 
 handleYNPromptEvent
-  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+  :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleYNPromptEvent s e = case e of
   VtyEvent (EvKey KEsc []) -> continue (s & modeL .~ NormalMode)
   VtyEvent (EvKey (KChar 'y') []) ->

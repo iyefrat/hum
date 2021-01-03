@@ -20,7 +20,7 @@ import           Hum.Rebuild
 import           Control.Lens
 import           System.Directory
 
-app :: App HState HumEvent Name
+app :: App HumState HumEvent Name
 
 app = App { appDraw         = drawUI
           , appChooseCursor = chooseCursor
@@ -29,7 +29,7 @@ app = App { appDraw         = drawUI
           , appAttrMap      = const humAttrMap
           }
 
-drawUI :: HState -> [Widget Name]
+drawUI :: HumState -> [Widget Name]
 drawUI st =
   [if st ^. modeL == PromptMode then drawPrompt st else emptyWidget,
    drawNowPlaying st
@@ -47,7 +47,7 @@ drawUI st =
           else txt " "
   ]
 
-chooseCursor :: HState -> [CursorLocation Name] -> Maybe (CursorLocation Name)
+chooseCursor :: HumState -> [CursorLocation Name] -> Maybe (CursorLocation Name)
 chooseCursor st ls
   | st ^. focusL . focExL = find (isCurrent ExEditor) ls
   | st ^. promptsL . currentPromptL == TextPrompt = find (isCurrent TextPromptEditor) ls
@@ -55,7 +55,7 @@ chooseCursor st ls
   where
       isCurrent n cl = cl ^. cursorLocationNameL == Just n
 
-buildInitialState :: BC.BChan HumEvent -> IO HState
+buildInitialState :: BC.BChan HumEvent -> IO HumState
 buildInitialState chan = do
   configDir <- getXdgDirectory XdgConfig "hum"
   _ <- createDirectoryIfMissing True configDir
@@ -103,7 +103,7 @@ buildInitialState chan = do
         , exitPrompt     = \s -> pure $ s & modeL .~ NormalMode
         }
   let helpScreen = 0
-  pure HState { chan
+  pure HumState { chan
               , hview
               , mode
               , ex
@@ -119,7 +119,7 @@ buildInitialState chan = do
               , helpScreen
               }
 
-humStartEvent :: HState -> EventM Name HState
+humStartEvent :: HumState -> EventM Name HumState
 humStartEvent = pure
 
 hBoxPad :: Padding -> [Widget n] -> Widget n
@@ -127,7 +127,7 @@ hBoxPad _ []       = emptyWidget
 hBoxPad _ [w     ] = w
 hBoxPad p (w : ws) = padRight p w <+> hBoxPad p ws
 
-handleEvent :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+handleEvent :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEvent s e = case e of
   VtyEvent vtye -> case s ^. modeL of
     ExMode     -> handleExEvent s e

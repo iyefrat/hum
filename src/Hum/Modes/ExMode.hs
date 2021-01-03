@@ -14,7 +14,7 @@ import qualified Data.Text                     as T
 import           Control.Lens hiding (uncons)
 import qualified Network.MPD                   as MPD
 
-exEnd :: HState -> EventM Name (Next HState)
+exEnd :: HumState -> EventM Name (Next HumState)
 exEnd s =
     let searched = (s ^. exL . exEditorL . editContentsL & Z.currentLine)
         s'= s & exL . exEditorL .~ editorText ExEditor (Just 1) ""
@@ -30,7 +30,7 @@ exEnd s =
                 HelpView      -> continue s'
                 where s''= s' & exL . searchHistoryL %~ (searched :)
 handleExEvent
-    :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+    :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleExEvent s e = case e of
     VtyEvent (EvKey KEsc []) ->
         continue $ s & exL . exEditorL .~ editorText ExEditor (Just 1) ""
@@ -46,11 +46,13 @@ exPrefixTxt Cmd = ":"
 exPrefixTxt FSearch= "/"
 exPrefixTxt BSearch = "?"
 
-exCmdExecute :: [Text] -> HState -> EventM Name (Next HState)
+exCmdExecute :: [Text] -> HumState -> EventM Name (Next HumState)
 exCmdExecute ("help":_) s = continue s { hview = HelpView }
 exCmdExecute ("q":_) s = halt s
 exCmdExecute ("save":name) s =
-  let name' = if null name then "unnamed" else unwords name in
+  let name' = if null name then "unnamed" else unwords name
+
+  in
   do
   _ <- liftIO $ MPD.withMPD $ MPD.save (fromString . T.unpack $ name')
   continue =<< rebuildPl s

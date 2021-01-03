@@ -42,7 +42,7 @@ yearOfAlbum album' = fromRight "????" <$> (minYear <<$>> withMPD (MPD.list MPD.D
         minYear [] = "????"
         minYear vals = minimum vals
 
-rebuildLib :: MonadIO m => HState -> m HState
+rebuildLib :: MonadIO m => HumState -> m HumState
 rebuildLib s = do
     artistsVec <- liftIO (V.fromList . fromRight [] <$> withMPD
       (MPD.list MPD.AlbumArtist mempty))
@@ -57,7 +57,7 @@ rebuildLib s = do
              &  libraryL . yalbumsL .~ yalbums'
              &  libraryL . songsL .~ songs'
 
-rebuildLibArtists :: MonadIO m => HState -> m HState
+rebuildLibArtists :: MonadIO m => HumState -> m HumState
 rebuildLibArtists s = do
     let artists' = s ^. libraryL . artistsL
     yalbumsVec   <- liftIO $ maybe (pure empty) (yalbumsOfArtist (s ^. libraryL . yalbumSortL)) (snd <$> listSelectedElement artists')
@@ -67,14 +67,14 @@ rebuildLibArtists s = do
     pure $ s &  libraryL . yalbumsL .~ yalbums'
              &  libraryL . songsL .~ songs'
 
-rebuildLibAlbums :: MonadIO m => HState -> m HState
+rebuildLibAlbums :: MonadIO m => HumState -> m HumState
 rebuildLibAlbums s = do
     let yalbums' = s ^. libraryL . yalbumsL
     songsVec   <- liftIO $ maybe (pure empty) songsOfAlbum (snd . snd <$> listSelectedElement yalbums')
     let songs'  = list SongsList songsVec 1
     pure $ s & libraryL . songsL .~ songs'
 
-rebuildPl :: MonadIO m => HState -> m HState
+rebuildPl :: MonadIO m => HumState -> m HumState
 rebuildPl s = do
   let mi = s ^. playlistsL . plListL & listSelected
   plListVec  <- liftIO $  V.fromList . sort . fromRight [] <$> withMPD MPD.listPlaylists
@@ -87,7 +87,7 @@ rebuildPl s = do
   pure $ s & playlistsL . plListL  .~ plList'
            & playlistsL . plSongsL .~ plSongs'
 
-rebuildPlList :: MonadIO m => HState -> m HState
+rebuildPlList :: MonadIO m => HumState -> m HumState
 rebuildPlList s = do
     let plList' = s ^. playlistsL . plListL
     plSongsVec <- liftIO
@@ -99,14 +99,14 @@ rebuildPlList s = do
     let plSongs' = (, False) <$> list PlaylistSongs plSongsVec 1
     pure $ s & playlistsL . plSongsL .~ plSongs'
 
-rebuildQueue :: MonadIO m => HState -> m HState
+rebuildQueue :: MonadIO m => HumState -> m HumState
 rebuildQueue s = do
   let mi = s ^. queueL & listSelected
   queueVec  <- liftIO $ V.fromList . fromRight [] <$> withMPD (MPD.playlistInfo Nothing)
   let queue' = maybe id listMoveTo mi $ (, False) <$> list QueueList queueVec 1
   pure $ s & queueL .~ queue'
 
-rebuildStatus :: MonadIO m => HState -> m HState
+rebuildStatus :: MonadIO m => HumState -> m HumState
 rebuildStatus s = do
   currentSong' <- liftIO (fromRight Nothing <$> withMPD MPD.currentSong)
   status'      <- liftIO (fromRight Nothing <$> (Just <<$>> withMPD MPD.status))

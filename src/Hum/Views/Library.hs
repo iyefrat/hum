@@ -20,7 +20,7 @@ import           Hum.Utils
 
 
 
-drawLibraryLeft :: HState -> Widget Name
+drawLibraryLeft :: HumState -> Widget Name
 drawLibraryLeft st =
   Widget Greedy Greedy $ do
     ctx <- getContext
@@ -37,7 +37,7 @@ drawLibraryLeft st =
                           (MPD.toText <$> st ^. libraryL . artistsL)
               )
         )
-drawLibraryMid :: HState -> Widget Name
+drawLibraryMid :: HumState -> Widget Name
 drawLibraryMid st =
   Widget Greedy Greedy $ do
     ctx <- getContext
@@ -56,7 +56,7 @@ drawLibraryMid st =
         )
 
 
-drawLibraryRight :: HState -> Widget Name
+drawLibraryRight :: HumState -> Widget Name
 drawLibraryRight st =
   Widget Greedy Greedy $ do
     ctx <- getContext
@@ -75,7 +75,7 @@ drawLibraryRight st =
         )
 
 
-libraryRow :: HState -> Name -> T.Text -> Widget n
+libraryRow :: HumState -> Name -> T.Text -> Widget n
 libraryRow _ name val =
   withAttr
       (case name of
@@ -98,7 +98,7 @@ libraryAlbumRow (yr,al) =
   in yearW <+> albumW
 
 
-librarySongRow :: HState -> MPD.Song -> Widget n
+librarySongRow :: HumState -> MPD.Song -> Widget n
 librarySongRow st song =
   let pathsInQueue =
         (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
@@ -120,12 +120,12 @@ libraryMoveLeft :: FocLib -> FocLib
 libraryMoveLeft FocSongs = FocAlbums
 libraryMoveLeft _        = FocArtists
 
-drawViewLibrary :: HState -> Widget Name
+drawViewLibrary :: HumState -> Widget Name
 drawViewLibrary st =
   drawLibraryLeft st <+> drawLibraryMid st <+> drawLibraryRight st
 
 libraryMove
-  :: (forall e . List Name e -> List Name e) -> HState -> EventM Name HState
+  :: (forall e . List Name e -> List Name e) -> HumState -> EventM Name HumState
 libraryMove moveFunc s =
   let libfoc = s ^. focusL . focLibL
   in  case libfoc of
@@ -135,7 +135,7 @@ libraryMove moveFunc s =
           pure $ s & libraryL . songsL %~ moveFunc
 
 
-libraryAddtoQ :: Bool -> HState -> EventM Name HState
+libraryAddtoQ :: Bool -> HumState -> EventM Name HumState
 libraryAddtoQ play s =
   let libfoc = s ^. focusL . focLibL
   in
@@ -153,7 +153,7 @@ libraryAddtoQ play s =
               (s ^. libraryL . songsL)
         songBulkAddtoQ play songs s
 
-librarySearch :: Bool -> HState -> EventM Name HState
+librarySearch :: Bool -> HumState -> EventM Name HumState
 librarySearch direction s =
   let libfoc    = s ^. focusL . focLibL
       dir       = if direction then id else listReverse
@@ -182,7 +182,7 @@ librarySearch direction s =
 
 
 handleEventLibrary
-  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+  :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventLibrary s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> continue =<< libraryMove listMoveDown s

@@ -23,7 +23,7 @@ import           Hum.Utils
 
 
 
-drawPlaylistLeft :: HState -> Widget Name
+drawPlaylistLeft :: HumState -> Widget Name
 drawPlaylistLeft st =
   Widget Greedy Greedy $ do
     ctx <- getContext
@@ -40,7 +40,7 @@ drawPlaylistLeft st =
                           (MPD.toText <$> st ^. playlistsL . plListL)
               )
         )
-drawPlaylistRight :: HState -> Widget Name
+drawPlaylistRight :: HumState -> Widget Name
 drawPlaylistRight st =
   Widget Greedy Greedy $ do
     ctx <- getContext
@@ -65,11 +65,11 @@ drawPlaylistRight st =
               )
         )
 
-playlistRow :: HState -> T.Text -> Widget n
+playlistRow :: HumState -> T.Text -> Widget n
 playlistRow _ val =
   withAttr albumAttr $ column Nothing (Pad 1) Max $ txt val
 
-playlistSongRow :: HState -> (MPD.Song,Highlight) -> Widget n
+playlistSongRow :: HumState -> (MPD.Song,Highlight) -> Widget n
 playlistSongRow st (song,hl) =
   let pathsInQueue =
         (MPD.sgFilePath <$>) . (fst <$>) . listElements . queue $ st
@@ -86,12 +86,12 @@ playlistSongRow st (song,hl) =
 
 
 
-drawViewPlaylists :: HState -> Widget Name
+drawViewPlaylists :: HumState -> Widget Name
 drawViewPlaylists st =
   hLimitPercent 25 (drawPlaylistLeft st) <+> drawPlaylistRight st
 
 playlistsMove
-  :: (forall e . List Name e -> List Name e) -> HState -> EventM Name HState
+  :: (forall e . List Name e -> List Name e) -> HumState -> EventM Name HumState
 playlistsMove moveFunc s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
@@ -99,7 +99,7 @@ playlistsMove moveFunc s =
         FocPSongs    -> do
           pure $ s & playlistsL . plSongsL %~ moveFunc
 
-playlistsAddtoQ :: Bool -> HState -> EventM Name HState
+playlistsAddtoQ :: Bool -> HumState -> EventM Name HumState
 playlistsAddtoQ play s =
   let playfoc = s ^. focusL . focPlayL
   in  case playfoc of
@@ -119,7 +119,7 @@ playlistsAddtoQ play s =
           song <- liftIO (withMPD MPD.currentSong)
           pure s { currentSong = fromRight Nothing song, queue = queue s }
 
-playlistsSearch :: Bool -> HState -> EventM Name HState
+playlistsSearch :: Bool -> HumState -> EventM Name HumState
 playlistsSearch direction s =
   let playfoc   = s ^. focusL . focPlayL
       dir       = if direction then id else listReverse
@@ -142,7 +142,7 @@ playlistsSearch direction s =
 
 
 handleEventPlaylists
-  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+  :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventPlaylists s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> continue =<< playlistsMove listMoveDown s

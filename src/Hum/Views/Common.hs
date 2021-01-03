@@ -14,7 +14,7 @@ import qualified Data.Text                     as T
 import           Brick.Widgets.List
 import           Control.Lens
 
-drawNowPlaying :: HState -> Widget Name
+drawNowPlaying :: HumState -> Widget Name
 drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
   (txt "nothing.")
   nowPlaying
@@ -56,7 +56,7 @@ drawNowPlaying st = reportExtent NowPlaying $ vLimit 5 . center $ maybe
     mode =
       txt $ "[" <> repeatmpd <> random <> single <> consume <> crossfade <> "]"
 
-drawProgressBar :: HState -> Widget Name
+drawProgressBar :: HumState -> Widget Name
 drawProgressBar st =
   Widget Fixed Fixed  $ do
     ctx <- getContext
@@ -79,7 +79,7 @@ drawProgressBar st =
       (replicate (completed width) '=' ++ replicate (width - (completed width)) ' ')
     )
 
---drawEx :: HState -> Widget Name
+--drawEx :: HumState -> Widget Name
 --drawEx st =
 
 data PerCol = Per Int | Col Int
@@ -100,7 +100,7 @@ stringySearch :: MPD.ToString a => Text -> a -> Bool
 stringySearch text value =
   T.isInfixOf (T.toLower text) (T.toLower . MPD.toText $ value)
 
-drawPrompt :: HState -> Widget Name
+drawPrompt :: HumState -> Widget Name
 drawPrompt st = case st ^. promptsL . currentPromptL of
   PlSelectPrompt ->
     centerLayer

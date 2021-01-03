@@ -9,7 +9,7 @@ import           Brick.Widgets.List
 import           Hum.Orphans ( )
 
 
-data HState = HState
+data HumState = HumState
     { chan        :: !(BChan HumEvent)
     , hview       :: !View
     , status      :: !(Maybe Status)
@@ -54,7 +54,7 @@ data Prompts = Prompts
     , promptTitle    :: Text
     , plSelectPrompt :: !(List Name (Maybe PlaylistName))
     , textPrompt     :: !(Editor Text Name)
-    , exitPrompt     :: HState -> EventM Name HState
+    , exitPrompt     :: HumState -> EventM Name HumState
     }
 
 data PromptType = PlSelectPrompt | YNPrompt | TextPrompt
@@ -99,7 +99,7 @@ type Highlight = Bool
 
 data Tick = Tick
 
-suffixLenses ''HState
+suffixLenses ''HumState
 suffixLenses ''Focus
 suffixLenses ''LibraryState
 suffixLenses ''PlaylistsState

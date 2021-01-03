@@ -11,10 +11,10 @@ import           Brick.Widgets.Center
 import           Control.Lens
 
 
-drawViewHelp :: HState -> Widget Name
+drawViewHelp :: HumState -> Widget Name
 drawViewHelp st = center ((hCenter . txt $ "j/k cycle between help screens.") <=> txt (helpText st))
 
-helpText :: HState -> Text
+helpText :: HumState -> Text
 helpText st = unlines $ case st^.helpScreenL of
   0 -> [
           "Change views:"
@@ -67,7 +67,7 @@ helpText st = unlines $ case st^.helpScreenL of
 
 
 handleEventHelp
-  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+  :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventHelp s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> continue $ s & helpScreenL %~ (\x -> if x==1 then 0 else x+1)

@@ -16,7 +16,7 @@ import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Control.Lens
 
-drawViewQueue :: HState -> Widget Name
+drawViewQueue :: HumState -> Widget Name
 drawViewQueue st =
   Widget Greedy Greedy $ do
     ctx <- getContext
@@ -48,7 +48,7 @@ drawViewQueue st =
                        ({-songIdx <+> songId <+>-}
                         album <+> track <+> title <+> artist <+> time)
 
-queueRow :: HState -> (MPD.Song, Highlight) -> Widget n
+queueRow :: HumState -> (MPD.Song, Highlight) -> Widget n
 queueRow st (song, hl) =
   (if hl then highlightOverAttrs else id)
     . (if Just (MPD.sgIndex song) == (MPD.sgIndex <$> nowPlaying)
@@ -95,7 +95,7 @@ queueRow st (song, hl) =
       $ MPD.sgLength song
 
 
-queueSearch :: Bool -> HState -> EventM Name HState
+queueSearch :: Bool -> HumState -> EventM Name HumState
 queueSearch direction s =
   let
     dir       = if direction then id else listReverse
@@ -115,7 +115,7 @@ queueSearch direction s =
              . dir
              )
 
-queueAddToPl :: HState -> String -> EventM Name HState
+queueAddToPl :: HumState -> String -> EventM Name HumState
 queueAddToPl s plName =
   let songs =
         (s ^.  queueL)
@@ -127,7 +127,7 @@ queueAddToPl s plName =
 
 
 handleEventQueue
-  :: HState -> BrickEvent Name HumEvent -> EventM Name (Next HState)
+  :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventQueue s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> do

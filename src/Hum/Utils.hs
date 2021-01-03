@@ -7,6 +7,7 @@ import           Brick.Types
 import           Brick.Widgets.List
 import qualified Data.Vector                   as V
 import qualified Data.Text                     as T
+import qualified Data.ByteString               as BS
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
@@ -74,12 +75,12 @@ listPaste paste ls =
       (es1, es2) = Brick.Widgets.List.splitAt (pos + 1) es
   in  ls { listElements = es1 <> listElements paste <> es2 }
 
-deleteHighlighted :: HState -> Lens' HState SongList -> HState
+deleteHighlighted :: HumState -> Lens' HumState SongList -> HumState
 deleteHighlighted st lns =
   st & clipboardL . clSongsL .~ (st ^. lns & getHighlighted)
      & lns %~ listHighlightSelected ?  W.filter (not . snd)
 
-yankHighlighted :: HState -> Lens' HState SongList -> HState
+yankHighlighted :: HumState -> Lens' HumState SongList -> HumState
 yankHighlighted st lns =
   st & clipboardL . clSongsL .~ (st ^. lns & getHighlighted)
 
@@ -108,33 +109,40 @@ overwriteListToPl ls name =
   in MPD.playlistClear name' >>
      for_ songpaths (MPD.playlistAdd name')
 
-saveEditedPl :: HState -> EventM n HState
+saveEditedPl :: HumState -> EventM n HumState
 saveEditedPl st = do
   let plSongs = st ^. playlistsL . plSongsL
   let plName = st ^. playlistsL . plListL & listSelectedElement ? maybe "unnamed" snd ? MPD.toText
   _ <- liftIO . withMPD $ overwriteListToPl plSongs plName
   pure st
 
-deleteSelectedPl :: HState -> EventM n HState
+deleteSelectedPl :: HumState -> EventM n HumState
 deleteSelectedPl st = do
   let plName = st ^. playlistsL . plListL & listSelectedElement <&> snd
   _ <- liftIO . withMPD $ traverse MPD.rm plName
   rebuildPl st
 
-duplicatePlaylist :: MPD.PlaylistName -> HState -> EventM n HState -- HACK
+unusedPlName :: MPD.PlaylistName -> IO MPD.PlaylistName
+unusedPlName prefix = do
+  plNames <- fromRight [] <$> (liftIO . withMPD $ MPD.listPlaylists)
+  let newPlName = viaNonEmpty head $ filter (`notElem` plNames) (append' prefix . show <$> [2::Int ..])
+  pure (fromMaybe "unnamed" newPlName) -- HACK
+  where
+    append' (MPD.PlaylistName x) (MPD.PlaylistName y) = MPD.PlaylistName (BS.append x y)
+
+duplicatePlaylist :: MPD.PlaylistName -> HumState -> EventM n HumState -- HACK
 duplicatePlaylist pl st = do
   songs <- V.fromList . fromRight [] <$> (liftIO . withMPD $ MPD.listPlaylistInfo pl)
-  plNames <- (MPD.toText <$>) . fromRight [] <$> (liftIO . withMPD $ MPD.listPlaylists)
-  let newPlName = viaNonEmpty head $ filter (`notElem` plNames) (map ((\tx num -> tx <> "-copy" <> show num) (MPD.toText pl)) [1::Int ..])
-  traverse_ (\pln -> songBulkAddtoPl pln songs st) (T.unpack <$> newPlName)
+  newPlName <- liftIO $ unusedPlName pl
+  _ <- songBulkAddtoPl (MPD.toString newPlName) songs st
   rebuildPl st
 
-pastePlaylist :: HState -> EventM n HState
+pastePlaylist :: HumState -> EventM n HumState
 pastePlaylist st = do
   let plName = fromMaybe "<error>" (st ^. clipboardL . clPlNameL)
   duplicatePlaylist plName st
 
-songBulkAddtoQ :: Bool -> V.Vector MPD.Song -> HState -> EventM n HState
+songBulkAddtoQ :: Bool -> V.Vector MPD.Song -> HumState -> EventM n HumState
 songBulkAddtoQ play songs s = do
   let songPaths = MPD.sgFilePath <$> songs
   traverse_
@@ -149,7 +157,7 @@ songBulkAddtoQ play songs s = do
             (V.drop 1 songPaths)
   pure s
 
-songBulkAddtoPl :: String -> V.Vector MPD.Song -> HState -> EventM n HState
+songBulkAddtoPl :: String -> V.Vector MPD.Song -> HumState -> EventM n HumState
 songBulkAddtoPl pl songs s = do
   let songPaths = MPD.sgFilePath <$> songs
   traverse_
