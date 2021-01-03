@@ -116,7 +116,6 @@ library
   exposed-modules:
                Hum.UI
              , Hum.Types
-             , Hum.BChan
              , Hum.Attributes
              , Hum.Views
              , Hum.Views.Common
