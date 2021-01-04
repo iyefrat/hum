@@ -1,6 +1,6 @@
 #+TITLE: Plans
 * PROJ 0.2.0.0
-** TODO implement scroll in help screen (remove hack)
+** TODO help state redundant? rething after search.
 ** TODO implement search in help screen
 ** TODO rename playlists
 ** TODO didn't i delete all the viewports?

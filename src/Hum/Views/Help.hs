@@ -1,3 +1,4 @@
+
 -- | Module    : Hum.Views.Help
 -- Copyright   : (c) Itai Y. Efrat 2020-2021
 -- License     : GPLv2-or-later (see LICENSE)
@@ -13,18 +14,11 @@ import           Brick.Types
 import           Graphics.Vty.Input.Events
 import           Brick.Main
 import           Brick.Widgets.Core
-import           Brick.Widgets.Center
 import           Control.Lens
 
 -- | Draws help.
 drawViewHelp :: HumState -> Widget Name
-drawViewHelp st =
-  Widget Greedy Greedy $ do
-    ctx <- getContext
-    let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
-    render $ reportExtent Help $
-      viewport Help Vertical $ -- TODO work out scroll logic
-      visibleRegion (Location {loc=(0,st ^. helpL . helpScrollL)}) (1,vsize) (txt (st ^. helpL . helpTextL))
+drawViewHelp st = viewport Help Vertical (txt (st ^. helpL . helpTextL))
 
 -- | Helper function that keeps "Hum.UI" tidy.
 helpText' :: Text
@@ -82,12 +76,12 @@ handleEventHelp
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventHelp s e = case e of
   VtyEvent vtye -> case vtye of
-    EvKey (KChar 'j') [] -> continue $ s & helpL . helpScrollL %~ (\x -> max 0 $ min helpHeight x+1)
-    EvKey (KChar 'k') [] -> continue $ s & helpL . helpScrollL %~ (\x -> max 0 $ min helpHeight x-1)
+    EvKey (KChar 'j') [] -> vScrollBy (viewportScroll Help) 1 >> continue s
+    EvKey (KChar 'k') [] -> vScrollBy (viewportScroll Help) (-1) >> continue s
     EvKey (KChar 'n') [] -> continue s
     EvKey (KChar 'N') [] -> continue s
     EvKey (KChar 'G') [] -> continue s
     EvKey (KChar 'g') [] -> continue s
     _                    -> continue s
   _ -> continue s
-  where helpHeight = (length . lines $ s ^. helpL . helpTextL) - 6 -- HACK Don't hardcode nowplaying size?
+  where helpHeight = length . lines $ s ^. helpL . helpTextL
