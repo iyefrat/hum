@@ -28,7 +28,7 @@ data HumState = HumState
     , focus       :: !Focus -- ^ The current focus in each view
     , editable    :: !Bool -- ^ Whether the selected stored playlist is editable
     , prompts     :: !Prompts
-    , helpScreen  :: !Int -- ^ HACK which help screen is visible
+    , help        :: !HelpState -- ^ Help View
     }
 
 
@@ -38,10 +38,15 @@ data LibraryState = LibraryState
     , yalbumSort  :: !Bool -- ^ Toggle sort of yalbums between years and alphabeitcal order
     , songs       :: !(List Name Song) -- ^ Songs in selected album
     }
+
 -- | Stored playlists
 data PlaylistsState = PlaylistsState
     { plList  :: !(List Name PlaylistName) -- ^ List of stored playlists
     , plSongs :: !SongList -- ^ Songs in selected playlist
+    }
+data HelpState = HelpState
+    { helpScroll :: !Int -- ^ lowest visible row in Help screen
+    , helpText   :: !Text
     }
 -- | Specific mode in the bottom prompt
 data ExSubMode =
@@ -94,6 +99,7 @@ data Name =
   | Queue | QueueList
   | Library | ArtistsList | LibraryLeft | AlbumsList | YalbumsList | LibraryMid | SongsList | LibraryRight
   | PlaylistList | PlaylistLeft | PlaylistSongs | PlaylistRight
+  | Help
   | ExEditor
   | TextPromptEditor
  deriving (Show, Eq, Ord)
@@ -124,6 +130,7 @@ suffixLenses ''HumState
 suffixLenses ''Focus
 suffixLenses ''LibraryState
 suffixLenses ''PlaylistsState
+suffixLenses ''HelpState
 suffixLenses ''ExState
 suffixLenses ''Prompts
 suffixLenses ''Clipboard

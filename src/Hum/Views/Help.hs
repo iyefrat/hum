@@ -18,11 +18,18 @@ import           Control.Lens
 
 -- | Draws help.
 drawViewHelp :: HumState -> Widget Name
-drawViewHelp st = center ((hCenter . txt $ "j/k cycle between help screens.") <=> txt (helpText st))
+drawViewHelp st =
+  Widget Greedy Greedy $ do
+    ctx <- getContext
+    let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
+    render $ reportExtent Help $
+      viewport Help Vertical $ -- TODO work out scroll logic
+      visibleRegion (Location {loc=(0,st ^. helpL . helpScrollL)}) (1,vsize) (txt (st ^. helpL . helpTextL))
 
-helpText :: HumState -> Text
-helpText st = unlines $ case st^.helpScreenL of
-  0 -> [
+-- | Helper function that keeps "Hum.UI" tidy.
+helpText' :: Text
+helpText' = unlines
+        [
           "Change views:"
         , "  1 - queue"
         , "  2 - library"
@@ -43,9 +50,9 @@ helpText st = unlines $ case st^.helpScreenL of
         , "  c       - toggle consume mode in mpd"
         , "  x       - toggle crossfade mode in mpd"
         , "  r       - toggle repeat mode in mpd"
-        , "  z       - toggle random mode in mpd"]
-  1 -> [
-          "Queue keybindings:"
+        , "  z       - toggle random mode in mpd"
+        , ""
+        , "Queue keybindings:"
         , "  SPC - select song"
         , "  y and d - yank and delete the selected songs"
         , "  p   - paste selected song"
@@ -69,18 +76,18 @@ helpText st = unlines $ case st^.helpScreenL of
         , ":q          - quits"
         , ":save $name - saves the queue to a playlist called $name"
         ]
-  _ -> ["something went wrong."]
 
 -- | handle key events in help view.
 handleEventHelp
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleEventHelp s e = case e of
   VtyEvent vtye -> case vtye of
-    EvKey (KChar 'j') [] -> continue $ s & helpScreenL %~ (\x -> if x==1 then 0 else x+1)
-    EvKey (KChar 'k') [] -> continue $ s & helpScreenL %~ (\x -> if x==0 then 1 else x-1)
+    EvKey (KChar 'j') [] -> continue $ s & helpL . helpScrollL %~ (\x -> max 0 $ min helpHeight x+1)
+    EvKey (KChar 'k') [] -> continue $ s & helpL . helpScrollL %~ (\x -> max 0 $ min helpHeight x-1)
     EvKey (KChar 'n') [] -> continue s
     EvKey (KChar 'N') [] -> continue s
     EvKey (KChar 'G') [] -> continue s
     EvKey (KChar 'g') [] -> continue s
     _                    -> continue s
   _ -> continue s
+  where helpHeight = (length . lines $ s ^. helpL . helpTextL) - 6 -- HACK Don't hardcode nowplaying size?

@@ -55,6 +55,7 @@ drawUI st =
             (st ^. focusL . focExL)
             (st ^. exL . exEditorL)
           else txt " "
+    <=> (txt . show $ st ^. helpL . helpScrollL)
   ]
 
 -- | Make sure cursor is displayed when editing text.
@@ -115,7 +116,10 @@ buildInitialState chan = do
         , plSelectPrompt = listInsert 0 Nothing (Just <$> plList)
         , exitPromptFunc     = \s -> pure $ s & modeL .~ NormalMode
         }
-  let helpScreen = 0
+  let help = HelpState
+        { helpScroll = 0
+        , helpText = helpText'
+        }
   pure HumState { chan
               , hview
               , mode
@@ -126,10 +130,10 @@ buildInitialState chan = do
               , clipboard
               , library
               , playlists
+              , help
               , focus
               , editable
               , prompts
-              , helpScreen
               }
 
 -- | Initial event.
