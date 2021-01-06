@@ -153,10 +153,8 @@ handleEvent s e = case e of
       EvKey (KChar 't') [] -> do
         st <- liftIO ((MPD.stState <$>) <$> withMPD MPD.status)
         _  <- case st of
-          Left  _           -> liftIO (withMPD $ MPD.pause True)
-          Right MPD.Paused  -> liftIO (withMPD $ MPD.play Nothing)
-          Right MPD.Stopped -> liftIO (withMPD $ MPD.play Nothing)
-          Right MPD.Playing -> liftIO (withMPD $ MPD.pause True)
+          Left  _  -> liftIO (withMPD $ MPD.pause (Just True))
+          Right _  -> liftIO (withMPD $ MPD.pause Nothing)
         continue s
       EvKey (KChar 's') [] -> do
         _ <- liftIO
