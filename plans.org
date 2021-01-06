@@ -6,6 +6,7 @@
 ** TODO didn't i delete all the viewports?
 ** TODO check if vendors work
 - TODO if so, move everything to new list
+** TODO song start on enter is a bit slow on first song
 
 * PROJ Near future
 ** TODO try and do initialBuild with reBuilds
