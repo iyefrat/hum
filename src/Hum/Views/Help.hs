@@ -42,14 +42,6 @@ helpW' st =
       mterm' = if mterm == Just "" then Nothing else mterm
   in  maybe (txt htx) (\term -> searchW hi term htx) mterm'
 
-
-{-
-helpSearch
-  :: Bool -- ^ Search direction, True for forward.
-  -> HumState
-  -> EventM Name HumState
-helpSearch dir st =
--}
 -- | Helper function that keeps "Hum.UI" tidy.
 helpText' :: Text
 helpText' = unlines
@@ -102,6 +94,7 @@ helpText' = unlines
         , ":save $name - saves the queue to a playlist called $name"
         ]
 
+-- | Updates which mathc is focused in the help buffer.
 helpSearch
   :: Bool -- ^ Search direction, True for forward.
   -> HumState
@@ -110,6 +103,7 @@ helpSearch dir st =
   pure $ if dir
          then st & helpL . helpSearchIntL %~ (\x->x+1)
          else st & helpL . helpSearchIntL %~ (\x->x-1)
+
 -- | handle key events in help view.
 handleEventHelp
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
