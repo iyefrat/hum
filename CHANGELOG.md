@@ -10,6 +10,7 @@
 -   Library now uses album artist on left column
 -   Library now displays and sorts by album year by default
 -   `\`` toggles album sort order in library (between year and alphabetical)
+-   Help can now be scrolled and searched with case insensitive POSIX regex
 
 ## 0.1.0.0 - 2020-12-12
 

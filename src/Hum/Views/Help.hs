@@ -16,18 +16,32 @@ import           Brick.Main
 import           Brick.Widgets.Core
 import           Brick.Widgets.Search
 import           Control.Lens
+import           Text.Regex.TDFA.Text
+import           Text.Regex.TDFA
 
 -- | Draws help.
 drawViewHelp :: HumState -> Widget Name
 drawViewHelp st = viewport Help Vertical (helpW st)
 
+-- | Help widget. Parses the last search as a case insensitive POSIX regex.
 helpW :: HumState -> Widget Name
 helpW st =
   let htx = st ^. helpL . helpTextL
       hi = st ^. helpL . helpSearchIntL
       mterm = viaNonEmpty head (st ^. exL . searchHistoryL)
       mterm' = if mterm == Just "" then Nothing else mterm
+      eterm =  maybe (Left "empty") (compile defaultCompOpt{caseSensitive = False} defaultExecOpt) mterm'
+  in  either (\_ -> txt htx) (\term -> regexW hi term htx) eterm
+
+-- | Help widget. Parses the last search as an exact match.
+helpW' :: HumState -> Widget Name
+helpW' st =
+  let htx = st ^. helpL . helpTextL
+      hi = st ^. helpL . helpSearchIntL
+      mterm = viaNonEmpty head (st ^. exL . searchHistoryL)
+      mterm' = if mterm == Just "" then Nothing else mterm
   in  maybe (txt htx) (\term -> searchW hi term htx) mterm'
+
 
 {-
 helpSearch
@@ -40,12 +54,12 @@ helpSearch dir st =
 helpText' :: Text
 helpText' = unlines
         [
-          "change views:"
+          "Change views:"
         , "  1 - queue"
         , "  2 - library"
         , "  3 - playlists"
         , ""
-        , "general bindings:"
+        , "General bindings:"
         , "  t       - play/pause toggle"
         , "  ,       - previous song"
         , "  .       - next song"
@@ -62,22 +76,23 @@ helpText' = unlines
         , "  r       - toggle repeat mode in mpd"
         , "  z       - toggle random mode in mpd"
         , ""
-        , "queue keybindings:"
+        , "Queue keybindings:"
         , "  SPC - select song"
         , "  y and d - yank and delete the selected songs"
         , "  p   - paste selected song"
         , "  a   - add selected songs to playlist"
         , ""
-        , "library and Playlists keybindigns:"
+        , "Library and Playlists keybindigns:"
         , "  SPC - add song/song collection to queue"
         , "  RET - add song/song collection to queue, and start playing the first one"
         , "  `   - toggle sort of the album column between release order and alphabetical order"
         , ""
-        , "playlists keybindigns:"
-        , " on playlist conents:"
+        , "Playlists keybindigns:"
+        , " On playlist conents:"
         , "  e - make playlist editable, press again to get save prompt."
         , "      editing a playlist is the same as editing the queue"
-        , " on list of playlists:"
+        , ""
+        , " On list of playlists:"
         , "  y and p - copy and paste playlists (with -copy added to the name)"
         , "  d       - delete playlist (with prompt)"
         , ""
@@ -108,4 +123,3 @@ handleEventHelp s e = case e of
     EvKey (KChar 'g') [] -> continue s
     _                    -> continue s
   _ -> continue s
-  where helpHeight = length . lines $ s ^. helpL . helpTextL
