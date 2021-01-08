@@ -45,8 +45,10 @@ data PlaylistsState = PlaylistsState
     , plSongs :: !SongList -- ^ Songs in selected playlist
     }
 data HelpState = HelpState
-    { helpScroll :: !Int -- ^ lowest visible row in Help screen
-    , helpText   :: !Text
+    { helpScroll    :: !Int -- ^ lowest visible row in Help screen
+    , helpText      :: !Text
+    , helpSearchInt :: !Int
+    , helpSearchMod :: !Int
     }
 -- | Specific mode in the bottom prompt
 data ExSubMode =

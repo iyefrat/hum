@@ -37,6 +37,8 @@ humAttrMap = attrMap
                                 (Vty.withStyle defAttr Vty.bold) Vty.underline)
   , (titleBoldAttr          , Vty.withStyle defAttr Vty.bold)
   , (editorAttr             , BU.bg Vty.black)
+  , (searchAttr             , Vty.withStyle defAttr Vty.reverseVideo)
+  , (searchFocusedAttr      , BU.fg Vty.red)
   ]
 
 wobAttr :: Vty.Attr
@@ -65,6 +67,10 @@ titleBoldAttr = titleAttr <> "bold"
 
 editorAttr :: AttrName
 editorAttr = "editor"
+
+searchAttr, searchFocusedAttr  :: AttrName
+searchAttr = "search"
+searchFocusedAttr = searchAttr <> "focus"
 
 -- | Overwrites attributes for item to be highlighted.
 highlightOverAttrs :: Widget n -> Widget n -- HACK?

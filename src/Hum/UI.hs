@@ -16,6 +16,7 @@ import qualified Brick.BChan                   as BC
 import           Brick.Widgets.Core
 import           Brick.Widgets.List
 import           Brick.Widgets.Edit
+import           Brick.Widgets.Search
 import           Graphics.Vty.Input.Events
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
@@ -55,7 +56,6 @@ drawUI st =
             (st ^. focusL . focExL)
             (st ^. exL . exEditorL)
           else txt " "
-    <=> (txt . show $ st ^. helpL . helpScrollL)
   ]
 
 -- | Make sure cursor is displayed when editing text.
@@ -119,6 +119,8 @@ buildInitialState chan = do
   let help = HelpState
         { helpScroll = 0
         , helpText = helpText'
+        , helpSearchInt = 0
+        , helpSearchMod = 1
         }
   pure HumState { chan
               , hview

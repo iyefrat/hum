@@ -14,22 +14,38 @@ import           Brick.Types
 import           Graphics.Vty.Input.Events
 import           Brick.Main
 import           Brick.Widgets.Core
+import           Brick.Widgets.Search
 import           Control.Lens
 
 -- | Draws help.
 drawViewHelp :: HumState -> Widget Name
-drawViewHelp st = viewport Help Vertical (txt (st ^. helpL . helpTextL))
+drawViewHelp st = viewport Help Vertical (helpW st)
 
+helpW :: HumState -> Widget Name
+helpW st =
+  let htx = st ^. helpL . helpTextL
+      hi = st ^. helpL . helpSearchIntL
+      mterm = viaNonEmpty head (st ^. exL . searchHistoryL)
+      mterm' = if mterm == Just "" then Nothing else mterm
+  in  maybe (txt htx) (\term -> searchW hi term htx) mterm'
+
+{-
+helpSearch
+  :: Bool -- ^ Search direction, True for forward.
+  -> HumState
+  -> EventM Name HumState
+helpSearch dir st =
+-}
 -- | Helper function that keeps "Hum.UI" tidy.
 helpText' :: Text
 helpText' = unlines
         [
-          "Change views:"
+          "change views:"
         , "  1 - queue"
         , "  2 - library"
         , "  3 - playlists"
         , ""
-        , "General Bindings:"
+        , "general bindings:"
         , "  t       - play/pause toggle"
         , "  ,       - previous song"
         , "  .       - next song"
@@ -46,18 +62,18 @@ helpText' = unlines
         , "  r       - toggle repeat mode in mpd"
         , "  z       - toggle random mode in mpd"
         , ""
-        , "Queue keybindings:"
+        , "queue keybindings:"
         , "  SPC - select song"
         , "  y and d - yank and delete the selected songs"
         , "  p   - paste selected song"
         , "  a   - add selected songs to playlist"
         , ""
-        , "Library and Playlists keybindigns:"
+        , "library and Playlists keybindigns:"
         , "  SPC - add song/song collection to queue"
         , "  RET - add song/song collection to queue, and start playing the first one"
         , "  `   - toggle sort of the album column between release order and alphabetical order"
         , ""
-        , "Playlists keybindigns:"
+        , "playlists keybindigns:"
         , " on playlist conents:"
         , "  e - make playlist editable, press again to get save prompt."
         , "      editing a playlist is the same as editing the queue"
@@ -65,12 +81,20 @@ helpText' = unlines
         , "  y and p - copy and paste playlists (with -copy added to the name)"
         , "  d       - delete playlist (with prompt)"
         , ""
-        , "Commands:"
+        , "commands:"
         , ":help       - gets you this"
         , ":q          - quits"
         , ":save $name - saves the queue to a playlist called $name"
         ]
 
+helpSearch
+  :: Bool -- ^ Search direction, True for forward.
+  -> HumState
+  -> EventM Name HumState
+helpSearch dir st =
+  pure $ if dir
+         then st & helpL . helpSearchIntL %~ (\x->x+1)
+         else st & helpL . helpSearchIntL %~ (\x->x-1)
 -- | handle key events in help view.
 handleEventHelp
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
@@ -78,8 +102,8 @@ handleEventHelp s e = case e of
   VtyEvent vtye -> case vtye of
     EvKey (KChar 'j') [] -> vScrollBy (viewportScroll Help) 1 >> continue s
     EvKey (KChar 'k') [] -> vScrollBy (viewportScroll Help) (-1) >> continue s
-    EvKey (KChar 'n') [] -> continue s
-    EvKey (KChar 'N') [] -> continue s
+    EvKey (KChar 'n') [] -> continue =<< helpSearch (s ^. exL . searchDirectionL) s
+    EvKey (KChar 'N') [] -> continue =<< helpSearch (s ^. exL . searchDirectionL & not) s
     EvKey (KChar 'G') [] -> continue s
     EvKey (KChar 'g') [] -> continue s
     _                    -> continue s

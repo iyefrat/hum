@@ -36,7 +36,7 @@ exEnd s =
                 QueueView     -> continue =<< queueSearch (srch == FSearch) s''
                 LibraryView   -> continue =<< librarySearch (srch == FSearch) s''
                 PlaylistsView -> continue =<< playlistsSearch (srch == FSearch) s''
-                HelpView      -> continue s''
+                HelpView      -> continue =<< helpSearch (srch == FSearch) s''
                 where s''= s' & exL . searchHistoryL %~ (searched :)
 
 -- | Handle key inputs for ex mode.
