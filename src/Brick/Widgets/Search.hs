@@ -46,8 +46,8 @@ splitRegex rg source = go [] rg <$> lines source
  where
   go :: [(Text, Text)] -> Regex -> Text -> [(Text, Text)]
   go prev rg rest =
-    let match = matchOnceText rg rest
-    in  case match of
+    let matches = matchOnceText rg rest
+    in  case matches of
           Nothing              -> prev ++ [(rest, "")]
           Just (pre, mt, post) -> go
             (prev ++ [(pre, maybe "" fst $ viaNonEmpty head (A.elems mt))])
