@@ -78,6 +78,20 @@ rebuildLibArtists s = do
     pure $ s &  libraryL . yalbumsL .~ yalbums'
              &  libraryL . songsL .~ songs'
 
+-- | Rebuild library state from selected artist.
+reloadLibArtists :: MonadIO m => HumState -> m HumState
+reloadLibArtists s = do
+    let mi = s ^. libraryL . yalbumsL & listSelected
+    let mj = s ^. libraryL . songsL & listSelected
+    let artists' = s ^. libraryL . artistsL
+    yalbumsVec   <- liftIO $ maybe (pure empty) (yalbumsOfArtist (s ^. libraryL . yalbumSortL)) (snd <$> listSelectedElement artists')
+    let yalbums'    = maybe id listMoveTo mi $ list YalbumsList yalbumsVec 1
+    songsVec    <- liftIO $ maybe (pure empty) songsOfAlbum (snd . snd <$> listSelectedElement yalbums')
+    let songs'   = maybe id listMoveTo mj $ list SongsList songsVec 1
+    pure $ s &  libraryL . yalbumsL .~ yalbums'
+             &  libraryL . songsL .~ songs'
+
+
 -- | Rebuild library state from selected album.
 rebuildLibAlbums :: MonadIO m => HumState -> m HumState
 rebuildLibAlbums s = do
@@ -85,6 +99,16 @@ rebuildLibAlbums s = do
     songsVec   <- liftIO $ maybe (pure empty) songsOfAlbum (snd . snd <$> listSelectedElement yalbums')
     let songs'  = list SongsList songsVec 1
     pure $ s & libraryL . songsL .~ songs'
+
+-- | Rebuild library state from selected album, keeping the selected song index if possible.
+reloadLibAlbums :: MonadIO m => HumState -> m HumState
+reloadLibAlbums s = do
+    let mi = s ^. libraryL . songsL & listSelected
+    let yalbums' = s ^. libraryL . yalbumsL
+    songsVec   <- liftIO $ maybe (pure empty) songsOfAlbum (snd . snd <$> listSelectedElement yalbums')
+    let songs'  = maybe id listMoveTo mi $ list SongsList songsVec 1
+    pure $ s & libraryL . songsL .~ songs'
+
 
 -- | Rebuild entire stored playlists state, keeping the index of the left column if possible.
 rebuildPl :: MonadIO m => HumState -> m HumState
@@ -112,6 +136,21 @@ rebuildPlList s = do
         )
     let plSongs' = (, False) <$> list PlaylistSongs plSongsVec 1
     pure $ s & playlistsL . plSongsL .~ plSongs'
+
+-- | Rebuild stored playlists state from selected playlist, keeping the selected song index if possible.
+reloadPlList :: MonadIO m => HumState -> m HumState
+reloadPlList s = do
+    let mi = s ^. playlistsL . plSongsL & listSelected
+    let plList' = s ^. playlistsL . plListL
+    plSongsVec <- liftIO
+        (V.fromList . fromRight [] <$> withMPD
+            (MPD.listPlaylistInfo
+                (maybe "<no playlists>" snd (listSelectedElement plList'))
+            )
+        )
+    let plSongs' = maybe id listMoveTo mi $ (, False) <$> list PlaylistSongs plSongsVec 1
+    pure $ s & playlistsL . plSongsL .~ plSongs'
+
 
 -- | Rebuild queue state, keeping the index of the left column if possible.
 rebuildQueue :: MonadIO m => HumState -> m HumState

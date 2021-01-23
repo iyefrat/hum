@@ -141,8 +141,8 @@ saveEditedPl bl st = if bl
     let plSongs = st ^. playlistsL . plSongsL
     let plName =  st ^. playlistsL . plListL & listSelectedElement ? maybe "unnamed" snd ? MPD.toText
     _ <- liftIO . withMPD $ overwriteListToPl plSongs plName
-    rebuildPlList st
-  else rebuildPlList st
+    reloadPlList st
+  else reloadPlList st
 
 -- | Deletes selected playlist in Playlist view from disk.
 deleteSelectedPl :: Bool -> HumState -> EventM n HumState

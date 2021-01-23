@@ -204,7 +204,7 @@ handleEventPlaylists s e = case e of
                    & promptsL . currentPromptL .~ YNPrompt
                    & promptsL . promptTitleL .~ ("Save changes to " <> selectedPl <> "?")
                    & promptsL . exitPromptFuncL .~ saveEditedPl
-      else continue =<< rebuildPlList (s & editableL %~ not)
+      else continue =<< reloadPlList (s & editableL %~ not)
     _                    -> continue s
   _ -> continue s
   where selectedPl = s ^. playlistsL . plListL & listSelectedElement ? maybe "<error>" snd ? MPD.toText
