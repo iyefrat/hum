@@ -117,10 +117,8 @@ buildInitialState chan = do
         , exitPromptFunc = \_ s -> pure $ s & modeL .~ NormalMode
         }
   let help = HelpState
-        { helpScroll = 0
-        , helpText = helpText'
+        { helpText = helpText'
         , helpSearchInt = 0
-        , helpSearchMod = 1
         }
   pure HumState { chan
               , hview

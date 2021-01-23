@@ -1,6 +1,5 @@
 #+TITLE: Plans
 * PROJ 0.2.0.0
-** TODO help state redundant? rethink after search.
 ** TODO didn't i delete all the viewports?
 ** TODO check if vendors work
 - TODO if so, move everything to new list
