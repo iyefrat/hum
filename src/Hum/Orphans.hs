@@ -8,7 +8,7 @@
 
 module Hum.Orphans where
 
-import qualified Data.Witherable.Class as W
+import qualified Witherable as W
 import Brick.Widgets.List
 import Control.Lens
 

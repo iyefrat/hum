@@ -3,9 +3,7 @@
 module Brick.Widgets.Search where
 
 import Text.Regex.TDFA
-import Text.Regex.TDFA.Text
 import qualified Data.Text as T
-import Hum.Types
 import Hum.Attributes
 import Brick.Types
 import Brick.Widgets.Core
@@ -45,8 +43,8 @@ splitRegex :: Regex -> Text -> [[(Text, Text)]]
 splitRegex rg source = go [] rg <$> lines source
  where
   go :: [(Text, Text)] -> Regex -> Text -> [(Text, Text)]
-  go prev rg rest =
-    let matches = matchOnceText rg rest
+  go prev rg' rest =
+    let matches = matchOnceText rg' rest
     in  case matches of
           Nothing              -> prev ++ [(rest, "")]
           Just (pre, mt, post) -> go

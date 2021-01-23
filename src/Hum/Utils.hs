@@ -19,7 +19,7 @@ import qualified Network.MPD                   as MPD
 import qualified Data.Map.Strict               as Map
 import           Text.Printf                    ( printf )
 import           Control.Lens
-import qualified Data.Witherable.Class         as W
+import qualified Witherable         as W
 
 -- | A backwards function composition operator that I love with my whole heart.
 infixl 8  ?

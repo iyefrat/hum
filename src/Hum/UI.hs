@@ -16,7 +16,6 @@ import qualified Brick.BChan                   as BC
 import           Brick.Widgets.Core
 import           Brick.Widgets.List
 import           Brick.Widgets.Edit
-import           Brick.Widgets.Search
 import           Graphics.Vty.Input.Events
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
