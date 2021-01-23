@@ -48,13 +48,15 @@ handlePlSelectPromptEvent s e = case e of
       case s ^. promptsL . plSelectPromptL & listSelectedElement <&> snd & join of
         Nothing -> continue $ s & promptsL . currentPromptL .~ TextPrompt
                                 & promptsL . exitPromptFuncL .~ songBulkAddtoNewPl songs
-        Just plname -> continue =<< songBulkAddtoPl (MPD.toString plname) songs s
+        Just plname -> continue
+          =<< songBulkAddtoPl (MPD.toString plname) songs (s & modeL .~ NormalMode)
     EvKey KEnter [] -> do -- HACK find a way to unduplucate this
       let songs = s ^. queueL & getHighlighted <&> fst & listElements
       case s ^. promptsL . plSelectPromptL & listSelectedElement <&> snd & join of
         Nothing -> continue $ s & promptsL . currentPromptL .~ TextPrompt
                                 & promptsL . exitPromptFuncL .~ songBulkAddtoNewPl songs
-        Just plname -> continue =<< songBulkAddtoPl (MPD.toString plname) songs s
+        Just plname -> continue
+          =<< songBulkAddtoPl (MPD.toString plname) songs (s & modeL .~ NormalMode)
     _ -> continue s
   _ -> continue s
 
