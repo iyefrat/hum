@@ -100,7 +100,7 @@ rebuildPl s = do
   pure $ s & playlistsL . plListL  .~ plList'
            & playlistsL . plSongsL .~ plSongs'
 
--- | Rebuild entire stored playlists state from selected playlist.
+-- | Rebuild stored playlists state from selected playlist.
 rebuildPlList :: MonadIO m => HumState -> m HumState
 rebuildPlList s = do
     let plList' = s ^. playlistsL . plListL
