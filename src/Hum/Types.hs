@@ -70,7 +70,7 @@ data Prompts = Prompts
     , promptTitle        :: Text
     , plSelectPrompt     :: !(List Name (Maybe PlaylistName)) -- ^ List to select playlist from
     , textPrompt         :: !(Editor Text Name) -- ^ Editor if needed
-    , exitPromptFunc     :: HumState -> EventM Name HumState -- ^ Executes on exit from prompt
+    , exitPromptFunc     :: Bool -> HumState -> EventM Name HumState -- ^ Executes on exit from prompt, True for execute and False for quit.
     }
 
 data PromptType =

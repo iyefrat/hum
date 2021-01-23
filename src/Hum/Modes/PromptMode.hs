@@ -35,8 +35,10 @@ handlePlSelectPromptEvent
     :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handlePlSelectPromptEvent s e = case e of
   VtyEvent vtye -> case vtye of
-    EvKey KEsc [] -> continue $ s & modeL .~ NormalMode
-    EvKey (KChar 'q') [] -> continue $ s & modeL .~ NormalMode
+    EvKey KEsc [] -> continue
+        =<< (s ^. promptsL . exitPromptFuncL) False (s & modeL .~ NormalMode)
+    EvKey (KChar 'q') [] -> continue
+      =<< (s ^. promptsL . exitPromptFuncL) False (s & modeL .~ NormalMode)
     EvKey (KChar 'j') [] -> do
       continue $ s & promptsL . plSelectPromptL %~ listMoveDown
     EvKey (KChar 'k') [] -> do
@@ -57,19 +59,23 @@ handlePlSelectPromptEvent s e = case e of
   _ -> continue s
 
 -- | Add given songs to new playlist entered in prompt.
-songBulkAddtoNewPl :: V.Vector MPD.Song -> HumState -> EventM n HumState
-songBulkAddtoNewPl songs st = songBulkAddtoPl
-  (toString $ st ^. promptsL . textPromptL . editContentsL & Z.currentLine)
-  songs
-  st
+songBulkAddtoNewPl
+  :: V.Vector MPD.Song -> Bool -> HumState -> EventM n HumState
+songBulkAddtoNewPl songs bl st = if bl
+  then songBulkAddtoPl
+    (toString $ st ^. promptsL . textPromptL . editContentsL & Z.currentLine)
+    songs
+    st
+  else pure st
 
 -- | Handles key events for generic text prompt.
 handleTextPromptEvent
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleTextPromptEvent s e = case e of
-  VtyEvent (EvKey KEsc []) -> continue (s & modeL .~ NormalMode)
-  VtyEvent (EvKey KEnter []) ->
-    continue =<< (s ^. promptsL . exitPromptFuncL) (s & modeL .~ NormalMode)
+  VtyEvent (EvKey KEsc []) -> continue
+    =<< (s ^. promptsL . exitPromptFuncL) False (s & modeL .~ NormalMode)
+  VtyEvent (EvKey KEnter []) -> continue
+    =<< (s ^. promptsL . exitPromptFuncL) True (s & modeL .~ NormalMode)
   VtyEvent vtye ->
     continue
       =<< handleEventLensed s (promptsL . textPromptL) handleEditorEvent vtye
@@ -79,9 +85,16 @@ handleTextPromptEvent s e = case e of
 handleYNPromptEvent
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
 handleYNPromptEvent s e = case e of
-  VtyEvent (EvKey KEsc []) -> continue (s & modeL .~ NormalMode)
+  VtyEvent (EvKey KEsc []) ->
+    continue
+      =<< (s ^. promptsL . exitPromptFuncL) False (s & modeL .~ NormalMode)
   VtyEvent (EvKey (KChar 'y') []) ->
-    continue =<< (s ^. promptsL . exitPromptFuncL) (s & modeL .~ NormalMode)
-  VtyEvent (EvKey (KChar 'n') []) -> continue (s & modeL .~ NormalMode)
-  VtyEvent (EvKey (KChar 'q') []) -> continue (s & modeL .~ NormalMode)
+    continue
+      =<< (s ^. promptsL . exitPromptFuncL) True (s & modeL .~ NormalMode)
+  VtyEvent (EvKey (KChar 'n') []) ->
+    continue
+      =<< (s ^. promptsL . exitPromptFuncL) False (s & modeL .~ NormalMode)
+  VtyEvent (EvKey (KChar 'q') []) ->
+    continue
+      =<< (s ^. promptsL . exitPromptFuncL) False (s & modeL .~ NormalMode)
   _                               -> continue s

@@ -135,19 +135,23 @@ overwriteListToPl ls name =
      for_ songpaths (MPD.playlistAdd name')
 
 -- | Save edited playlist in Playlist view to disk.
-saveEditedPl :: HumState -> EventM n HumState
-saveEditedPl st = do
-  let plSongs = st ^. playlistsL . plSongsL
-  let plName = st ^. playlistsL . plListL & listSelectedElement ? maybe "unnamed" snd ? MPD.toText
-  _ <- liftIO . withMPD $ overwriteListToPl plSongs plName
-  pure st
+saveEditedPl :: Bool -> HumState -> EventM n HumState
+saveEditedPl bl st = if bl
+  then do
+    let plSongs = st ^. playlistsL . plSongsL
+    let plName =  st ^. playlistsL . plListL & listSelectedElement ? maybe "unnamed" snd ? MPD.toText
+    _ <- liftIO . withMPD $ overwriteListToPl plSongs plName
+    rebuildPlList st
+  else rebuildPlList st
 
 -- | Deletes selected playlist in Playlist view from disk.
-deleteSelectedPl :: HumState -> EventM n HumState
-deleteSelectedPl st = do
-  let plName = st ^. playlistsL . plListL & listSelectedElement <&> snd
-  _ <- liftIO . withMPD $ traverse MPD.rm plName
-  rebuildPl st
+deleteSelectedPl :: Bool -> HumState -> EventM n HumState
+deleteSelectedPl bl st = if bl
+  then do
+    let plName = st ^. playlistsL . plListL & listSelectedElement <&> snd
+    _ <- liftIO . withMPD $ traverse MPD.rm plName
+    rebuildPl st
+ else pure st
 
 -- | Appends smallest number possible to playlist name for it to not be taken.
 -- Does nothing if name is untaken.

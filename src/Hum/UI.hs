@@ -114,7 +114,7 @@ buildInitialState chan = do
         , promptTitle    = ""
         , textPrompt     = editorText TextPromptEditor (Just 1) ""
         , plSelectPrompt = listInsert 0 Nothing (Just <$> plList)
-        , exitPromptFunc     = \s -> pure $ s & modeL .~ NormalMode
+        , exitPromptFunc = \_ s -> pure $ s & modeL .~ NormalMode
         }
   let help = HelpState
         { helpScroll = 0
