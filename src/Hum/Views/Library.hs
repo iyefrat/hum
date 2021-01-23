@@ -26,11 +26,11 @@ import           Hum.Utils
 
 -- | Draw left column in Library view.
 drawLibraryLeft :: HumState -> Widget Name
-drawLibraryLeft st =
+drawLibraryLeft st = reportExtent LibraryLeft $
   Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
-    render $ reportExtent LibraryLeft $ hCenter
+    render $ hCenter
         (   viewport LibraryLeft Vertical
         .   visible
         .   vLimit vsize
@@ -45,11 +45,11 @@ drawLibraryLeft st =
 
 -- | Draw middle column in Library view.
 drawLibraryMid :: HumState -> Widget Name
-drawLibraryMid st =
+drawLibraryMid st = reportExtent LibraryMid $
   Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
-    render $ reportExtent LibraryMid $ hCenter
+    render $ hCenter
         (   viewport LibraryMid Vertical
         .   visible
         .   vLimit vsize
@@ -64,11 +64,11 @@ drawLibraryMid st =
 
 -- | Draw right column in Library view.
 drawLibraryRight :: HumState -> Widget Name
-drawLibraryRight st =
+drawLibraryRight st = reportExtent LibraryRight $
   Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
-    render $ reportExtent LibraryRight $ hCenter
+    render $ hCenter
         (   viewport LibraryRight Vertical
         .   visible
         .   vLimit vsize

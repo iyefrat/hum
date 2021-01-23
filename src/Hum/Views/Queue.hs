@@ -25,7 +25,7 @@ import           Control.Lens
 
 -- | Draw the queue.
 drawViewQueue :: HumState -> Widget Name
-drawViewQueue st =
+drawViewQueue st = reportExtent Queue $
   Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?

@@ -30,11 +30,11 @@ import           Hum.Utils
 
 -- | Draw left column in Playlist view.
 drawPlaylistLeft :: HumState -> Widget Name
-drawPlaylistLeft st =
+drawPlaylistLeft st = reportExtent PlaylistLeft $
   Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
-    render $ reportExtent PlaylistLeft $ hCenter
+    render $ hCenter
         (   viewport PlaylistLeft Vertical
         .   visible
         .   vLimit vsize
@@ -49,11 +49,11 @@ drawPlaylistLeft st =
 
 -- | Draw right column in Playlist view.
 drawPlaylistRight :: HumState -> Widget Name
-drawPlaylistRight st =
+drawPlaylistRight st = reportExtent PlaylistRight $
   Widget Greedy Greedy $ do
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
-    render $  reportExtent PlaylistRight $ hCenter
+    render $ hCenter
         (   viewport PlaylistRight Vertical
         .   visible
         .   vLimit vsize
