@@ -1,6 +1,3 @@
 [submodule "libmpd"]
 	path = libmpd
 	url = https://github.com/iyefrat/libmpd-haskell
-[submodule "vty"]
-	path = vty
-	url = https://github.com/jtdaugherty/vty
