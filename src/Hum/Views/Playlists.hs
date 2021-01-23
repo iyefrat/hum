@@ -10,6 +10,7 @@ module Hum.Views.Playlists where
 
 import           Hum.Types
 import           Brick.Types
+import           Brick.Widgets.Edit      hiding ( decodeUtf8 )
 import           Graphics.Vty.Input.Events
 import           Brick.Main
 import           Brick.Widgets.Core
@@ -22,6 +23,7 @@ import           Hum.Attributes
 import           Hum.Views.Common
 import           Hum.Rebuild
 import qualified Data.Text                     as T
+import qualified Data.Text.Zipper              as Z
 import           Network.MPD                    ( withMPD )
 import qualified Network.MPD                   as MPD
 import           Hum.Utils
@@ -156,6 +158,18 @@ playlistsSearch direction s =
               .  plSongsL
               %~ (dir . listFindBy (songSearch searchkey [MPD.Title] . fst) . dir)
 
+-- | Rename the given playlist with input from the text prompt.
+renamePl
+  :: T.Text -> Bool -> HumState -> EventM n HumState
+renamePl oldname bl st = if bl
+  then
+    let newname = fromString (toString $ st ^. promptsL . textPromptL . editContentsL & Z.currentLine)
+        oldname' = fromString . T.unpack $ oldname
+    in do
+      _ <- liftIO . withMPD $MPD.rename oldname' newname
+      rebuildPl st
+  else pure st
+
 -- | handle key inputs for Playlist view.
 handleEventPlaylists
   :: HumState -> BrickEvent Name HumEvent -> EventM Name (Next HumState)
@@ -198,13 +212,19 @@ handleEventPlaylists s e = case e of
        | otherwise -> continue s
     EvKey (KChar 'G') [] -> continue =<< playlistsMove (listMoveTo (-1)) s
     EvKey (KChar 'g') [] -> continue =<< playlistsMove (listMoveTo 0) s -- TODO change this to  'gg', somehow
-    EvKey (KChar 'e') [] -> if s ^. editableL then
-      continue $ s & editableL %~ not
-                   & modeL .~ PromptMode
-                   & promptsL . currentPromptL .~ YNPrompt
-                   & promptsL . promptTitleL .~ ("Save changes to " <> selectedPl <> "?")
-                   & promptsL . exitPromptFuncL .~ saveEditedPl
-      else continue =<< reloadPlList (s & editableL %~ not)
+    EvKey (KChar 'e') [] -> case s ^. focusL . focPlayL of
+      FocPlaylists
+         -> continue $ s & modeL .~ PromptMode
+                         & promptsL . currentPromptL .~ TextPrompt
+                         & promptsL . promptTitleL .~ ("Rename " <> selectedPl <> " to:")
+                         & promptsL . exitPromptFuncL .~ renamePl selectedPl
+      FocPSongs -> if s ^. editableL then
+        continue $ s & editableL %~ not
+                     & modeL .~ PromptMode
+                     & promptsL . currentPromptL .~ YNPrompt
+                     & promptsL . promptTitleL .~ ("Save changes to " <> selectedPl <> "?")
+                     & promptsL . exitPromptFuncL .~ saveEditedPl
+        else continue =<< reloadPlList (s & editableL %~ not)
     _                    -> continue s
   _ -> continue s
   where selectedPl = s ^. playlistsL . plListL & listSelectedElement ? maybe "<error>" snd ? MPD.toText

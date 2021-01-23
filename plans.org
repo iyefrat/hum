@@ -1,7 +1,6 @@
 #+TITLE: Plans
 * PROJ 0.2.0.0
 ** TODO help state redundant? rethink after search.
-** TODO rename playlists
 ** TODO didn't i delete all the viewports?
 ** TODO check if vendors work
 - TODO if so, move everything to new list
@@ -21,6 +20,7 @@
 ** TODO more vim motions
 ** TODO tags
 ** TODO undo
+** TODO rename playlist without prompt?
 
 * PROJ Far future
 ** TODO write generic Response handler to print the MPDError instead of doing the thing.
