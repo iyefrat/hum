@@ -30,8 +30,7 @@ drawViewQueue st = reportExtent Queue $
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ hCenter
-        (   viewport Queue Vertical
-        .   vLimit vsize
+        (   vLimit vsize
         .   center
         $   hCenter header
         <=> hCenter

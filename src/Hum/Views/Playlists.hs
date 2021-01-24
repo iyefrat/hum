@@ -35,8 +35,7 @@ drawPlaylistLeft st = reportExtent PlaylistLeft $
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ hCenter
-        (   viewport PlaylistLeft Vertical
-        .   visible
+        (   visible
         .   vLimit vsize
         .   center
         $   hBorder
@@ -54,8 +53,7 @@ drawPlaylistRight st = reportExtent PlaylistRight $
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ hCenter
-        (   viewport PlaylistRight Vertical
-        .   visible
+        (   visible
         .   vLimit vsize
         .   center
         $   (if st ^. editableL

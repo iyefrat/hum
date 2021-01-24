@@ -31,8 +31,7 @@ drawLibraryLeft st = reportExtent LibraryLeft $
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ hCenter
-        (   viewport LibraryLeft Vertical
-        .   visible
+        (   visible
         .   vLimit vsize
         .   center
         $   hBorder
@@ -50,8 +49,7 @@ drawLibraryMid st = reportExtent LibraryMid $
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ hCenter
-        (   viewport LibraryMid Vertical
-        .   visible
+        (   visible
         .   vLimit vsize
         .   center
         $   hBorder
@@ -69,8 +67,7 @@ drawLibraryRight st = reportExtent LibraryRight $
     ctx <- getContext
     let vsize = ctx ^. windowHeightL - 6 -- HACK Don't hardcode nowplaying size?
     render $ hCenter
-        (   viewport LibraryRight Vertical
-        .   visible
+        (   visible
         .   vLimit vsize
         .   center
         $   hBorder

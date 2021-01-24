@@ -1,11 +1,9 @@
 #+TITLE: Plans
 * PROJ 0.2.0.0
-** TODO didn't i delete all the viewports?
 ** WAIT get libmpd 0.10 released
 
 * PROJ Near future
 ** TODO try and do initialBuild with reBuilds
-** TODO consider if viewports do anything
 ** TODO paste back deleted playlists
 ** TODO implement completion in cmds
 ** TODO more commands
