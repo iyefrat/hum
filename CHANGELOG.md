@@ -1,7 +1,7 @@
 
 # Revision history for hum
 
-## 0.2.0.0 - unreleased
+## 0.2.0.0 - 2020-01-25
 
 -   Add to playlist prompt now updates for new playlists
 -   Playlists now sorted alphabetically

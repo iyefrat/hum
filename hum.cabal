@@ -12,7 +12,7 @@ name:                hum
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.1.0.0
+version:             0.2.0.0
 
 -- A short (one-line) description of the package.
 synopsis:            A TUI MPD client, inspired by ncmpcpp
@@ -42,7 +42,7 @@ copyright: (c) Itai Efrat 2020
 
 category: Sound
 
-tested-with: GHC == 8.10.2, GHC == 8.8.4, GHC == 8.6.5, GHC == 8.4.4
+tested-with: GHC == 8.10.3, GHC == 8.8.4, GHC == 8.6.5, GHC == 8.4.4
 -- Extra files to be distributed with the package, such as examples or a
 -- README.
 extra-source-files:
