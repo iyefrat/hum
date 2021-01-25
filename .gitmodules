@@ -1,3 +1,0 @@
-[submodule "libmpd"]
-	path = libmpd
-	url = https://github.com/iyefrat/libmpd-haskell
