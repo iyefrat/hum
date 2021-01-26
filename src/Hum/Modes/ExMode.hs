@@ -19,6 +19,7 @@ import qualified Data.Text.Zipper              as Z
 import qualified Data.Text                     as T
 import           Control.Lens hiding (uncons)
 import qualified Network.MPD                   as MPD
+import qualified Network.MPD.Core              as MPD
 import           Hum.Utils
 
 -- | Executed after pressing enter in the ex mode prompt.
@@ -68,4 +69,9 @@ exCmdExecute ("save":name) s =
     name'' <- liftIO $ unusedPlName (fromString . T.unpack $ name')
     _ <- liftIO $ MPD.withMPD $ MPD.save name''
     continue =<< rebuildPl s
+exCmdExecute ("send":command) s =
+  let command' = T.unpack . unwords $ command in
+    do
+    response <- liftIO . MPD.withMPD $ MPD.send command'
+    continue s
 exCmdExecute _ s = continue s
