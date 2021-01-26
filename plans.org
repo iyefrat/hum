@@ -1,6 +1,4 @@
 #+TITLE: Plans
-* PROJ 0.2.0.0
-** WAIT get libmpd 0.10 released
 
 * PROJ Near future
 ** TODO try and do initialBuild with reBuilds
@@ -24,17 +22,13 @@
 
 * PROJ Upstream
 ** TODO libmpd-haskell
-*** DONE filter combinators
 *** TODO past mpd version tests?
-*** DONE Ord on PlaylistName
 *** TODO need to upstream tests for different versions of MPD
 ** STRT want list to actually be good
 *** TODO need to think about other breaking changes that should be made
 *** TODO upstream breaking changes
 ** TODO brick
-*** DONE witherable
 *** TODO seperated list, maybe?
-*** DONE cycle search
 ** TODO mpd
 *** TODO toggle random, single, etc
 *** TODO duplicate playlist
