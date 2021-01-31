@@ -16,7 +16,9 @@ The plan is to basically reimplement ncmpcpp in haskell (at least featurewise). 
 
 As this is an MPD client, you will need to install [mpd](https://github.com/MusicPlayerDaemon/MPD) from your favorite package manager.
 
-You can install `hum` either by running `cabal install hum` to install directly from hackage, or by cloning the repo and running `cabal install`  from within it.
+You can install `hum` directly from [Hackage](https://hackage.com/package/hum), or by cloning the repo and running `cabal install`.
+
+Nix support will be available in the near future, but in the meantime you can run `nix-build release.nix` and then launch hum with `./result/bin/hum` to try it out, but this requires an up to date `nixpkgs-unstable`.
 
 ## Features
 
