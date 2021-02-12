@@ -24,9 +24,9 @@ searchW highlight term contents =
         let (rest,numFinal) = runState (mkLine ts) (num+1)
         put numFinal
         pure $ txt t
-          <+> ((if hl then
-                  visible . withAttr searchFocusedAttr
-                else withAttr searchAttr) $ txt term)
+          <+> (if hl then
+                 visible . withAttr searchFocusedAttr
+               else withAttr searchAttr) (txt term)
           <+> rest
       mkWidget :: [[Text]] -> State Int (Widget n)
       mkWidget [] = pure emptyWidget
@@ -67,9 +67,9 @@ regexW highlight term contents =
         let (rest,numFinal) = runState (mkLine ts) (num+1)
         put numFinal
         pure $ txt tx
-          <+> ((if hl then
-                  visible . withAttr searchFocusedAttr
-                else withAttr searchAttr) $ txt mtch)
+          <+> (if hl then
+                 visible . withAttr searchFocusedAttr
+               else withAttr searchAttr) (txt mtch)
           <+> rest
       mkWidget :: [[(Text,Text)]] -> State Int (Widget n)
       mkWidget [] = pure emptyWidget

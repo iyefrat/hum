@@ -54,7 +54,7 @@ drawLibraryMid st = reportExtent LibraryMid $
         .   center
         $   hBorder
         <=> hCenter
-              (renderList (const $ libraryAlbumRow)
+              (renderList (const libraryAlbumRow)
                           ((focLib . focus $ st) == FocAlbums)
                           (st ^. libraryL . yalbumsL)
               )

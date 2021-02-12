@@ -153,7 +153,7 @@ handleEvent s e = case e of
         st <- liftIO ((MPD.stState <$>) <$> withMPD MPD.status)
         _  <- case st of
           Left  _  -> liftIO (withMPD $ MPD.pause True)
-          Right _  -> liftIO (withMPD $ MPD.toggle)
+          Right _  -> liftIO (withMPD MPD.toggle)
         continue s
       EvKey (KChar 's') [] -> do
         _ <- liftIO
