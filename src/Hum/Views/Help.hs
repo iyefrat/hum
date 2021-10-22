@@ -74,7 +74,7 @@ helpText' = unlines
         , "  p   - paste selected song"
         , "  a   - add selected songs to playlist"
         , ""
-        , "Library and Playlists keybindigns:"
+        , "Library and Playlists keybindings:"
         , "  SPC - add song/song collection to queue"
         , "  RET - add song/song collection to queue, and start playing the first one"
         , "  `   - toggle sort of the album column between release order and alphabetical order"
@@ -95,7 +95,7 @@ helpText' = unlines
         , ":save $name - saves the queue to a playlist called $name"
         ]
 
--- | Updates which mathc is focused in the help buffer.
+-- | Updates which match is focused in the help buffer.
 helpSearch
   :: Bool -- ^ Search direction, True for forward.
   -> HumState
