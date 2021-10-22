@@ -1,6 +1,12 @@
 # Hum: a Haskell Music Manager
 
-A TUI mpd client, currently in beta and under active development.
+## Status
+This project is on indefinite hiatus. It might see more development in the future, but I'll likely pivot to writing an Emacs mpd client instead.
+
+Haskell is wonderful, but imo Emacs as a better enviornment for text based UI than the terminal.
+
+## Introduction
+A TUI mpd client, currently usable, but missing some features.
 
 The plan is to basically reimplement ncmpcpp in haskell (at least featurewise). The reasons are as follows:
 
