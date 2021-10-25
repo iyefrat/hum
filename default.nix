@@ -20,6 +20,7 @@
 , vector
 , vty
 , witherable
+, optparse-applicative
 }:
 mkDerivation {
   pname = "hum";
@@ -48,6 +49,7 @@ mkDerivation {
     vector
     vty
     witherable
+    optparse-applicative
   ];
   executableHaskellDepends = [
     array
@@ -70,6 +72,7 @@ mkDerivation {
     vector
     vty
     witherable
+    optparse-applicative
   ];
   testHaskellDepends = [
     array
@@ -92,6 +95,7 @@ mkDerivation {
     vector
     vty
     witherable
+    optparse-applicative
   ];
   description = "A TUI MPD client, inspired by ncmpcpp";
   license = stdenv.lib.licenses.gpl2Plus;
