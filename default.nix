@@ -11,7 +11,7 @@
 , mtl
 , regex-tdfa
 , relude
-, stdenv
+, lib
 , template-haskell
 , text
 , text-zipper
@@ -98,5 +98,5 @@ mkDerivation {
     optparse-applicative
   ];
   description = "A TUI MPD client, inspired by ncmpcpp";
-  license = stdenv.lib.licenses.gpl2Plus;
+  license = lib.licenses.gpl2Plus;
 }
