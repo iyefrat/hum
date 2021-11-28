@@ -3,7 +3,7 @@
 ## Status
 This project is on indefinite hiatus. It might see more development in the future, but I'll likely pivot to writing an Emacs mpd client instead.
 
-Haskell is wonderful, but imo Emacs as a better enviornment for text based UI than the terminal.
+Haskell is wonderful, but imo Emacs is a better enviornment for text based UI than the terminal.
 
 ## Introduction
 A TUI mpd client, currently usable, but missing some features.
